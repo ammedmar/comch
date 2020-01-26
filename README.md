@@ -1,2 +1,1 @@
-# RCPG
-Resolutions of Cyclic and Permutation Groups
+# Chain Level Steenrod Operations

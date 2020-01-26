@@ -4,13 +4,13 @@ from collections import Counter
 
 # ## Modules over the ring integers
 
-class int_comb(Counter):
+class Z_Module_element(Counter):
     '''...'''
     
     def __init__(*args, **kwds):
         '''...'''
         self, *args = args
-        super(int_comb, self).__init__(*args, **kwds)
+        super(Z_Module_element, self).__init__(*args, **kwds)
         
         if not all( [type(v) is int for v in self.values()] ):
             raise TypeError('values must be integers')
@@ -23,23 +23,23 @@ class int_comb(Counter):
     
     def __add__(self, other):
         '''...'''
-        answer = int_comb(self)
+        answer = Z_Module_element(self)
         answer.update(other)
-        return int_comb( {k:v for k,v in answer.items() if v} )
+        return Z_Module_element( {k:v for k,v in answer.items() if v} )
     
     def __sub__(self, other):
         '''...'''
-        answer = int_comb(self)
+        answer = Z_Module_element(self)
         answer.subtract(other)
-        return int_comb( {k:-v for k,v in answer.items() if v} )
+        return Z_Module_element( {k:-v for k,v in answer.items() if v} )
     
     def __mod__(self, p):
         '''...'''
-        return int_comb( {k:v%p for k,v in self.items() if v % p} )
+        return Z_Module_element( {k:v%p for k,v in self.items() if v % p} )
     
     def __neg__(self):
         '''...'''
-        return int_comb( {k:-v for k,v in self.items() if v} )
+        return Z_Module_element( {k:-v for k,v in self.items() if v} )
     
     def __rmul__(self, c):
         '''...'''
@@ -89,13 +89,13 @@ class int_comb(Counter):
             return answer
 
 
-print('1st)', int_comb({'a':4, 'should be zero':0}), '\n')
+print('1st)', Z_Module_element({'a':4, 'should be zero':0}), '\n')
 
 #_________________________________79_characters________________________________
 
 # ## Modules over the ring modulor integers
 
-class mod_p_comb(int_comb):
+class Z_p_Module_element(Z_Module_element):
     '''...'''
     
     prime = 3
@@ -103,7 +103,7 @@ class mod_p_comb(int_comb):
     def __init__(*args, **kwds):
         '''...'''
         self, *args = args
-        super(mod_p_comb, self).__init__(*args, **kwds)
+        super(Z_p_Module_element, self).__init__(*args, **kwds)
         self.reduce_rep()
         
     def reduce_rep(self):
@@ -116,37 +116,37 @@ class mod_p_comb(int_comb):
         if self.prime != other.prime:
             raise ValueError('same prime for both')
             
-        return mod_p_comb( super().__add__(other) )
+        return Z_p_Module_element( super().__add__(other) )
     
     def __sub__(self, other):
         '''...'''
         if self.prime != other.prime:
             raise ValueError('same prime for both')
             
-        return mod_p_comb( super().__sub__(other) )
+        return Z_p_Module_element( super().__sub__(other) )
     
     def __neg__(self):
         '''...'''
-        return mod_p_comb( {k:-v for k,v in self.items() if v} )
+        return Z_p_Module_element( {k:-v for k,v in self.items() if v} )
     
     def __rmul__(self, c):
         '''...'''
         super().__rmul__(c)
         self.reduce_rep()
 
-print('2nd)', mod_p_comb({'a':4, 'should be 0':0}),'\n')
+print('2nd)', Z_p_Module_element({'a':4, 'should be 0':0}),'\n')
 
 #_________________________________79_characters________________________________
 
 # ## Integral bar resolutions
 
-class bar_cpx_elmt(int_comb):
+class Normalized_Chain_Complex_element(Z_Module_element):
     '''...'''
     
     def __init__(*args, **kwds):
         '''...'''
         self, *args = args
-        super(bar_cpx_elmt, self).__init__(*args, **kwds)
+        super(Normalized_Chain_Complex_element, self).__init__(*args, **kwds)
         if not all([isinstance(x,tuple) for x in self.keys()]):
             raise TypeError('keys must be tuples')
         self.reduce_rep()
@@ -160,12 +160,12 @@ class bar_cpx_elmt(int_comb):
     
     def boundary(self):
         '''...'''
-        bdry = bar_cpx_elmt()
+        bdry = Normalized_Chain_Complex_element()
         for spx, coeff in self.items():
             for i in range(len(spx)):
                 i_face = tuple(spx[:i]+spx[i+1:])
                 i_coeff = coeff*((-1)**i)
-                bdry += bar_cpx_elmt({i_face: i_coeff})
+                bdry += Normalized_Chain_Complex_element({i_face: i_coeff})
         return bdry
     
 def _is_degenerate(simplex):
@@ -177,12 +177,11 @@ def _is_degenerate(simplex):
             return True
     return False
 
-print('3er) bar_cpx_elmt:', bar_cpx_elmt({(1,2):3, (1,1):1, (2,3):1}), '\n')    
 #_________________________________79_characters________________________________
 
 # ## Bar resolution of Z_p[C_p]
 
-class cyclic_bar_cpx_elmt(mod_p_comb, bar_cpx_elmt):
+class EZ_pC_p_element(Z_p_Module_element, Normalized_Chain_Complex_element):
     '''...'''
     def reduce_rep(self):
         '''reduces mod p the keys and values and deletes keys with 0 value 
@@ -208,20 +207,18 @@ class cyclic_bar_cpx_elmt(mod_p_comb, bar_cpx_elmt):
         s = s.replace(', ', ',')
         return s.replace('(','a^(')
 
-print('4th) cyclic_bar_cpx_elmt:', 
-    cyclic_bar_cpx_elmt({(1,5):3, (1,1):1, (2,4):1}), '\n')
 
 #_________________________________79_characters________________________________
 
 # ## Z_p[C_p]
 
-class cyclic_mod_p_alg_elmt(mod_p_comb):
+class Z_pC_p_element(Z_p_Module_element):
     '''...'''
     
     def __init__(*args, **kwds):
         '''...'''
         self, *args = args
-        super(cyclic_mod_p_alg_elmt, self).__init__(*args, **kwds)
+        super(Z_pC_p_element, self).__init__(*args, **kwds)
         if not all([isinstance(k,int) for k in self.keys()]):
             raise TypeError('keys must be integers')
         self.reduce_rep()
@@ -239,24 +236,24 @@ class cyclic_mod_p_alg_elmt(mod_p_comb):
         if self.prime != other.prime:
             raise ValueError('same prime for both')
             
-        return cyclic_mod_p_alg_elmt( super().__add__(other) )
+        return Z_pC_p_element( super().__add__(other) )
     
     def __sub__(self, other):
         '''...'''
         if self.prime != other.prime:
             raise ValueError('same prime for both')
             
-        return cyclic_mod_p_alg_elmt( super().__sub__(other) )
+        return Z_pC_p_element( super().__sub__(other) )
     
     def __neg__(self):
         '''...'''
-        return cyclic_mod_p_alg_elmt( {k:-v for k,v in self.items() if v} )
+        return Z_pC_p_element( {k:-v for k,v in self.items() if v} )
             
     def __mul__(self, other):
         '''...'''
         if self.prime != other.prime:
             raise ValueError('same prime for both')
-        answer = cyclic_mod_p_alg_elmt()
+        answer = Z_pC_p_element()
         for k1,v1 in self.items():
             for k2,v2 in other.items():
                 answer[k1+k2] += v1*v2
@@ -266,9 +263,9 @@ class cyclic_mod_p_alg_elmt(mod_p_comb):
         
     def __call__(self, other):
         '''...'''
-        if isinstance(other, cyclic_mod_p_alg_elmt):
+        if isinstance(other, Z_pC_p_element):
             return self*other
-        if isinstance(other, cyclic_bar_cpx_elmt):
+        if isinstance(other, EZ_pC_p_element):
             if self.prime != other.prime:
                 raise ValueError('same prime for both')  
             answer = Counter()
@@ -276,7 +273,7 @@ class cyclic_mod_p_alg_elmt(mod_p_comb):
                 for x,v2 in other.items():
                     y = tuple(k+i % self.prime for i in x)
                     answer[y] += v1*v2
-            return cyclic_bar_cpx_elmt(answer)
+            return EZ_pC_p_element(answer)
     
     def __repr__(self):
         '''...'''
@@ -307,23 +304,21 @@ class cyclic_mod_p_alg_elmt(mod_p_comb):
     @staticmethod
     def norm_elmt():
         '''...'''
-        elmt = {i:1 for i in range(mod_p_comb.prime)}
-        return cyclic_mod_p_alg_elmt(elmt)
+        elmt = {i:1 for i in range(Z_p_Module_element.prime)}
+        return Z_pC_p_element(elmt)
     
     @staticmethod
     def transpo_elmt():
         '''...'''
         elmt = {1:1, 0:-1}
-        return cyclic_mod_p_alg_elmt(elmt)
+        return Z_pC_p_element(elmt)
     
     @staticmethod
     def all_elmts():
         '''...'''
-        p = mod_p_comb.prime
-        return ( cyclic_mod_p_alg_elmt( dict(zip(range(p), coeffs)) ) 
+        p = Z_p_Module_element.prime
+        return ( Z_pC_p_element( dict(zip(range(p), coeffs)) ) 
                  for coeffs in product(range(p),repeat=p) )
-
-print('5th) cyclic_mod_p_alg_elmt:', cyclic_mod_p_alg_elmt({2:4}), '\n')
 
 #_________________________________79_characters________________________________
 
@@ -344,4 +339,3 @@ def join(simplex, counter):
                        for elmt, coeff in counter.items()})
     
     return clean(counter)
-

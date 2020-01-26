@@ -1,10 +1,10 @@
-import setuptools
+from setuptools import setup
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="chain_level_steenrod_operations",
+    name="clesto",
     version="0.0.1",
     author="Anibal M. Medina-Mardones",
     author_email="anibalm3@gmail.com",

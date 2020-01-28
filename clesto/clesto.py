@@ -43,23 +43,24 @@ class Z_Module_element(Counter):
     
     def __rmul__(self, c):
         '''...'''
+        answer = Z_Module_element()
         if type(c) is int:
             for key, value in self.items():
-                self[key] = value*c
-            return self
+                answer[key] = value*c
+            return answer
         else:
-            raise TypeError('can scale by integers only')
+            raise TypeError(f"can't act by non-int of type {type(c)}")
     
     def __iadd__(self, other):
         '''...'''
         self.update(other)
-        self.remove_zeros()
+        self.reduce_rep()
         return self
     
     def __isub__(self, other):
         '''...'''
         self.subtract(other)
-        self.remove_zeros()
+        self.reduce_rep()
         return self
     
     def __imod__(self, p):
@@ -77,8 +78,10 @@ class Z_Module_element(Counter):
         else:
             answer = '' 
             for key, value in self.items():
-                if value < 0:
+                if value < -1:
                     answer += f'{value}{key}'
+                elif value == -1:
+                    answer += f'-{key}'
                 elif value == 1:
                     answer += f'+{key}'
                 elif value > 1:
@@ -87,9 +90,6 @@ class Z_Module_element(Counter):
                 answer = answer[1:]
 
             return answer
-
-
-print('1st)', Z_Module_element({'a':4, 'should be zero':0}), '\n')
 
 #_________________________________79_characters________________________________
 
@@ -131,22 +131,20 @@ class Z_p_Module_element(Z_Module_element):
     
     def __rmul__(self, c):
         '''...'''
-        super().__rmul__(c)
-        self.reduce_rep()
-
-print('2nd)', Z_p_Module_element({'a':4, 'should be 0':0}),'\n')
+        answer = super().__rmul__(c)
+        return Z_p_Module_element(answer)
 
 #_________________________________79_characters________________________________
 
-# ## Integral bar resolutions
+# ## Simplicial_Chain_Complex_element
 
-class Normalized_Chain_Complex_element(Z_Module_element):
+class Simplicial_Chain_Complex_element(Z_Module_element):
     '''...'''
     
     def __init__(*args, **kwds):
         '''...'''
         self, *args = args
-        super(Normalized_Chain_Complex_element, self).__init__(*args, **kwds)
+        super(Simplicial_Chain_Complex_element, self).__init__(*args, **kwds)
         if not all([isinstance(x,tuple) for x in self.keys()]):
             raise TypeError('keys must be tuples')
         self.reduce_rep()
@@ -160,13 +158,17 @@ class Normalized_Chain_Complex_element(Z_Module_element):
     
     def boundary(self):
         '''...'''
-        bdry = Normalized_Chain_Complex_element()
+        bdry = Simplicial_Chain_Complex_element()
         for spx, coeff in self.items():
             for i in range(len(spx)):
                 i_face = tuple(spx[:i]+spx[i+1:])
                 i_coeff = coeff*((-1)**i)
-                bdry += Normalized_Chain_Complex_element({i_face: i_coeff})
+                bdry += Simplicial_Chain_Complex_element({i_face: i_coeff})
         return bdry
+    
+    def __str__(self):
+        string = super().__str__()
+        return string.replace(', ', ',')
     
 def _is_degenerate(simplex):
     '''returns True if the simplex is non-degenerate and False otherwise'''
@@ -181,7 +183,7 @@ def _is_degenerate(simplex):
 
 # ## Bar resolution of Z_p[C_p]
 
-class EZ_pC_p_element(Z_p_Module_element, Normalized_Chain_Complex_element):
+class EZ_pC_p_element(Z_p_Module_element, Simplicial_Chain_Complex_element):
     '''...'''
     def reduce_rep(self):
         '''reduces mod p the keys and values and deletes keys with 0 value 
@@ -286,15 +288,14 @@ class Z_pC_p_element(Z_p_Module_element):
     def __str__(self):
         '''...'''
         self.reduce_rep()
-        print(repr(self))
         if not self:
             return '0'
         else:
             answer = '' 
             for exponent, coefficient in self.items():
-                if coefficient != 1:
+                if coefficient != 1 or exponent == 0:
                     answer += f'+{coefficient}a^{exponent}'
-                if coefficient == 1:
+                else:
                     answer += f'+a^{exponent}'    
             if answer[0] == '+':
                 answer = answer[1:]
@@ -302,19 +303,19 @@ class Z_pC_p_element(Z_p_Module_element):
             return answer.replace('a^0','').replace('a^1','a')
         
     @staticmethod
-    def norm_elmt():
+    def norm_element():
         '''...'''
         elmt = {i:1 for i in range(Z_p_Module_element.prime)}
         return Z_pC_p_element(elmt)
     
     @staticmethod
-    def transpo_elmt():
+    def transpo_element():
         '''...'''
         elmt = {1:1, 0:-1}
         return Z_pC_p_element(elmt)
     
     @staticmethod
-    def all_elmts():
+    def all_elements():
         '''...'''
         p = Z_p_Module_element.prime
         return ( Z_pC_p_element( dict(zip(range(p), coeffs)) ) 

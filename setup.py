@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="clesto",
-    version="0.0.1",
+    version="0.0.2",
     author="Anibal M. Medina-Mardones",
     author_email="anibalm3@gmail.com",
     description="A package to study Steenrod"

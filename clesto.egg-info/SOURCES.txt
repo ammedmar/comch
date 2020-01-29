@@ -1,0 +1,8 @@
+README.md
+setup.py
+clesto/__init__.py
+clesto/clesto.py
+clesto.egg-info/PKG-INFO
+clesto.egg-info/SOURCES.txt
+clesto.egg-info/dependency_links.txt
+clesto.egg-info/top_level.txt

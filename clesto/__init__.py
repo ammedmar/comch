@@ -209,7 +209,6 @@ class EZ_pC_p_element(Z_p_Module_element, Simplicial_Chain_Complex_element):
         s = s.replace(', ', ',')
         return s.replace('(','a^(')
 
-
 #_________________________________79_characters________________________________
 
 # ## Z_p[C_p]
@@ -217,7 +216,7 @@ class EZ_pC_p_element(Z_p_Module_element, Simplicial_Chain_Complex_element):
 class Z_pC_p_element(Z_p_Module_element):
     '''...'''
     
-    psi = {0 : EZ_pC_p_element({(0,):1})}
+    psi_dict = {0 : EZ_pC_p_element({(0,):1})}
 
     def __init__(*args, **kwds):
         '''...'''
@@ -235,14 +234,14 @@ class Z_pC_p_element(Z_p_Module_element):
             self[k%self.prime] += v
         super().reduce_rep()
 
-    def send_forward(self, n):
+    def psi(self, n):
         '''considering self as an element in W_n we compute 
         its image in E(Z/p[C_p]). We use that the coefficients
         in psi[n] are equal to 1 for each basis element'''
 
         try:
             answer = EZ_pC_p_element()
-            for k1 in (Z_pC_p_element.psi[n]).keys():
+            for k1 in (Z_pC_p_element.psi_dict[n]).keys():
                 for k2,v2 in self.items():
                     to_add = EZ_pC_p_element({tuple(k2+i for i in k1): v2})
                     answer += to_add
@@ -250,7 +249,7 @@ class Z_pC_p_element(Z_p_Module_element):
 
         except KeyError:
             Z_pC_p_element._compute_psi(n)
-            return self.send_forward(n)
+            return self.psi(n)
 
     def __add__(self, other):
         '''...'''
@@ -306,7 +305,6 @@ class Z_pC_p_element(Z_p_Module_element):
     
     def __str__(self):
         '''...'''
-        self.reduce_rep()
         if not self:
             return '0'
         else:
@@ -335,43 +333,149 @@ class Z_pC_p_element(Z_p_Module_element):
         return ( Z_pC_p_element( dict(zip(range(p), coeffs)) ) 
                    for coeffs in product(range(p),repeat=p) )
 
-
     @classmethod
     def _compute_psi(self, i):
         '''...'''
 
         try:
-            previous_psi = Z_pC_p_element.psi[i-1]
+            previous_psi = Z_pC_p_element.psi_dict[i-1]
 
             operators = {0: Z_pC_p_element.norm_element(),
                          1: Z_pC_p_element.transpo_element()}
 
-            operator_psi = operators[i%2](previous_psi)
+            op_psi = operators[i%2](previous_psi)
             
-            Z_pC_p_element.psi[i] = ( EZ_pC_p_element({(0,) + elmt: coeff 
-                                      for elmt, coeff in operator_psi.items()}) )
+            Z_pC_p_element.psi_dict[i] = ( EZ_pC_p_element({(0,) + k:v
+                                           for k,v in op_psi.items()}) )
         
         except KeyError:
             Z_pC_p_element._compute_psi(i-1)
             Z_pC_p_element._compute_psi(i)
 
-
 #_________________________________79_characters________________________________
 
-## Reusable code
+## # E(Z_p[S_p])
 
-def get_basis(n):
-    '''Returns the preferred basis of $\mathcal E(\pi)_n$'''
-    basis = [group_element for group_element 
-             in product((0,1,2), repeat=n+1) 
-             if nondegenerate(group_element)]
-    
-    return basis
+class Z_pS_p_element(Z_p_Module_element):
+    '''...'''
 
-def join(simplex, counter):
-    '''Returns the Counter resulting from changing the 
-    keys of counter via the join with simplex'''
-    counter = Counter({simplex + elmt: coeff 
-                       for elmt, coeff in counter.items()})
+    def __init__(*args, **kwds):
+        '''...'''
+        self, *args = args
+        super(Z_pS_p_element, self).__init__(*args, **kwds)
+        p = Z_p_Module_element.prime
+        if bool(self) and (
+           not {len(k) for k in self.keys()} == {p} \
+           or not {frozenset(k) for k in self.keys()} \
+           ==  {frozenset(range(1,p+1))} ):
+            raise TypeError(f'keys must be permutations of {tuple(range(1,p+1))}')
+        self.reduce_rep()
+
+    def __add__(self, other):
+        '''...'''
+        if self.prime != other.prime:
+            raise ValueError('same prime for both')
+            
+        return Z_pS_p_element( super().__add__(other) )
     
-    return clean(counter)
+    def __sub__(self, other):
+        '''...'''
+        if self.prime != other.prime:
+            raise ValueError('same prime for both')
+            
+        return Z_pS_p_element( super().__sub__(other) )
+    
+    def __neg__(self):
+        '''...'''
+        return Z_pS_p_element( {k:-v for k,v in self.items() if v} )
+            
+    def __mul__(self, other):
+        '''...'''
+        if self.prime != other.prime:
+            raise ValueError('same prime for both')
+        answer = Z_pS_p_element()
+        for k1,v1 in self.items():
+            for k2,v2 in other.items():
+                answer[tuple(k1[i-1] for i in k2)] += v1*v2
+        answer.reduce_rep()
+        return answer
+    
+    # CONTINUE HERE ...    
+    def __call__(self, other):
+        '''...'''
+        if isinstance(other, Z_pS_p_element):
+            return self*other
+        if isinstance(other, EZ_pS_p_element):
+            if self.prime != other.prime:
+                raise ValueError('same prime for both')  
+            answer = Counter()
+            for k,v1 in self.items():
+                for x,v2 in other.items():
+                    y = tuple(k+i % self.prime for i in x)
+                    answer[y] += v1*v2
+            return EZ_pC_p_element(answer)
+    
+    def __repr__(self):
+        '''...'''
+        s = super().__repr__()
+        if self:
+            return s.replace('})',f'}}, p={self.prime})')
+        if not self:
+            return s.replace('()', f'({{}}, p={self.prime})')
+    
+    def __str__(self):
+        '''...'''
+        self.reduce_rep()
+        if not self:
+            return '0'
+        else:
+            s = super().__str__()
+            return s.replace(', ',',')
+    
+    @staticmethod
+    def all_elements():
+        '''...'''
+        p = Z_p_Module_element.prime
+        return ( Z_pC_p_element( dict(zip(range(p), coeffs)) ) 
+                   for coeffs in product(range(p),repeat=p) )
+
+Z_p_Module_element.prime = 4
+a = Z_pS_p_element({(1,2,4,3):2})
+b = Z_pS_p_element({(2,3,4,1):2})
+print(a*b)
+#_________________________________79_characters________________________________
+
+## # E(Z_p[S_)
+
+class EZ_pS_p_element(Z_p_Module_element, Simplicial_Chain_Complex_element):
+    '''...'''
+
+    def __init__(*args, **kwds):
+        '''...'''
+        self, *args = args
+        super(EZ_pS_p_element, self).__init__(*args, **kwds)
+        for spx in self.keys():
+            print({len(sigma) for sigma in spx})
+            if not ( {len(sigma) for sigma in spx} 
+                == {Z_p_Module_element.prime} ):
+                raise TypeError(f'length of all tuples in {spx} must '
+                                 + f'be {Z_p_Module_element.prime}')
+        self.reduce_rep()
+    
+    def __repr__(self):
+        '''...'''
+        s = super().__repr__()
+        if self:
+            return s.replace('})',f'}}, p={self.prime})')
+        if not self:
+            return s.replace('()', f'({{}}, p={self.prime})')
+        
+    def __str__(self):
+        '''...'''
+        s = super().__str__()
+        return s.replace(', ', ',')
+
+
+
+#print(str(EZ_pS_p_element({((1,2,3),):5})))
+

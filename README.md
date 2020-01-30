@@ -1,1 +1,1 @@
-# CLESTO: Chain LEvel STeenrod Operations
+# CLeStO: Chain Level Steenrod Operations

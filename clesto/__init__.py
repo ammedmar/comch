@@ -110,18 +110,20 @@ class Z_p_Module_element(Z_Module_element):
         '''reduces mod p the values and deletes keys with 0 value'''
         super().__imod__(self.prime)
         super().reduce_rep()
+
+    def check_prime(self, other):
+        if self.prime != other.prime:
+            raise TypeError('same prime for both')
         
     def __add__(self, other):
         '''...'''
-        if self.prime != other.prime:
-            raise ValueError('same prime for both')
+        self.check_prime(other)
             
         return Z_p_Module_element( super().__add__(other) )
     
     def __sub__(self, other):
         '''...'''
-        if self.prime != other.prime:
-            raise ValueError('same prime for both')
+        self.check_prime(other)
             
         return Z_p_Module_element( super().__sub__(other) )
     
@@ -253,15 +255,13 @@ class Z_pC_p_element(Z_p_Module_element):
 
     def __add__(self, other):
         '''...'''
-        if self.prime != other.prime:
-            raise ValueError('same prime for both')
+        self.check_prime(other)
             
         return Z_pC_p_element( super().__add__(other) )
     
     def __sub__(self, other):
         '''...'''
-        if self.prime != other.prime:
-            raise ValueError('same prime for both')
+        self.check_prime(other)
             
         return Z_pC_p_element( super().__sub__(other) )
     
@@ -271,8 +271,7 @@ class Z_pC_p_element(Z_p_Module_element):
             
     def __mul__(self, other):
         '''...'''
-        if self.prime != other.prime:
-            raise ValueError('same prime for both')
+        self.check_prime(other)
         answer = Z_pC_p_element()
         for k1,v1 in self.items():
             for k2,v2 in other.items():
@@ -365,24 +364,21 @@ class Z_pS_p_element(Z_p_Module_element):
         super(Z_pS_p_element, self).__init__(*args, **kwds)
         p = Z_p_Module_element.prime
         if bool(self) and (
-           not {len(k) for k in self.keys()} == {p} \
-           or not {frozenset(k) for k in self.keys()} \
-           ==  {frozenset(range(1,p+1))} ):
-            raise TypeError(f'keys must be permutations of {tuple(range(1,p+1))}')
+            not {len(k) for k in self.keys()} == {p} or \
+            not {frozenset(k) for k in self.keys()} \
+            == {frozenset(range(1,p+1))} ):
+                raise TypeError(f'keys must be permutations \
+                                  of {tuple(range(1,p+1))}')
         self.reduce_rep()
 
     def __add__(self, other):
         '''...'''
-        if self.prime != other.prime:
-            raise ValueError('same prime for both')
-            
+        self.check_prime(other)
         return Z_pS_p_element( super().__add__(other) )
     
     def __sub__(self, other):
         '''...'''
-        if self.prime != other.prime:
-            raise ValueError('same prime for both')
-            
+        self.check_prime(other) 
         return Z_pS_p_element( super().__sub__(other) )
     
     def __neg__(self):
@@ -391,8 +387,7 @@ class Z_pS_p_element(Z_p_Module_element):
             
     def __mul__(self, other):
         '''...'''
-        if self.prime != other.prime:
-            raise ValueError('same prime for both')
+        self.check_prime(other)
         answer = Z_pS_p_element()
         for k1,v1 in self.items():
             for k2,v2 in other.items():
@@ -406,12 +401,10 @@ class Z_pS_p_element(Z_p_Module_element):
         if isinstance(other, Z_pS_p_element):
             return self*other
         if isinstance(other, EZ_pS_p_element):
-            if self.prime != other.prime:
-                raise ValueError('same prime for both')  
+            self.check_prime(other) 
             answer = Counter()
             for k,v1 in self.items():
                 for x,v2 in other.items():
-                    y = tuple(k+i % self.prime for i in x)
                     answer[y] += v1*v2
             return EZ_pC_p_element(answer)
     
@@ -439,10 +432,14 @@ class Z_pS_p_element(Z_p_Module_element):
         return ( Z_pC_p_element( dict(zip(range(p), coeffs)) ) 
                    for coeffs in product(range(p),repeat=p) )
 
-Z_p_Module_element.prime = 4
-a = Z_pS_p_element({(1,2,4,3):2})
-b = Z_pS_p_element({(2,3,4,1):2})
+Z_p_Module_element.prime = 3
+
+a = Z_pS_p_element({(1,2,3):1})
+b = Z_pS_p_element({(2,3,1):2})
+
 print(a*b)
+
+
 #_________________________________79_characters________________________________
 
 ## # E(Z_p[S_)
@@ -455,7 +452,6 @@ class EZ_pS_p_element(Z_p_Module_element, Simplicial_Chain_Complex_element):
         self, *args = args
         super(EZ_pS_p_element, self).__init__(*args, **kwds)
         for spx in self.keys():
-            print({len(sigma) for sigma in spx})
             if not ( {len(sigma) for sigma in spx} 
                 == {Z_p_Module_element.prime} ):
                 raise TypeError(f'length of all tuples in {spx} must '
@@ -475,7 +471,4 @@ class EZ_pS_p_element(Z_p_Module_element, Simplicial_Chain_Complex_element):
         s = super().__str__()
         return s.replace(', ', ',')
 
-
-
-#print(str(EZ_pS_p_element({((1,2,3),):5})))
-
+print(EZ_pS_p_element({((1,2,3),):5, ((2,3,1),):1}))

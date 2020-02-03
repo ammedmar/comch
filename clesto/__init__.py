@@ -193,7 +193,7 @@ class EZ_pC_p_element(Z_p_Module_element, Simplicial_Chain_Complex_element):
         aux = list(self.items())
         self.clear()
         for x, v in aux:
-            y = tuple(i % 3 for i in x)
+            y = tuple(i % self.prime for i in x)
             self[y] += v
         super().reduce_rep()
 
@@ -395,7 +395,6 @@ class Z_pS_p_element(Z_p_Module_element):
         answer.reduce_rep()
         return answer
     
-    # CONTINUE HERE ...    
     def __call__(self, other):
         '''...'''
         if isinstance(other, Z_pS_p_element):
@@ -403,10 +402,10 @@ class Z_pS_p_element(Z_p_Module_element):
         if isinstance(other, EZ_pS_p_element):
             self.check_prime(other) 
             answer = Counter()
-            for k,v1 in self.items():
-                for x,v2 in other.items():
-                    answer[y] += v1*v2
-            return EZ_pC_p_element(answer)
+            for k1,v1 in self.items():
+                for k2,v2 in other.items():
+                    answer[tuple(tuple(k1[i-1] for i in x) for x in k2)] = v1*v2
+            return EZ_pS_p_element(answer)
     
     def __repr__(self):
         '''...'''
@@ -437,12 +436,11 @@ Z_p_Module_element.prime = 3
 a = Z_pS_p_element({(1,2,3):1})
 b = Z_pS_p_element({(2,3,1):2})
 
-print(a*b)
-
+#print(a*a)
 
 #_________________________________79_characters________________________________
 
-## # E(Z_p[S_)
+## # E(Z_p[S_p)
 
 class EZ_pS_p_element(Z_p_Module_element, Simplicial_Chain_Complex_element):
     '''...'''
@@ -471,4 +469,5 @@ class EZ_pS_p_element(Z_p_Module_element, Simplicial_Chain_Complex_element):
         s = super().__str__()
         return s.replace(', ', ',')
 
-print(EZ_pS_p_element({((1,2,3),):5, ((2,3,1),):1}))
+c = EZ_pS_p_element({((2,1,3),):1, ((1,3,2),):1})
+print(b,c,b(c))

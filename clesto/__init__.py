@@ -1,8 +1,9 @@
 from collections import Counter
+from itertools import product
 
 #_________________________________79_characters________________________________
 
-# ## Modules over the ring integers
+# ## Z_Modules
 
 class Z_Module_element(Counter):
     '''...'''
@@ -93,7 +94,7 @@ class Z_Module_element(Counter):
 
 #_________________________________79_characters________________________________
 
-# ## Modules over the ring modulor integers
+# ## Z_p_Modules
 
 class Z_p_Module_element(Z_Module_element):
     '''...'''
@@ -138,7 +139,7 @@ class Z_p_Module_element(Z_Module_element):
 
 #_________________________________79_characters________________________________
 
-# ## Simplicial_Chain_Complex_element
+# ## Simplicial_Chain_Complex
 
 class Simplicial_Chain_Complex_element(Z_Module_element):
     '''...'''
@@ -183,7 +184,7 @@ def _is_degenerate(simplex):
 
 #_________________________________79_characters________________________________
 
-# ## Bar resolution of Z_p[C_p]
+# ## EZ_p[C_p]
 
 class EZ_pC_p_element(Z_p_Module_element, Simplicial_Chain_Complex_element):
     '''...'''
@@ -210,6 +211,17 @@ class EZ_pC_p_element(Z_p_Module_element, Simplicial_Chain_Complex_element):
         s = super().__str__()
         s = s.replace(', ', ',')
         return s.replace('(','a^(')
+
+    def phi(self):
+        p = self.prime
+        answer = Counter()
+        for k, v in self.items():
+            x = []
+            for i in k:
+                x.append(tuple(j%p + 1 for j in range(i, p+i)))
+            answer[tuple(x)] = v
+            
+        return EZ_pS_p_element(answer)
 
 #_________________________________79_characters________________________________
 
@@ -353,7 +365,7 @@ class Z_pC_p_element(Z_p_Module_element):
 
 #_________________________________79_characters________________________________
 
-## # E(Z_p[S_p])
+## # Z_p[S_p]
 
 class Z_pS_p_element(Z_p_Module_element):
     '''...'''
@@ -431,16 +443,9 @@ class Z_pS_p_element(Z_p_Module_element):
         return ( Z_pC_p_element( dict(zip(range(p), coeffs)) ) 
                    for coeffs in product(range(p),repeat=p) )
 
-Z_p_Module_element.prime = 3
-
-a = Z_pS_p_element({(1,2,3):1})
-b = Z_pS_p_element({(2,3,1):2})
-
-#print(a*a)
-
 #_________________________________79_characters________________________________
 
-## # E(Z_p[S_p)
+## # EZ_p[S_p]
 
 class EZ_pS_p_element(Z_p_Module_element, Simplicial_Chain_Complex_element):
     '''...'''
@@ -468,6 +473,3 @@ class EZ_pS_p_element(Z_p_Module_element, Simplicial_Chain_Complex_element):
         '''...'''
         s = super().__str__()
         return s.replace(', ', ',')
-
-c = EZ_pS_p_element({((2,1,3),):1, ((1,3,2),):1})
-print(b,c,b(c))

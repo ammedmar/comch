@@ -1,1 +1,1 @@
-# CLeStO: Chain Level Steenrod Operations
+# (C)hain (le)vel (St)eenrod (o)perations

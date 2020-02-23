@@ -1,2 +1,4 @@
-/notebooks/.ipynb_checkpoints
-/clesto/__pycache__
+clesto/__pycache__
+
+.ipynb_checkpoints
+

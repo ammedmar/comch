@@ -157,12 +157,12 @@ class DGModule_element(Module_element):
     
     def boundary(self):
         '''...'''
-        bdry = DGModule_element()
+        bdry = type(self)()
         for spx, coeff in self.items():
             for i in range(len(spx)):
                 i_face = tuple(spx[:i]+spx[i+1:])
                 i_coeff = coeff*((-1)**i)
-                bdry += DGModule_element({i_face: i_coeff})
+                bdry += type(self)({i_face: i_coeff})
         return bdry
 
 # Module_element.torsion = 4

@@ -126,50 +126,7 @@ class Module_element(Counter):
         for key in zeros:
             del self[key]
 
-# Module_element.torsion = 7
-# a = Module_element({'a':6})
-# print(a)
-
 #_________________________________79_characters________________________________
-
-class DGModule_element(Module_element):
-    '''...'''
-        
-    def __str__(self):
-        string = super().__str__()
-        return string.replace(', ', ',')
-
-    def reduce_rep(self):
-        '''deletes degenerate keys and reduces as Module_element'''
-        # print('reducing as DGModule_element')
-        if not all([isinstance(x,tuple) for x in self.keys()]):
-            raise TypeError('keys must be tuples')
-
-        for simplex,v in self.items():
-            if not type(simplex) is tuple:
-                raise TypeError('keys must be tuples')
-            
-            for i in range(len(simplex)-1):
-                if simplex[i] == simplex[i+1]:
-                    self[simplex] = 0
-                
-        super().reduce_rep()
-    
-    def boundary(self):
-        '''...'''
-        bdry = type(self)()
-        for spx, coeff in self.items():
-            for i in range(len(spx)):
-                i_face = tuple(spx[:i]+spx[i+1:])
-                i_coeff = coeff*((-1)**i)
-                bdry += type(self)({i_face: i_coeff})
-        return bdry
-
-# Module_element.torsion = 4
-# x = DGModule_element({(1,1):3})
-# print(x)
-
-# #_________________________________79_characters________________________________
 
 class Cyclic_Module_element(Module_element):
     '''Modeling elements in Z[C] or Z/nZ[C_n] where C is the 
@@ -285,8 +242,107 @@ class Cyclic_Module_element(Module_element):
                 Cyclic_Module_element._compute_psi(i-1)
                 Cyclic_Module_element._compute_psi(i)
 
-# Module_element.torsion = 3
-# print(Cyclic_Module_element({3:4, 4:1}))
+#_________________________________79_characters________________________________
+
+# class Symmetric_Module_element(Module_element):
+# #     '''...'''
+
+# #     def __init__(*args, **kwds):
+# #         '''...'''
+# #         self, *args = args
+# #         super(Z_pS_p_element, self).__init__(*args, **kwds)
+# #         p = Z_p_Module_element.prime
+# #         if bool(self) and (
+# #             not {len(k) for k in self.keys()} == {p} or \
+# #             not {frozenset(k) for k in self.keys()} \
+# #             == {frozenset(range(1,p+1))} ):
+# #                 raise TypeError(f'keys must be permutations \
+# #                                   of {tuple(range(1,p+1))}')
+# #         self.reduce_rep()
+
+# #     def __repr__(self):
+# #         '''...'''
+# #         s = super().__repr__()
+# #         if self:
+# #             return s.replace('})',f'}}, p={self.prime})')
+# #         if not self:
+# #             return s.replace('()', f'({{}}, p={self.prime})')
+    
+# #     def __str__(self):
+# #         '''...'''
+# #         self.reduce_rep()
+# #         if not self:
+# #             return '0'
+# #         else:
+# #             s = super().__str__()
+# #             return s.replace(', ',',')    
+            
+# #     def __mul__(self, other):
+# #         '''...'''
+# #         self.check_prime(other)
+# #         answer = Z_pS_p_element()
+# #         for k1,v1 in self.items():
+# #             for k2,v2 in other.items():
+# #                 answer[tuple(k1[i-1] for i in k2)] += v1*v2
+# #         answer.reduce_rep()
+# #         return answer
+    
+# #     def __call__(self, other):
+# #         '''...'''
+# #         if isinstance(other, Z_pS_p_element):
+# #             return self*other
+# #         if isinstance(other, EZ_pS_p_element):
+# #             self.check_prime(other) 
+# #             answer = Counter()
+# #             for k1,v1 in self.items():
+# #                 for k2,v2 in other.items():
+# #                     answer[tuple(tuple(k1[i-1] for i in x) for x in k2)] = v1*v2
+# #             return EZ_pS_p_element(answer)
+    
+# #     @staticmethod
+# #     def all_elements():
+# #         '''...'''
+# #         p = Z_p_Module_element.prime
+# #         return ( Z_pC_p_element( dict(zip(range(p), coeffs)) ) 
+# #                    for coeffs in product(range(p),repeat=p) )
+
+# x = Symmetric_Module_element({(1,2,3):1})
+# print(x)
+
+#_________________________________79_characters________________________________
+
+class DGModule_element(Module_element):
+    '''...'''
+        
+    def __str__(self):
+        string = super().__str__()
+        return string.replace(', ', ',')
+
+    def reduce_rep(self):
+        '''deletes degenerate keys and reduces as Module_element'''
+        # print('reducing as DGModule_element')
+        if not all([isinstance(x,tuple) for x in self.keys()]):
+            raise TypeError('keys must be tuples')
+
+        for simplex,v in self.items():
+            if not type(simplex) is tuple:
+                raise TypeError('keys must be tuples')
+            
+            for i in range(len(simplex)-1):
+                if simplex[i] == simplex[i+1]:
+                    self[simplex] = 0
+                
+        super().reduce_rep()
+    
+    def boundary(self):
+        '''...'''
+        bdry = type(self)()
+        for spx, coeff in self.items():
+            for i in range(len(spx)):
+                i_face = tuple(spx[:i]+spx[i+1:])
+                i_coeff = coeff*((-1)**i)
+                bdry += type(self)({i_face: i_coeff})
+        return bdry
 
 #_________________________________79_characters________________________________
 
@@ -322,28 +378,12 @@ class Cyclic_DGModule_element(DGModule_element):
             
         return Symmetric_DGModule_element(answer)
 
-# Module_element.torsion = 3
-# x = Cyclic_Module_element({0:1})
-# print('after x')
-# print(str(x.psi(3)))
-# print(Cyclic_Module_element.psi_dict)
+#_________________________________79_characters________________________________
 
-# #_________________________________79_characters________________________________
-
-class Symmetric_DGModule_element(DGModule_element):
+class Barratt_Eccles_element(DGModule_element):
     '''...'''
-    
-    def reduce_rep(self):
-        # print('reducing as Symmetric_DGModule_element')
-        for spx in self.keys():
-            if not ( {len(sigma) for sigma in spx} 
-                == {Module_element.torsion} ):
-                raise TypeError(f'length of all tuples in {spx} must '
-                                 + f'be {Module_element.torsion}')
-        super().reduce_rep()
-
     def table_reduction(self):
-        '''given a set of basis element in the Barratt-Eccles operad, it returns 
+        '''given a set of basis element in the Barratt_Eccles operad, it returns 
         the set of surjections in its image via the table reduction morphism'''
         
         answer = Counter()
@@ -366,93 +406,3 @@ class Symmetric_DGModule_element(DGModule_element):
                     answer += Counter({tuple(surjection):value})
      
         return DGModule_element(answer)
-
-
-# Module_element.torsion = 3
-# x = Symmetric_DGModule_element({((1,2,3),(1,3,2)):2})
-# print(x.table_reduction() + x.table_reduction())
-
-
-# Module_element.torsion = 3
-# x = Cyclic_DGModule_element({(0, 1, 2): 1, (0, 2, 3): 1})
-# print(x.phi().table_reduction())
-
-
-
-# Not needed but aesthetically appealing
-# class Symmetric_Module_element(Z_p_Module_element):
-#     '''...'''
-
-#     def __init__(*args, **kwds):
-#         '''...'''
-#         self, *args = args
-#         super(Z_pS_p_element, self).__init__(*args, **kwds)
-#         p = Z_p_Module_element.prime
-#         if bool(self) and (
-#             not {len(k) for k in self.keys()} == {p} or \
-#             not {frozenset(k) for k in self.keys()} \
-#             == {frozenset(range(1,p+1))} ):
-#                 raise TypeError(f'keys must be permutations \
-#                                   of {tuple(range(1,p+1))}')
-#         self.reduce_rep()
-
-#     def __add__(self, other):
-#         '''...'''
-#         self.check_prime(other)
-#         return Z_pS_p_element( super().__add__(other) )
-    
-#     def __sub__(self, other):
-#         '''...'''
-#         self.check_prime(other) 
-#         return Z_pS_p_element( super().__sub__(other) )
-    
-#     def __neg__(self):
-#         '''...'''
-#         return Z_pS_p_element( {k:-v for k,v in self.items() if v} )
-            
-#     def __mul__(self, other):
-#         '''...'''
-#         self.check_prime(other)
-#         answer = Z_pS_p_element()
-#         for k1,v1 in self.items():
-#             for k2,v2 in other.items():
-#                 answer[tuple(k1[i-1] for i in k2)] += v1*v2
-#         answer.reduce_rep()
-#         return answer
-    
-#     def __call__(self, other):
-#         '''...'''
-#         if isinstance(other, Z_pS_p_element):
-#             return self*other
-#         if isinstance(other, EZ_pS_p_element):
-#             self.check_prime(other) 
-#             answer = Counter()
-#             for k1,v1 in self.items():
-#                 for k2,v2 in other.items():
-#                     answer[tuple(tuple(k1[i-1] for i in x) for x in k2)] = v1*v2
-#             return EZ_pS_p_element(answer)
-    
-#     def __repr__(self):
-#         '''...'''
-#         s = super().__repr__()
-#         if self:
-#             return s.replace('})',f'}}, p={self.prime})')
-#         if not self:
-#             return s.replace('()', f'({{}}, p={self.prime})')
-    
-#     def __str__(self):
-#         '''...'''
-#         self.reduce_rep()
-#         if not self:
-#             return '0'
-#         else:
-#             s = super().__str__()
-#             return s.replace(', ',',')
-    
-#     @staticmethod
-#     def all_elements():
-#         '''...'''
-#         p = Z_p_Module_element.prime
-#         return ( Z_pC_p_element( dict(zip(range(p), coeffs)) ) 
-#                    for coeffs in product(range(p),repeat=p) )
-

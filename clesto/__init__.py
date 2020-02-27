@@ -244,70 +244,47 @@ class Cyclic_Module_element(Module_element):
 
 #_________________________________79_characters________________________________
 
-# class Symmetric_Module_element(Module_element):
-# #     '''...'''
+class Symmetric_Module_element(Module_element):
+    '''...'''
 
-# #     def __init__(*args, **kwds):
-# #         '''...'''
-# #         self, *args = args
-# #         super(Z_pS_p_element, self).__init__(*args, **kwds)
-# #         p = Z_p_Module_element.prime
-# #         if bool(self) and (
-# #             not {len(k) for k in self.keys()} == {p} or \
-# #             not {frozenset(k) for k in self.keys()} \
-# #             == {frozenset(range(1,p+1))} ):
-# #                 raise TypeError(f'keys must be permutations \
-# #                                   of {tuple(range(1,p+1))}')
-# #         self.reduce_rep()
+    def __str__(self):
+        '''...'''
+        if not self:
+            return '0'
+        else:
+            s = super().__str__()
+            return s.replace(', ',',')
 
-# #     def __repr__(self):
-# #         '''...'''
-# #         s = super().__repr__()
-# #         if self:
-# #             return s.replace('})',f'}}, p={self.prime})')
-# #         if not self:
-# #             return s.replace('()', f'({{}}, p={self.prime})')
+    def __mul__(self, other):
+        '''...'''
+        answer = Symmetric_Module_element()
+        for k1,v1 in self.items():
+            for k2,v2 in other.items():
+                answer[tuple(k1[i-1] for i in k2)] += v1*v2
+        return answer
     
-# #     def __str__(self):
-# #         '''...'''
-# #         self.reduce_rep()
-# #         if not self:
-# #             return '0'
-# #         else:
-# #             s = super().__str__()
-# #             return s.replace(', ',',')    
-            
-# #     def __mul__(self, other):
-# #         '''...'''
-# #         self.check_prime(other)
-# #         answer = Z_pS_p_element()
-# #         for k1,v1 in self.items():
-# #             for k2,v2 in other.items():
-# #                 answer[tuple(k1[i-1] for i in k2)] += v1*v2
-# #         answer.reduce_rep()
-# #         return answer
-    
-# #     def __call__(self, other):
-# #         '''...'''
-# #         if isinstance(other, Z_pS_p_element):
-# #             return self*other
-# #         if isinstance(other, EZ_pS_p_element):
-# #             self.check_prime(other) 
-# #             answer = Counter()
-# #             for k1,v1 in self.items():
-# #                 for k2,v2 in other.items():
-# #                     answer[tuple(tuple(k1[i-1] for i in x) for x in k2)] = v1*v2
-# #             return EZ_pS_p_element(answer)
-    
-# #     @staticmethod
-# #     def all_elements():
-# #         '''...'''
-# #         p = Z_p_Module_element.prime
-# #         return ( Z_pC_p_element( dict(zip(range(p), coeffs)) ) 
-# #                    for coeffs in product(range(p),repeat=p) )
+    def __call__(self, other):
+        '''...'''
+        if isinstance(other, Symmetric_Module_element):
+            return self*other
+        if isinstance(other, Barratt_Eccles_element):
+            answer = Counter()
+            for k1,v1 in self.items():
+                for k2,v2 in other.items():
+                    answer[tuple(tuple(k1[i-1] for i in x) for x in k2)] = v1*v2
+            return Barratt_Eccles_element(answer)
 
-# x = Symmetric_Module_element({(1,2,3):1})
-# print(x)
+    def reduce_rep(self):
+        '''...'''
+        # print('reducing as Symmetric_Module_element')
+        if any([set(k) != set(range(1,len(k)+1)) for k in self.keys()]):
+            raise TypeError('keys must be permutations of (1,2,...,r)') 
+
+        super().reduce_rep()
+
+    @staticmethod
+    def all_elements(r):
+        pass
 
 #_________________________________79_characters________________________________
 
@@ -385,7 +362,7 @@ class Barratt_Eccles_element(DGModule_element):
     def table_reduction(self):
         '''given a set of basis element in the Barratt_Eccles operad, it returns 
         the set of surjections in its image via the table reduction morphism'''
-        
+
         answer = Counter()
         for bar_ecc_element, value in self.items():
             d, a = len(bar_ecc_element)-1, max(bar_ecc_element[0]) #dim and arity

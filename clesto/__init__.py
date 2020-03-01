@@ -275,12 +275,20 @@ class Symmetric_Module_element(Module_element):
         '''...'''
         if isinstance(other, Symmetric_Module_element):
             return self*other
+
         if isinstance(other, Barratt_Eccles_element):
             answer = Counter()
             for k1,v1 in self.items():
                 for k2,v2 in other.items():
                     answer[tuple(tuple(k1[i-1] for i in x) for x in k2)] = v1*v2
             return Barratt_Eccles_element(answer)
+
+        if isinstance(other, Surjection_element):
+            answer = Counter()
+            for k1,v1 in self.items():
+                for k2,v2 in other.items():
+                    answer[tuple(k1[i-1] for i in k2)] = v1*v2
+            return Surjection_element(answer)
 
     def reduce_rep(self):
         '''...'''
@@ -290,7 +298,11 @@ class Symmetric_Module_element(Module_element):
 
         super().reduce_rep()
 
-    @staticmethod
+    def compose(self, *others):
+        '''...'''
+        pass
+
+    @classmethod
     def all_elements(r):
         pass
 
@@ -377,6 +389,11 @@ class Cyclic_DGModule_element(DGModule_element):
 
 class Barratt_Eccles_element(DGModule_element):
     '''...'''
+    
+    def compose(self, *others):
+        '''...'''
+        pass
+
     def table_reduction(self):
         '''given a set of basis element in the Barratt_Eccles operad, it returns 
         the set of surjections in its image via the table reduction morphism'''
@@ -400,8 +417,31 @@ class Barratt_Eccles_element(DGModule_element):
                 if not degenerate:
                     answer += Counter({tuple(surjection):value})
      
-        return DGModule_element(answer)
+        return Surjection_element(answer)
+
+#_________________________________79_characters________________________________
 
 class Surjection_element(DGModule_element):
     '''...'''
-    pass
+    
+    def compose(self, *others):
+        '''...'''
+        pass
+
+    def reduce_rep(self):
+        '''...'''
+
+        zeros = [k for k in self.keys() if set(k) != set(range(1,max(k)+1))]
+        for k in zeros:
+            del self[k]
+
+        super().reduce_rep()
+
+
+b = Barratt_Eccles_element({(
+                    (1,2,3,4,5),
+                    (3,4,5,1,2),
+                    (4,5,1,2,3),
+                    (2,3,4,5,1),
+                    (3,4,5,1,2)):1})
+print(b)

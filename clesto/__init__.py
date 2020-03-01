@@ -216,13 +216,15 @@ class Cyclic_Module_element(Module_element):
             return self.psi(n)
 
     @classmethod    
-    def transpo_element(self):
+    def transposition_element(self):
         return Cyclic_Module_element({1:1, 0:-1})
 
     @classmethod
     def norm_element(self):
         if self.order:
-            return Cyclic_Module_element({i:1 for i in range(self.order)}) 
+            return Cyclic_Module_element({i:1 for i in range(self.order)})
+        else:
+            raise TypeError('Norm element not defined for infinite order')
 
     @classmethod
     def _compute_psi(self, i):
@@ -232,7 +234,7 @@ class Cyclic_Module_element(Module_element):
             previous_psi = Cyclic_Module_element.psi_dict[i-1]
 
             operators = {0: Cyclic_Module_element.norm_element(),
-                         1: Cyclic_Module_element.transpo_element()}
+                         1: Cyclic_Module_element.transposition_element()}
 
             op_psi = operators[i%2](previous_psi)
             
@@ -363,13 +365,14 @@ class Cyclic_DGModule_element(DGModule_element):
                 x.append(tuple(j%r + 1 for j in range(i, r+i)))
             answer[tuple(x)] = v
             
-        return Symmetric_DGModule_element(answer)
+        return Barratt_Eccles_element(answer)
 
     def set_order(self, r):
         '''...'''
         self.order = r
         self.reduce_rep()
         return self
+
 #_________________________________79_characters________________________________
 
 class Barratt_Eccles_element(DGModule_element):
@@ -399,48 +402,6 @@ class Barratt_Eccles_element(DGModule_element):
      
         return DGModule_element(answer)
 
-
-#_________________________________main_________________________________________
-
-# #_________________________________79_characters________________________________
-
-# Module_element.torsion = None
-# x = Module_element({'a':1, 'b':2, 'c':3})
-# print(f'Let x = {x}, then \nx+x = {x+x}\nx-x = {x-x}\n2*x = {2*x}')
-
-# print(f'and with 2-torsion \nx = {x.set_torsion(2)}.')
-
-# #_________________________________79_characters________________________________
-
-# Cyclic_Module_element.order = 7
-# Cyclic_Module_element.torsion = 5
-# T = Cyclic_Module_element.transpo_element()
-# N = Cyclic_Module_element.norm_element()
-# print(f'For r = 7 and n = 5 \nT = {T} \nN = {N} \nand T*N = {T*N}')
-# print(f'and with order 3 \nN = {N.set_order(3)}')
-
-# #_________________________________79_characters________________________________
-
-# x = Symmetric_Module_element({(1,3,2):1})
-# print(x*x)
-
-# #_________________________________79_characters________________________________
-
-# DGModule_element.torsion = None
-# x = DGModule_element({('a','b','c'):1, ('a','a','c'):2, ('a','b','a'):2})
-# print(f'Let x = {x}, then\nboundary(x) = {x.boundary()}.')
-
-# #_________________________________79_characters________________________________
-
-# Cyclic_Module_element.order = 5
-# Cyclic_DGModule_element.order = 5
-# N = Cyclic_Module_element.norm_element()
-# x = Cyclic_DGModule_element({(0,1,0,4):1})
-# print(f'Let x = {x} and \nN = {N} then \nNx = {N(x)}')
-# print(f'and boundary(x) = {x.boundary()}.')
-
-# #_________________________________79_characters________________________________
-
-# b = Barratt_Eccles_element({((1,2,3),):1})
-# x = Symmetric_Module_element({(1,3,2):1})
-# print(x,b,x(b))
+class Surjection_element(DGModule_element):
+    '''...'''
+    pass

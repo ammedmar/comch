@@ -30,12 +30,23 @@ def partitions(n, k, smallest_value=1, largest_value=None, ordered=False):
 #_________________________________79_characters________________________________
 
 class Module_element(Counter):
-    '''Implements modules over the integers or the integers mod p'''
+    """
+    Counter with arithmetic improvements to handle (modular) integer values.
+
+    Class constructed to model free module elements over the ring of integers
+    or of modular integers.
+
+    Attributes
+    ----------
+    torsion : int or None 
+        Chooses the underlying ring R. 
+        An int n sets R = Z/nZ whereas None sets R = Z
+
+    """
 
     torsion = None 
 
     def __init__(*args, **kwds):
-        '''...'''
         # print('initializing as Module_element')
         self, *args = args
         super(Module_element, self).__init__(*args, **kwds)
@@ -43,10 +54,9 @@ class Module_element(Counter):
         if not all( [type(v) is int for v in self.values()] ):
             raise TypeError('values must be integers')
 
-        self.reduce_rep()
+        self._reduce_rep()
 
     def __str__(self):
-        '''...'''
         if not self:
             return '0'
         else:
@@ -66,27 +76,43 @@ class Module_element(Counter):
             return answer
 
     def __add__(self, other):
-        '''...'''
+        '''The sum of two free module elements.
+
+        >>> Module_element({'a':1, 'b':2}) + Module_element({'a':1})
+        Module_element({'a':2, 'b':2})
+
+        '''
         answer = Module_element(self)
         answer.update(other)
         return type(self)( {k:v for k,v in answer.items() if v} )
     
     def __sub__(self, other):
-        '''...'''
+        '''The substraction of two free module elements.
+
+        >>> Module_element({'a':1, 'b':2}) - Module_element({'a':1})
+        Module_element({'b':2})
+
+        '''
         answer = Module_element(self)
         answer.subtract(other)
         return type(self)( {k:-v for k,v in answer.items() if v} )
 
-    def __mod__(self, p):
-        '''...'''
-        return type(self)( {k:v%p for k,v in self.items() if v % p} )
-    
     def __neg__(self):
-        '''...'''
+        '''The additive inverse of a free module element.
+
+        >>> -Module_element({'a':1, 'b':2})
+        Module_element({'a':-1, 'b':-22})
+
+        '''
         return type(self)( {k:-v for k,v in self.items() if v} )
     
     def __rmul__(self, c):
-        '''...'''
+        '''The scaling by c of a free module element.
+
+        >>> 3*Module_element({'a':1, 'b':2})
+        Module_element({'a':3, 'b':6})
+
+        '''
         answer = Module_element()
         if type(c) is int:
             for key, value in self.items():
@@ -95,29 +121,62 @@ class Module_element(Counter):
         else:
             raise TypeError(f"can't act by non-int of type {type(c)}")
 
+    def __mod__(self, n):
+        '''The reduction mod n of the coefficients of a free module element.
+
+        >>> Module_element({'a':3, 'b':2}) % 2
+        Module_element({'a':1})
+
+        '''
+        return type(self)( {k:v%n for k,v in self.items() if v % n} )
+    
     def __iadd__(self, other):
-        '''...'''
+        '''The in place addition of two free module elements.
+
+        >>> x = Module_element({'a':1, 'b':2})
+        >>> x += Module_element({'a':3, 'b':6})
+        Module_element({'a':4, 'b':8})
+
+        '''
         self.update(other)
-        self.reduce_rep()
+        self._reduce_rep()
         return self
     
     def __isub__(self, other):
-        '''...'''
+        '''The in place addition of two free module elements.
+
+        >>> x = Module_element({'a':1, 'b':2})
+        >>> x -= Module_element({'a':3, 'b':6})
+        Module_element({'a':-2, 'b':-4})
+
+        '''
         self.subtract(other)
-        self.reduce_rep()
+        self._reduce_rep()
         return self
     
-    def __imod__(self, p):
-        '''...'''
+    def __imod__(self, n):
+        '''The in place reduction mod n of the values of a free module element.
+
+        >>> x = Module_element({'a':1, 'b':2})
+        >>> x += Module_element({'a':3, 'b':6})
+        Module_element({'a':4, 'b':8})
+
+        '''
         for key, value in self.items():
             self[key] = value % p
             
         return self
 
-    def reduce_rep(self):
-        '''chooses preferred representatives of values (if torsion 
-        is specified) and deletes keys with 0 value'''
+    def _reduce_rep(self):
+        '''The referred representative of the free module element.
 
+        It reduces all values mod n if torsion is n and removes 
+        key:value pairs with value = 0.
+        
+        >>> Module_element({'a':1, 'b':2, 'c':0})
+        Module_element({'a':1, 'b':2})
+         
+        '''
         # print('reducing as Module_element')
         if self.torsion:
             for key, value in self.items():
@@ -130,7 +189,7 @@ class Module_element(Counter):
     def set_torsion(self, n):
         '''...'''
         self.torsion = n
-        self.reduce_rep()
+        self._reduce_rep()
         return self
 
 #_________________________________79_characters________________________________
@@ -181,7 +240,7 @@ class Cyclic_Module_element(Module_element):
                     answer[y] += v1*v2
             return Cyclic_DGModule_element(answer)
 
-    def reduce_rep(self):
+    def _reduce_rep(self):
         '''in place mod p reduction of the keys'''
         # print('reducing as Cyclic_Module_element')
         if not all([isinstance(k,int) for k in self.keys()]):
@@ -192,11 +251,11 @@ class Cyclic_Module_element(Module_element):
             for k,v in aux:
                 self[k%self.order] += v
         
-        super().reduce_rep()
+        super()._reduce_rep()
 
     def set_order(self, r):
         self.order = r
-        self.reduce_rep()
+        self._reduce_rep()
         return(self)
 
     def psi(self, n):
@@ -291,13 +350,13 @@ class Symmetric_Module_element(Module_element):
                     answer[tuple(k1[i-1] for i in k2)] = v1*v2
             return Surjection_element(answer)
 
-    def reduce_rep(self):
+    def _reduce_rep(self):
         '''...'''
         # print('reducing as Symmetric_Module_element')
         if any([set(k) != set(range(1,len(k)+1)) for k in self.keys()]):
             raise TypeError('keys must be permutations of (1,2,...,r)') 
 
-        super().reduce_rep()
+        super()._reduce_rep()
 
     def compose(self, *others):
         '''...'''
@@ -316,7 +375,7 @@ class DGModule_element(Module_element):
         string = super().__str__()
         return string.replace(', ', ',')
 
-    def reduce_rep(self):
+    def _reduce_rep(self):
         '''deletes degenerate keys and reduces as Module_element'''
         # print('reducing as DGModule_element')
         if not all([isinstance(x,tuple) for x in self.keys()]):
@@ -330,7 +389,7 @@ class DGModule_element(Module_element):
                 if simplex[i] == simplex[i+1]:
                     self[simplex] = 0
                 
-        super().reduce_rep()
+        super()._reduce_rep()
     
     def boundary(self):
         '''...'''
@@ -355,7 +414,7 @@ class Cyclic_DGModule_element(DGModule_element):
         s = s.replace(', ', ',')
         return s.replace('(','a^(')
 
-    def reduce_rep(self):
+    def _reduce_rep(self):
         '''reduces mod p the keys and values and deletes keys with 0 value 
         or which are degenerate'''
 
@@ -367,7 +426,7 @@ class Cyclic_DGModule_element(DGModule_element):
                 y = tuple(i % self.order for i in x)
                 self[y] += v
 
-        super().reduce_rep()
+        super()._reduce_rep()
 
     def phi(self):
         if not self.order:
@@ -386,7 +445,7 @@ class Cyclic_DGModule_element(DGModule_element):
     def set_order(self, r):
         '''...'''
         self.order = r
-        self.reduce_rep()
+        self._reduce_rep()
         return self
 
 #_________________________________79_characters________________________________
@@ -432,27 +491,18 @@ class Surjection_element(DGModule_element):
         '''...'''
         pass
 
-    def reduce_rep(self):
+    def _reduce_rep(self):
         '''...'''
 
         zeros = [k for k in self.keys() if set(k) != set(range(1,max(k)+1))]
         for k in zeros:
             del self[k]
 
-        super().reduce_rep()
+        super()._reduce_rep()
 
-i = 5
-r = 5
+#_________________________________79_characters________________________________
 
-Module_element.torsion = r
-Cyclic_Module_element.order = r
-Cyclic_DGModule_element.order = r
+class Eilenberg_Zilber_element(Module_element):
+    pass
 
-e = Cyclic_Module_element({0:1})
-
-for k,v in e.psi(i).phi().items():
-    if v != 1:
-        raise('coeff not 1')
-    print(str(k).replace('((','(').replace('))',')').replace('), ',')\n'))
-    surj = Barratt_Eccles_element({k:v}).table_reduction()
-    print(surj,'\n')
+help(Module_element)

@@ -1,4 +1,4 @@
-clesto/__pycache__
-
+# notebooks
 .ipynb_checkpoints
-
+# cache
+clesto/__pycache__

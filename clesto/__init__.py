@@ -33,8 +33,8 @@ class Module_element(Counter):
     """
     Counter with arithmetic improvements to handle (modular) integer values.
 
-    Class constructed to model free module elements over the ring of integers
-    or of modular integers.
+    Class constructed to model free module elements over the ring of 
+    (modular) integers.
 
     Attributes
     ----------
@@ -168,7 +168,7 @@ class Module_element(Counter):
         return self
 
     def _reduce_rep(self):
-        '''The referred representative of the free module element.
+        '''The preferred representative of the free module element.
 
         It reduces all values mod n if torsion is n and removes 
         key:value pairs with value = 0.
@@ -504,5 +504,3 @@ class Surjection_element(DGModule_element):
 
 class Eilenberg_Zilber_element(Module_element):
     pass
-
-help(Module_element)

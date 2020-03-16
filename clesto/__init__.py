@@ -211,13 +211,13 @@ class Cyclic_Module_element(Module_element):
             answer = '' 
             for exponent, coefficient in self.items():
                 if coefficient != 1 or exponent == 0:
-                    answer += f'+{coefficient}a^{exponent}'
+                    answer += f'+{coefficient}q^{exponent}'
                 else:
-                    answer += f'+a^{exponent}'    
+                    answer += f'+q^{exponent}'    
             if answer[0] == '+':
                 answer = answer[1:]
 
-            return answer.replace('a^0','').replace('a^1','a')
+            return answer.replace('q^0','').replace('q^1','q')
             
     def __mul__(self, other):
         '''...'''
@@ -412,7 +412,7 @@ class Cyclic_DGModule_element(DGModule_element):
         '''...'''
         s = super().__str__()
         s = s.replace(', ', ',')
-        return s.replace('(','a^(')
+        return s.replace('(','q^(')
 
     def _reduce_rep(self):
         '''reduces mod p the keys and values and deletes keys with 0 value 

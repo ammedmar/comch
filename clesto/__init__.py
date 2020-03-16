@@ -502,5 +502,61 @@ class Surjection_element(DGModule_element):
 
 #_________________________________79_characters________________________________
 
+
 class Eilenberg_Zilber_element(Module_element):
-    pass
+    '''...'''
+    def __str__(self):
+        '''...'''
+        string = ''
+        for multiop, coeff in self.items():
+            if coeff != 1:
+                string += str(coeff)
+            string += '('
+            for op in multiop:
+                if not op:
+                    d = 'id'
+                else:
+                    d = f'd_{"d_".join(str(i) for i in op)}'
+
+                string += d+')x('
+            string = string[:-2]+' + '
+        return string[:-3]
+
+    def _reduce_rep(self):
+        '''...'''
+        aux = list(self.items())
+        self.clear()
+        for multiop, coeff in aux:
+            ordered_multiop = tuple()
+            for op in multiop:
+                # check input
+                if not(isinstance(multiop,tuple) and isinstance(op,tuple) and
+                       all([isinstance(i, int) for i in op])):
+                    raise TypeError('keys must be tuple of tuple of int')
+                # order input
+                deg_maps  = Eilenberg_Zilber_element._face_maps_sort(op)
+                ordered_multiop += (deg_maps,)
+            self[ordered_multiop] += coeff
+
+        super()._reduce_rep()
+
+    @staticmethod
+    def _face_maps_sort(face_maps):
+        '''puts the face maps in canonical order d < ... < d using the
+        simplicial identity d_i d_j = d_j d_{i+1} if i >= j'''
+
+        face_maps = list(face_maps)
+        for index in range(1, len(face_maps)):
+
+            currentvalue = face_maps[index]
+            position = index
+
+            while (position > 0 and
+                   face_maps[position-1] >= currentvalue):
+
+                face_maps[position] = face_maps[position-1]+1
+                position = position-1
+
+            face_maps[position] = currentvalue
+
+        return tuple(face_maps)

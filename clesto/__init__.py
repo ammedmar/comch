@@ -1,5 +1,6 @@
 from collections import Counter
 from itertools import combinations, product, chain, permutations
+from math import floor, factorial
 
 #_________________________________79_characters________________________________
 
@@ -258,57 +259,60 @@ class Cyclic_Module_element(Module_element):
         self._reduce_rep()
         return(self)
 
-    def psi(self, n):
-        '''considering self as an element in W_n we compute 
-        its image in E(Z/p[C_p]). We use that the coefficients
-        in psi[n] are equal to 1 for each basis element'''
-
-        try:
-            answer = Cyclic_DGModule_element()
-            for k1 in (Cyclic_Module_element.psi_dict[n]).keys():
-                for k2,v2 in self.items():
-                    to_add = Cyclic_DGModule_element({tuple(k2+i for i in k1): v2})
-                    answer += to_add
-            return answer
-
-        except KeyError:
-            Cyclic_Module_element._compute_psi(n)
-            return self.psi(n)
-
-    @classmethod    
-    def transposition_element(self):
-        return Cyclic_Module_element({1:1, 0:-1})
-
-    @classmethod
-    def norm_element(self):
-        if self.order:
-            return Cyclic_Module_element({i:1 for i in range(self.order)})
-        else:
-            raise TypeError('Norm element not defined for infinite order')
-
-    @classmethod
-    def _compute_psi(self, i):
+    @staticmethod    
+    def transposition_element(n):
         '''...'''
+        if not(isinstance(n,int) and n>0):
+            raise TypeError('order must be a positive integer')
+        else:
+            T = Cyclic_Module_element({1:1, 0:-1})
+            T.set_order(n)
+            T.set_torsion(n)
+            return T
 
-        try:
-            previous_psi = Cyclic_Module_element.psi_dict[i-1]
+    @staticmethod
+    def norm_element(n):
+        '''...'''
+        if not(isinstance(n,int) and n>0):
+            raise TypeError('order must be a positive integer')
+        else:
+            N = Cyclic_Module_element({i:1 for i in range(n)})
+            N.set_order(n)
+            N.set_torsion(n)
+            return N
 
-            operators = {0: Cyclic_Module_element.norm_element(),
-                         1: Cyclic_Module_element.transposition_element()}
+    def psi(self, d):
+        '''...'''
+        # recursive function to find psi(e_d)
+        def _psi_on_generator(d):
+            if d == 0:
+                return Cyclic_DGModule_element({(0,):1})
+            else:
+                operators = {
+                    0: Cyclic_Module_element.norm_element(self.order),
+                    1: Cyclic_Module_element.transposition_element(self.order)}
 
-            op_psi = operators[i%2](previous_psi)
+                op_psi = operators[d%2](_psi_on_generator(d-1))
             
-            Cyclic_Module_element.psi_dict[i] = ( 
-                             Cyclic_DGModule_element(
-                                {(0,) + k:v for k,v in op_psi.items()}) )
-        
-        except KeyError:
-            if i == 0:
-                Cyclic_Module_element.psi_dict[0] = \
-                        Cyclic_DGModule_element({(0,):1})
-            else:            
-                Cyclic_Module_element._compute_psi(i-1)
-                Cyclic_Module_element._compute_psi(i)
+                previous = \
+                    Cyclic_DGModule_element({(0,)+k:v for k,v in op_psi.items()})
+                previous.set_torsion(self.order)
+                previous.set_order(self.order)
+                
+                return previous
+
+        # using linearity of psi knowing psi(e_d)
+        answer = Cyclic_DGModule_element()
+        answer.set_torsion(self.order)
+        answer.set_order(self.order)
+        for k1 in _psi_on_generator(d).keys():
+            for k2,v2 in self.items():
+                to_add = Cyclic_DGModule_element({tuple(k2+i for i in k1): v2})
+                to_add.set_torsion(self.order)
+                to_add.set_order(self.order)
+                answer += to_add
+        return answer
+
 
 #_________________________________79_characters________________________________
 
@@ -501,7 +505,6 @@ class Surjection_element(DGModule_element):
         super()._reduce_rep()
 
 #_________________________________79_characters________________________________
-
 
 class Eilenberg_Zilber_element(Module_element):
     '''...'''

@@ -47,10 +47,13 @@ class Module_element(Counter):
 
     torsion = None 
 
-    def __init__(*args, **kwds):
+    def __init__(*args, torsion=None, **kwds):
         # print('initializing as Module_element')
         self, *args = args
         super(Module_element, self).__init__(*args, **kwds)
+        
+        if torsion:
+            self.torsion = torsion
         
         if not all( [type(v) is int for v in self.values()] ):
             raise TypeError('values must be integers')
@@ -202,7 +205,18 @@ class Cyclic_Module_element(Module_element):
     
     order = None
 
-    psi_dict = {}
+    def __init__(*args, torsion=None, order=None, **kwds):
+        # print("initializing as Cyclic_Module_element")
+        self, *args = args
+        super(Module_element, self).__init__(*args, **kwds)
+
+        if torsion:
+            self.torsion = torsion
+
+        if order:
+            self.order = order
+        
+        self._reduce_rep()
 
     def __str__(self):
         '''...'''
@@ -219,15 +233,19 @@ class Cyclic_Module_element(Module_element):
                 answer = answer[1:]
 
             return answer.replace('q^0','').replace('q^1','q')
-            
+
     def __mul__(self, other):
         '''...'''
+        if self.order != other.order or self.torsion != other.torsion: 
+            raise('underlying rings and cyclic groups must agree')
+
         answer = Counter()
         for k1,v1 in self.items():
             for k2,v2 in other.items():
                 answer[k1+k2] += v1*v2
         
-        return Cyclic_Module_element(answer)
+        return Cyclic_Module_element(answer, torsion=self.torsion, 
+                                             order=self.order)
         
     def __call__(self, other):
         '''...'''
@@ -265,21 +283,16 @@ class Cyclic_Module_element(Module_element):
         if not(isinstance(n,int) and n>0):
             raise TypeError('order must be a positive integer')
         else:
-            T = Cyclic_Module_element({1:1, 0:-1})
-            T.set_order(n)
-            T.set_torsion(n)
-            return T
-
+            return Cyclic_Module_element({1:1, 0:-1}, torsion=n, order=n)
+            
     @staticmethod
     def norm_element(n):
         '''...'''
         if not(isinstance(n,int) and n>0):
             raise TypeError('order must be a positive integer')
         else:
-            N = Cyclic_Module_element({i:1 for i in range(n)})
-            N.set_order(n)
-            N.set_torsion(n)
-            return N
+            return Cyclic_Module_element( {i:1 for i in range(n)}, 
+                                           torsion=n, order=n )
 
     def psi(self, d):
         '''...'''
@@ -312,7 +325,6 @@ class Cyclic_Module_element(Module_element):
                 to_add.set_order(self.order)
                 answer += to_add
         return answer
-
 
 #_________________________________79_characters________________________________
 
@@ -412,6 +424,19 @@ class Cyclic_DGModule_element(DGModule_element):
 
     order = None
 
+    def __init__(*args, torsion=None, order=None, **kwds):
+        # print("initializing as Cyclic_DGModule_element")
+        self, *args = args
+        super(Module_element, self).__init__(*args, **kwds)
+
+        if torsion:
+            self.torsion = torsion
+
+        if order:
+            self.order = order
+        
+        self._reduce_rep()
+
     def __str__(self):
         '''...'''
         s = super().__str__()
@@ -508,6 +533,7 @@ class Surjection_element(DGModule_element):
 
 class Eilenberg_Zilber_element(Module_element):
     '''...'''
+
     def __str__(self):
         '''...'''
         string = ''
@@ -563,3 +589,21 @@ class Eilenberg_Zilber_element(Module_element):
             face_maps[position] = currentvalue
 
         return tuple(face_maps)
+
+#_________________________________79_characters________________________________
+
+class Power_operation(object):
+    '''...'''
+    def __init__(self, p, s, d, bockstein=False):
+        coeff = (-1)**(floor(d/2)+s)
+        if d/2 - floor(d/2):
+            coeff *= factorial((p-1)/2)
+
+        b = int(bockstein)
+        
+        e = Cyclic_Module_element({0:coeff})
+        e.set_torsion(p)
+        e.set_order(p)
+        self.cyclic = e.psi((2*s-d)*(p-1)-b)
+        self.barrat_eccles = self.cyclic.phi()
+        self.surjection = self.barrat_eccles.table_reduction()

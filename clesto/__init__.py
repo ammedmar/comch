@@ -295,7 +295,7 @@ class Cyclic_Module_element(Module_element):
                                            torsion=n, order=n )
 
     def psi(self, d):
-        '''...'''
+        '''...''' 
         # recursive function to find psi(e_d)
         def _psi_on_generator(d):
             if d == 0:
@@ -307,22 +307,17 @@ class Cyclic_Module_element(Module_element):
 
                 op_psi = operators[d%2](_psi_on_generator(d-1))
             
-                previous = \
-                    Cyclic_DGModule_element({(0,)+k:v for k,v in op_psi.items()})
-                previous.set_torsion(self.order)
-                previous.set_order(self.order)
-                
-                return previous
+                return Cyclic_DGModule_element(
+                            {(0,)+k:v for k,v in op_psi.items()},
+                            torsion=self.torsion, order=self.order)
 
         # using linearity of psi knowing psi(e_d)
-        answer = Cyclic_DGModule_element()
-        answer.set_torsion(self.order)
-        answer.set_order(self.order)
+        answer = Cyclic_DGModule_element(torsion=self.torsion, 
+                                         order=self.order)
         for k1 in _psi_on_generator(d).keys():
             for k2,v2 in self.items():
-                to_add = Cyclic_DGModule_element({tuple(k2+i for i in k1): v2})
-                to_add.set_torsion(self.order)
-                to_add.set_order(self.order)
+                to_add = Cyclic_DGModule_element({tuple(k2+i for i in k1): v2},
+                                        torsion=self.torsion, order=self.order)
                 answer += to_add
         return answer
 
@@ -600,10 +595,13 @@ class Power_operation(object):
             coeff *= factorial((p-1)/2)
 
         b = int(bockstein)
-        
-        e = Cyclic_Module_element({0:coeff})
-        e.set_torsion(p)
-        e.set_order(p)
+    
+        e = Cyclic_Module_element({0:coeff}, torsion=p, order=p)
+
         self.cyclic = e.psi((2*s-d)*(p-1)-b)
         self.barrat_eccles = self.cyclic.phi()
         self.surjection = self.barrat_eccles.table_reduction()
+
+
+e = Cyclic_Module_element({0:1}, torsion=3, order=3)
+print(Power_operation(3,2,3, bockstein=True).surjection)

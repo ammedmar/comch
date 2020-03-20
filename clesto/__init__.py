@@ -570,7 +570,7 @@ class Surjection_element(DGModule_element):
 
         super()._reduce_rep()
 
-    def as_Eilenber_Zilber_element(self, n):
+    def to_Eilenber_Zilber_element(self, n):
         '''I forgot what this function does. Bad documentation comes back to bite'''
 
 

@@ -416,11 +416,44 @@ class Symmetric_Module_element(Module_element):
             raise TypeError('keys must be permutations of (1,2,...,r)') 
 
         super()._reduce_rep()
-
+        
+    def domain(self):
+         '''returns the integer r such that self is a linear combination 
+            of permutations in Sigma_r'''
+            
+         if len(self) == 0:
+             raise ValueError('the symmetric module element is 0')
+             
+         perm = list(self.keys())[0]
+         return len(perm)
+        
     def compose(self, *others):
-        '''...'''
-        pass
-
+        if len(others) == 2 and isinstance(others[1], int): 
+            # partial composition
+            answer = Symmetric_Module_element()
+            k = others[1]
+            other = others[0]
+            for perm1, coeff1 in self.items():
+                for perm2, coeff2 in other.items():
+                    s = len(perm2)-1
+                    to_insert = tuple(i+k-1 for i in perm2)
+                    at = perm1.index(k)
+                    shifted = tuple(map(lambda i: i+s if i>k else i, perm1))
+                    inserted = shifted[:at] + to_insert + shifted[at+1:]
+                    new_coeff = coeff1*coeff2
+                    answer += Symmetric_Module_element({inserted:new_coeff})
+            return answer
+        else:
+            if not len(others) == self.domain():
+                raise TypeError('the number of arguments must be equal to ' + 
+                                'the domain of self')
+                                
+            answer = self
+            for idx, other in reversed(list(enumerate(others))):
+                answer = answer.compose(other, idx+1)
+            return answer
+            
+            
     @staticmethod
     def all_elements(r):
         pass
@@ -527,9 +560,107 @@ class Cyclic_DGModule_element(DGModule_element):
 class Barratt_Eccles_element(DGModule_element):
     '''...'''
     
+    
+    def domain(self):
+        '''returns the integer r such that self is a linear combination 
+           of vector of permutations in Sigma_r'''
+           
+        perm_vect = list(self.keys())[0]
+        return len(perm_vect[0])
+    
+    def _int_to_bin(n):
+        '''returns a list representing n in binary'''
+        
+        if n == 0: return [0]
+        
+        result = []
+        while n > 0:
+            result.insert(0, n % 2)
+            n = n // 2
+        return result
+        
+    def _paths(p, q):
+        '''returns as a list all increasing paths from (0,0) to (p,q)'''
+        
+        if (p,q) == (0,0): return [((0,0),)]
+        
+        answer = list()
+        if p > 0:
+            west = Barratt_Eccles_element._paths(p-1, q)
+            for path in west:
+                answer.append(path + ((p,q),))
+            
+        if q > 0:
+            south = Barratt_Eccles_element._paths(p, q-1)
+            for path in south:
+                answer.append(path + ((p,q),))
+              
+        return answer
+
+    def _sgn_of_path(path):
+        '''...'''
+        
+        segments = range(1,len(path))
+        horizontal_segments = []
+        vertical_segments = []
+        for i in segments:
+            vertex1 = path[i-1]
+            vertex2 = path[i]
+            if vertex2[0] > vertex1[0]:
+                horizontal_segments.append(i)
+            else:
+                vertical_segments.append(i)
+     
+        ordered_segments = horizontal_segments + vertical_segments
+        
+        # find the permutation that transforms segments to orderedSegments
+        permutation = {}
+        for seg in segments:
+            for j in range(1,len(ordered_segments)+1):
+                if seg == ordered_segments[j-1]:
+                    permutation[seg] = j
+       
+        # compute the signature of the permutation
+        sgn = 1
+        for i in range(1,len(segments)+1):
+            for j in range(i+1,len(segments)+1):
+                diff = permutation[j] - permutation[i]
+                sgn = diff//abs(diff)
+        return sgn
+    
     def compose(self, *others):
         '''...'''
-        pass
+        
+        if len(others) == 2 and isinstance(others[1], int):
+            # partial composition
+            answer = Barratt_Eccles_element()
+            k = others[1]
+            other = others[0]
+            for perm_vect1, coeff1 in self.items():
+                for perm_vect2, coeff2 in other.items():
+                    comp = Barratt_Eccles_element()
+                    d = len(perm_vect1)-1
+                    e = len(perm_vect2)-1
+                    for path in Barratt_Eccles_element._paths(d,e):
+                        new_perm_vect = ()
+                        for i,j in path:
+                            perm1 = Symmetric_Module_element({perm_vect1[i]:1})
+                            perm2 = Symmetric_Module_element({perm_vect2[j]:1})
+                            partial_comp = perm1.compose(perm2, k)
+                            new_perm_vect += (list(partial_comp.keys())[0],)
+                        sgn = Barratt_Eccles_element._sgn_of_path(path)
+                        comp += Barratt_Eccles_element({new_perm_vect:sgn})
+                    answer += coeff1*coeff2*comp
+            return answer
+        else:
+            if not len(others) == self.domain():
+                raise TypeError('the number of arguments must be equal to ' + 
+                                'the domain of self')
+                                
+            answer = self
+            for idx, other in reversed(list(enumerate(others))):
+                answer = answer.compose(other, idx+1)
+            return answer
 
     def table_reduction(self):
         '''given a set of basis element in the Barratt_Eccles operad, it returns 

@@ -2,6 +2,9 @@ from collections import Counter
 from itertools import combinations, product, chain, permutations
 from math import floor, factorial
 
+# TODO: 
+# 1) check input in __init__ not _reduced_rep
+# 2) arity for Surjection_element
 #_________________________________79_characters________________________________
 
 def partitions(n, k, smallest_value=1, largest_value=None, ordered=False):
@@ -29,11 +32,6 @@ def partitions(n, k, smallest_value=1, largest_value=None, ordered=False):
         return unordered_partitions(n,k)
 
 #_________________________________79_characters________________________________
-
-# TODO: 
-# 1) compare_attributes
-# 2) copy_attributes_to
-# 3) copy_attributes_from
 
 class Module_element(Counter):
     """
@@ -89,12 +87,9 @@ class Module_element(Counter):
         Module_element({'a':2, 'b':2})
 
         '''
-        if self.__dict__ != other.__dict__:
-            raise AttributeError('same attributes please')
-        answer = type(self)(self)
+        self.compare_attributes(other)
+        answer = type(self)(self).copy_attributes_from(self)
         answer.update(other)
-        for attr, value in self.__dict__.items():
-            setattr(answer,attr,value)
         answer._reduce_rep()
         return answer
 
@@ -105,12 +100,9 @@ class Module_element(Counter):
         Module_element({'b':2})
 
         '''
-        if self.__dict__ != other.__dict__:
-            raise AttributeError('same attributes please')
-        answer = type(self)(self)
+        self.compare_attributes(other)
+        answer = type(self)(self).copy_attributes_from(self)
         answer.subtract(other)
-        for attr, value in self.__dict__.items():
-            setattr(answer,attr,value)
         answer._reduce_rep()
         return answer
     
@@ -124,9 +116,8 @@ class Module_element(Counter):
         if not isinstance(c,int):
             raise TypeError(f"can't act by non-int of type {type(c)}")
 
-        answer = type(self)({k:c*v for k,v in self.items()})
-        for attr, value in self.__dict__.items():
-            setattr(answer,attr,value)
+        scaled = {k:c*v for k,v in self.items()}
+        answer = type(self)(scaled).copy_attributes_from(self)
         answer._reduce_rep()
         return answer
 
@@ -146,9 +137,8 @@ class Module_element(Counter):
         Module_element({'a':1})
 
         '''
-        answer = type(self)({k:v%n for k,v in self.items()})
-        for attr, value in self.__dict__.items():
-            setattr(answer,attr,value)
+        reduced = {k:v%n for k,v in self.items()}
+        answer = type(self)(reduced).copy_attributes_from(self)
         answer._reduce_rep()
         return answer
     
@@ -160,8 +150,7 @@ class Module_element(Counter):
         Module_element({'a':4, 'b':8})
 
         '''
-        if self.__dict__ != other.__dict__:
-            raise AttributeError('same attributes please')
+        self.compare_attributes(other)
         self.update(other)
         self._reduce_rep()
         return self
@@ -174,8 +163,7 @@ class Module_element(Counter):
         Module_element({'a':-2, 'b':-4})
 
         '''
-        if self.__dict__ != other.__dict__:
-            raise AttributeError('same attributes please')
+        self.compare_attributes(other)
         self.subtract(other)
         self._reduce_rep()
         return self
@@ -224,6 +212,23 @@ class Module_element(Counter):
         self._reduce_rep()
         return self
 
+    def compare_attributes(self, other):
+        '''...'''
+        if self.__dict__ != other.__dict__:
+            raise AttributeError('same attributes please')
+
+    def copy_attributes_to(self, other):
+        '''...'''
+        for attr, value in self.__dict__.items():
+            setattr(other, attr, value)
+        return(other)
+
+    def copy_attributes_from(self, other):
+        '''...'''
+        for attr, value in other.__dict__.items():
+            setattr(self, attr, value)
+        return(self)
+
 #_________________________________79_characters________________________________
 
 class Cyclic_Module_element(Module_element):
@@ -260,11 +265,8 @@ class Cyclic_Module_element(Module_element):
 
     def __mul__(self, other):
         '''...'''
-        if self.__dict__ != other.__dict__:
-            raise AttributeError('same attributes please')
-        answer = type(self)()
-        for attr, value in self.__dict__.items():
-            setattr(answer,attr,value)
+        self.compare_attributes(other)
+        answer = type(self)().copy_attributes_from(self)
         for k1,v1 in self.items():
             for k2,v2 in other.items():
                 answer[k1+k2] += v1*v2
@@ -275,9 +277,9 @@ class Cyclic_Module_element(Module_element):
         '''...'''
         if isinstance(other, Cyclic_Module_element):
             return self.__mul__(other)
+
         if isinstance(other, Cyclic_DGModule_element):
-            if self.__dict__ != other.__dict__:
-                raise AttributeError('same attributes please')
+            self.compare_attributes(other)
             answer = type(other)()
             for attr, value in other.__dict__.items():
                 setattr(answer,attr,value)
@@ -345,8 +347,7 @@ class Cyclic_Module_element(Module_element):
                             torsion=self.torsion, order=self.order)
 
         # using linearity of psi knowing psi(e_d)
-        answer = Cyclic_DGModule_element(torsion=self.torsion, 
-                                         order=self.order)
+        answer = Cyclic_DGModule_element().copy_attributes_from(self)
         for k1 in _psi_on_generator(d).keys():
             for k2,v2 in self.items():
                 to_add = Cyclic_DGModule_element({tuple(k2+i for i in k1): v2},
@@ -359,6 +360,20 @@ class Cyclic_Module_element(Module_element):
 class Symmetric_Module_element(Module_element):
     '''...'''
 
+    def __init__(self, data=None, torsion=None):
+        # print("initializing as Symmetric_Module_element")
+
+        arity = None
+        if data:
+            arities = set(max(k) for k in data.keys())
+            if len(arities) != 1:
+                raise TypeError('keys must have equal arity')  
+            else:
+                arity = arities.pop()
+        setattr(self, 'arity', arity)
+
+        super(Symmetric_Module_element, self).__init__(data=data, torsion=torsion)
+
     def __str__(self):
         '''...'''
         if not self:
@@ -369,11 +384,8 @@ class Symmetric_Module_element(Module_element):
 
     def __mul__(self, other):
         '''...'''
-        if self.__dict__ != other.__dict__:
-            raise AttributeError('same attributes please')
-        answer = type(self)()
-        for attr, value in self.__dict__.items():
-            setattr(answer,attr,value)
+        self.compare_attributes(other)
+        answer = type(other)().copy_attributes_from(self)
         for k1,v1 in self.items():
             for k2,v2 in other.items():
                 answer[tuple(k1[i-1] for i in k2)] += v1*v2
@@ -386,11 +398,8 @@ class Symmetric_Module_element(Module_element):
             return self*other
 
         if isinstance(other, Barratt_Eccles_element):
-            if self.__dict__ != other.__dict__:
-                raise AttributeError('same attributes please')
-            answer = type(other)()
-            for attr, value in other.__dict__.items():
-                setattr(answer,attr,value)
+            self.compare_attributes(other)
+            answer = type(other)().copy_attributes_from(other)
             for k1,v1 in self.items():
                 for k2,v2 in other.items():
                     answer[tuple(tuple(k1[i-1] for i in x) for x in k2)] = v1*v2
@@ -398,11 +407,8 @@ class Symmetric_Module_element(Module_element):
             return answer
 
         if isinstance(other, Surjection_element):
-            if self.__dict__ != other.__dict__:
-                raise AttributeError('same attributes please')
-            answer = type(other)()
-            for attr, value in other.__dict__.items():
-                setattr(answer,attr,value)
+            self.compare_attributes(other)
+            answer = type(other)().copy_attributes_from(other)
             for k1,v1 in self.items():
                 for k2,v2 in other.items():
                     answer[tuple(k1[i-1] for i in k2)] = v1*v2
@@ -412,25 +418,24 @@ class Symmetric_Module_element(Module_element):
     def _reduce_rep(self):
         '''...'''
         # print('reducing as Symmetric_Module_element')
+
         if any([set(k) != set(range(1,len(k)+1)) for k in self.keys()]):
             raise TypeError('keys must be permutations of (1,2,...,r)') 
 
         super()._reduce_rep()
-        
-    def domain(self):
-         '''returns the integer r such that self is a linear combination 
-            of permutations in Sigma_r'''
             
-         if len(self) == 0:
-             raise ValueError('the symmetric module element is 0')
-             
-         perm = list(self.keys())[0]
-         return len(perm)
-        
     def compose(self, *others):
+
+        if self == Symmetric_Module_element():
+            # composing with 0 is 0
+            return Symmetric_Module_element()
+
         if len(others) == 2 and isinstance(others[1], int): 
             # partial composition
             answer = Symmetric_Module_element()
+            for attr, value in self.__dict__.items():
+                setattr(answer, attr, value)
+
             k = others[1]
             other = others[0]
             for perm1, coeff1 in self.items():
@@ -441,18 +446,22 @@ class Symmetric_Module_element(Module_element):
                     shifted = tuple(map(lambda i: i+s if i>k else i, perm1))
                     inserted = shifted[:at] + to_insert + shifted[at+1:]
                     new_coeff = coeff1*coeff2
-                    answer += Symmetric_Module_element({inserted:new_coeff})
+                    to_add = Symmetric_Module_element({inserted:new_coeff})
+                    for attr, value in self.__dict__.items():
+                        setattr(to_add, attr, value)
+                    answer += to_add 
             return answer
-        else:
-            if not len(others) == self.domain():
-                raise TypeError('the number of arguments must be equal to ' + 
-                                'the domain of self')
-                                
+
+        else: 
+            # total composition
+            if len(others) != self.arity:
+                raise TypeError('the number of arguments must equal the arity '
+                                +f'of self, but {len(others)} != {self.arity}')
+
             answer = self
             for idx, other in reversed(list(enumerate(others))):
                 answer = answer.compose(other, idx+1)
             return answer
-            
             
     @staticmethod
     def all_elements(r):
@@ -485,17 +494,13 @@ class DGModule_element(Module_element):
     
     def boundary(self):
         '''...'''
-        bdry = type(self)()
-        for attr, value in self.__dict__.items():
-            setattr(bdry, attr, value)
+        bdry = type(self)().copy_attributes_from(self)
         for spx, coeff in self.items():
             for i in range(len(spx)):
-                i_face = tuple(spx[:i]+spx[i+1:])
-                i_coeff = coeff*((-1)**i)
-                to_add = type(self)({i_face: i_coeff})
-                for attr, value in bdry.__dict__.items():
-                    setattr(to_add, attr, value)
+                i_term = {tuple(spx[:i]+spx[i+1:]) : coeff*((-1)**i)}
+                to_add = type(self)(i_term).copy_attributes_from(bdry)
                 bdry += to_add
+        bdry._reduce_rep()
         return bdry
 
 #_________________________________79_characters________________________________
@@ -536,18 +541,20 @@ class Cyclic_DGModule_element(DGModule_element):
         super()._reduce_rep()
 
     def phi(self):
+        '''from Cyclic_DGModule to Barrat_Eccles'''
+
         if self.order == 'infinite':
             raise('phi is not define for elements of infinite order')
 
         r = self.order
-        answer = Counter()
+        answer = {}
         for k, v in self.items():
             x = []
             for i in k:
                 x.append(tuple(j%r + 1 for j in range(i, r+i)))
             answer[tuple(x)] = v
-            
-        return Barratt_Eccles_element(answer)
+
+        return Barratt_Eccles_element(answer, torsion=self.torsion)
 
     def set_order(self, r):
         '''...'''
@@ -559,8 +566,29 @@ class Cyclic_DGModule_element(DGModule_element):
 
 class Barratt_Eccles_element(DGModule_element):
     '''...'''
-    
-    
+    def __init__(self, data=None, torsion=None):
+        # print("initializing as Symmetric_Module_element")
+
+        # checking input and setting the attribute arity
+        arity = None
+        if data:
+            arities = set()
+            for k in data.keys():
+                arities_in_k = set()
+                for perm in k:
+                    if len(perm) != max(perm):
+                        raise ValueError(f'the term {perm} is not a permutation')
+                    arities_in_k.add(max(perm))
+                if len(arities_in_k) != 1:
+                    raise ValueError(f'the key {k} is not well formed')
+                arities |= arities_in_k # in place union
+            if len(arities) != 1:
+                raise ValueError('keys must have the same arity')
+            arity = arities.pop()
+        setattr(self, 'arity', arity)
+
+        super(Barratt_Eccles_element, self).__init__(data=data, 
+                                                     torsion=torsion)
     def domain(self):
         '''returns the integer r such that self is a linear combination 
            of vector of permutations in Sigma_r'''
@@ -667,6 +695,7 @@ class Barratt_Eccles_element(DGModule_element):
         the set of surjections in its image via the table reduction morphism'''
 
         answer = Surjection_element(torsion=self.torsion)
+        setattr(answer, 'arity', self.arity)
 
         for bar_ecc_element, value in self.items():
             d, a = len(bar_ecc_element)-1, max(bar_ecc_element[0]) #dim and arity
@@ -695,6 +724,29 @@ class Barratt_Eccles_element(DGModule_element):
 class Surjection_element(DGModule_element):
     '''...'''
     
+    def __init__(self, data=None, torsion=None):
+        '''...'''
+
+        # checking input and setting attribute arity
+        arity = None
+        if data:
+            data_copy = dict(data)
+            arities = set()
+            for surj in data_copy.keys():
+                if not ( isinstance(surj, tuple) and
+                all(isinstance(i,int) for i in surj) ):
+                    raise ValueError(f'basis elements are tuple of int unlike {surj}')
+                if set(surj) != set(range(1, max(surj)+1)):
+                    del data[surj] # degenerate element
+                else:
+                    arities.add(max(surj))
+            if len(arities) != 1:
+                raise ValueError('keys must have the same arity')
+            arity = arities.pop()
+        setattr(self, 'arity', arity)
+
+        super(Surjection_element, self).__init__(data=data, torsion=torsion)
+
     def compose(self, *others):
         '''...'''
         pass
@@ -708,8 +760,8 @@ class Surjection_element(DGModule_element):
 
         super()._reduce_rep()
 
-    def as_Eilenber_Zilber_element(self, n):
-        '''I forgot what this function does. Bad documentation comes back to bite'''
+    def to_Eilenber_Zilber_element(self, n):
+        '''I forgot how this function works. Bad documentation comes back to bite'''
 
         def _new_term(term, num_to_append, pos_to_append, k):
             tuple_to_replace = term['seq'][pos_to_append]+(num_to_append,)

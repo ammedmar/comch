@@ -3,8 +3,9 @@ from itertools import combinations, product, chain, permutations
 from math import floor, factorial
 
 # TODO: 
-# 1) check input in __init__ not _reduced_rep
-# 2) arity for Surjection_element
+# fix EZ_element
+# change psi, phi, and table_reduction to to_... methods
+
 #_________________________________79_characters________________________________
 
 def partitions(n, k, smallest_value=1, largest_value=None, ordered=False):
@@ -42,9 +43,9 @@ class Module_element(Counter):
 
     Attributes
     ----------
-    defaoult_torsion : int or None 
+    default_torsion : int or string 'free' 
         Chooses the underlying ring R. 
-        An int n sets R = Z/nZ whereas None sets R = Z
+        An int n sets R = Z/nZ whereas 'free' sets R = Z
 
     """
 
@@ -53,10 +54,25 @@ class Module_element(Counter):
     def __init__(self, data=None, torsion=None):
         # print('initializing as Module_element')
 
-        # setting torsion makes it appear in __dict__
+        # checking input data: dict with int values
+        if data:
+            if not ( isinstance(data, dict) and
+                     all((type(v) is int for v in data.values()))
+                ):
+                raise TypeError('input must be dict with int values')
+
+        # checking input torsion: positive int or 'free'
+        if not torsion is None:
+            if not( isinstance(torsion, int) and torsion > 0 
+                    or torsion == 'free'
+                ):
+                raise TypeError("torsion must be a positive int or 'free'") 
+        
+        # setting torsion
         n = torsion if torsion else type(self).default_torsion
         setattr(self, 'torsion', n)
 
+        # initialize element
         super(Module_element, self).__init__(data)
 
         self._reduce_rep()
@@ -88,7 +104,7 @@ class Module_element(Counter):
 
         '''
         self.compare_attributes(other)
-        answer = type(self)(self).copy_attributes_from(self)
+        answer = type(self)(self).copy_attrs_from(self)
         answer.update(other)
         answer._reduce_rep()
         return answer
@@ -101,7 +117,7 @@ class Module_element(Counter):
 
         '''
         self.compare_attributes(other)
-        answer = type(self)(self).copy_attributes_from(self)
+        answer = type(self)(self).copy_attrs_from(self)
         answer.subtract(other)
         answer._reduce_rep()
         return answer
@@ -117,8 +133,7 @@ class Module_element(Counter):
             raise TypeError(f"can't act by non-int of type {type(c)}")
 
         scaled = {k:c*v for k,v in self.items()}
-        answer = type(self)(scaled).copy_attributes_from(self)
-        answer._reduce_rep()
+        answer = type(self)(scaled).copy_attrs_from(self)
         return answer
 
     def __neg__(self):
@@ -129,18 +144,6 @@ class Module_element(Counter):
 
         '''
         return self.__rmul__(-1)
-
-    def __mod__(self, n):
-        '''The reduction mod n of the coefficients of a free module element.
-
-        >>> Module_element({'a':3, 'b':2}) % 2
-        Module_element({'a':1})
-
-        '''
-        reduced = {k:v%n for k,v in self.items()}
-        answer = type(self)(reduced).copy_attributes_from(self)
-        answer._reduce_rep()
-        return answer
     
     def __iadd__(self, other):
         '''The in place addition of two free module elements.
@@ -167,19 +170,6 @@ class Module_element(Counter):
         self.subtract(other)
         self._reduce_rep()
         return self
-    
-    def __imod__(self, n):
-        '''The in place reduction mod n of the values of a free module element.
-
-        >>> x = Module_element({'a':1, 'b':2})
-        >>> x += Module_element({'a':3, 'b':6})
-        Module_element({'a':4, 'b':8})
-
-        '''
-        for key, value in self.items():
-            self[key] = value % p
-            
-        return self
 
     def _reduce_rep(self):
         '''The preferred representative of the free module element.
@@ -192,9 +182,6 @@ class Module_element(Counter):
          
         '''
         # print('reducing as Module_element')
-
-        if not all( [type(v) is int for v in self.values()] ):
-            raise TypeError('values must be integers')
 
         # reducing coefficients mod torsion    
         if self.torsion != 'free':
@@ -215,18 +202,20 @@ class Module_element(Counter):
     def compare_attributes(self, other):
         '''...'''
         if self.__dict__ != other.__dict__:
-            raise AttributeError('same attributes please')
+            raise AttributeError('not the same attributes')
 
     def copy_attributes_to(self, other):
         '''...'''
         for attr, value in self.__dict__.items():
             setattr(other, attr, value)
+        other._reduce_rep()
         return(other)
 
-    def copy_attributes_from(self, other):
+    def copy_attrs_from(self, other):
         '''...'''
         for attr, value in other.__dict__.items():
             setattr(self, attr, value)
+        self._reduce_rep()
         return(self)
 
 #_________________________________79_characters________________________________
@@ -240,11 +229,26 @@ class Cyclic_Module_element(Module_element):
 
     def __init__(self, data=None, torsion=None, order=None):
         # print("initializing as Cyclic_Module_element")
-    
-        # setting torsion/order even if none is passed makes it into __dict__        
+
+        # checking input data: dict with int keys
+        if data:
+            if not( isinstance(data, dict) and
+                    all((type(k) is int for k in data.keys()))
+                ):
+                raise TypeError('data type must be dict with int keys')
+
+        # checking input order: positive int or 'infinite'
+        if not order is None:
+            if not( isinstance(order, int) and order > 0 
+                    or order != 'infinite'
+                ):
+                raise TypeError("order must be a positive int or 'infinite'")
+
+        # setting order
         n = order if order else type(self).default_order
         setattr(self, 'order', n)
 
+        # initializing element
         super(Cyclic_Module_element, self).__init__(data=data, torsion=torsion)
 
     def __str__(self):
@@ -266,7 +270,7 @@ class Cyclic_Module_element(Module_element):
     def __mul__(self, other):
         '''...'''
         self.compare_attributes(other)
-        answer = type(self)().copy_attributes_from(self)
+        answer = type(self)().copy_attrs_from(self)
         for k1,v1 in self.items():
             for k2,v2 in other.items():
                 answer[k1+k2] += v1*v2
@@ -293,9 +297,6 @@ class Cyclic_Module_element(Module_element):
     def _reduce_rep(self):
         '''in place mod p reduction of the keys'''
         # print('reducing as Cyclic_Module_element')
-        
-        if not all([isinstance(k,int) for k in self.keys()]):
-            raise TypeError('keys must be integers')
 
         # reducing keys mod order
         if self.order != 'infinite':    
@@ -347,7 +348,7 @@ class Cyclic_Module_element(Module_element):
                             torsion=self.torsion, order=self.order)
 
         # using linearity of psi knowing psi(e_d)
-        answer = Cyclic_DGModule_element().copy_attributes_from(self)
+        answer = Cyclic_DGModule_element().copy_attrs_from(self)
         for k1 in _psi_on_generator(d).keys():
             for k2,v2 in self.items():
                 to_add = Cyclic_DGModule_element({tuple(k2+i for i in k1): v2},
@@ -361,9 +362,23 @@ class Symmetric_Module_element(Module_element):
     '''...'''
 
     def __init__(self, data=None, torsion=None):
-        # print("initializing as Symmetric_Module_element")
+        #print("initializing as Symmetric_Module_element")
 
-        arity = None
+        # checking input data: dict with tuple of int keys
+        if data:
+            if not( isinstance(data, dict) and
+                    all(isinstance(perm, tuple) for perm in data.keys()) and
+                    all(isinstance(i, int) for i in 
+                    chain.from_iterable(data.keys()))
+                ):
+                raise TypeError('data type must be dict '+
+                                'with tuple of int keys')
+            
+            if any((set(k) != set(range(1,len(k)+1)) for k in data.keys())):
+                raise TypeError('keys must be permutations of (1,2,...,r)')
+
+        # setting attribute arity
+        arity = None # arity of 0 element
         if data:
             arities = set(max(k) for k in data.keys())
             if len(arities) != 1:
@@ -372,7 +387,9 @@ class Symmetric_Module_element(Module_element):
                 arity = arities.pop()
         setattr(self, 'arity', arity)
 
-        super(Symmetric_Module_element, self).__init__(data=data, torsion=torsion)
+        # initialize element
+        super(Symmetric_Module_element, self).__init__( data=data,
+                                                        torsion=torsion )        
 
     def __str__(self):
         '''...'''
@@ -385,7 +402,7 @@ class Symmetric_Module_element(Module_element):
     def __mul__(self, other):
         '''...'''
         self.compare_attributes(other)
-        answer = type(other)().copy_attributes_from(self)
+        answer = type(other)().copy_attrs_from(self)
         for k1,v1 in self.items():
             for k2,v2 in other.items():
                 answer[tuple(k1[i-1] for i in k2)] += v1*v2
@@ -399,7 +416,7 @@ class Symmetric_Module_element(Module_element):
 
         if isinstance(other, Barratt_Eccles_element):
             self.compare_attributes(other)
-            answer = type(other)().copy_attributes_from(other)
+            answer = type(other)().copy_attrs_from(other)
             for k1,v1 in self.items():
                 for k2,v2 in other.items():
                     answer[tuple(tuple(k1[i-1] for i in x) for x in k2)] = v1*v2
@@ -408,24 +425,15 @@ class Symmetric_Module_element(Module_element):
 
         if isinstance(other, Surjection_element):
             self.compare_attributes(other)
-            answer = type(other)().copy_attributes_from(other)
+            answer = type(other)().copy_attrs_from(other)
             for k1,v1 in self.items():
                 for k2,v2 in other.items():
                     answer[tuple(k1[i-1] for i in k2)] = v1*v2
             answer._reduce_rep()
             return answer
-
-    def _reduce_rep(self):
-        '''...'''
-        # print('reducing as Symmetric_Module_element')
-
-        if any([set(k) != set(range(1,len(k)+1)) for k in self.keys()]):
-            raise TypeError('keys must be permutations of (1,2,...,r)') 
-
-        super()._reduce_rep()
             
     def compose(self, *others):
-
+        '''...'''
         if self == Symmetric_Module_element():
             # composing with 0 is 0
             return Symmetric_Module_element()
@@ -471,7 +479,18 @@ class Symmetric_Module_element(Module_element):
 
 class DGModule_element(Module_element):
     '''...'''
-        
+    
+    def __init__(self, data=None, torsion=None):
+        #print('initializing as DGModule_element')
+
+        # checking input data: dict with tuple keys
+        if data:
+            if not all((isinstance(x, tuple) for x in data.keys())):
+                raise ValueError('data type must be dict with tuple keys')
+
+        # initializing element
+        super(DGModule_element, self).__init__(data=data, torsion=torsion)
+
     def __str__(self):
         string = super().__str__()
         return string.replace(', ', ',')
@@ -479,13 +498,9 @@ class DGModule_element(Module_element):
     def _reduce_rep(self):
         '''deletes degenerate keys and reduces as Module_element'''
         # print('reducing as DGModule_element')
-        if not all([isinstance(x,tuple) for x in self.keys()]):
-            raise TypeError('keys must be tuples')
 
-        for simplex,v in self.items():
-            if not type(simplex) is tuple:
-                raise TypeError('keys must be tuples')
-            
+        # removes degenerate simplices
+        for simplex, v in self.items():            
             for i in range(len(simplex)-1):
                 if simplex[i] == simplex[i+1]:
                     self[simplex] = 0
@@ -494,11 +509,11 @@ class DGModule_element(Module_element):
     
     def boundary(self):
         '''...'''
-        bdry = type(self)().copy_attributes_from(self)
+        bdry = type(self)().copy_attrs_from(self)
         for spx, coeff in self.items():
             for i in range(len(spx)):
                 i_term = {tuple(spx[:i]+spx[i+1:]) : coeff*((-1)**i)}
-                to_add = type(self)(i_term).copy_attributes_from(bdry)
+                to_add = type(self)(i_term).copy_attrs_from(bdry)
                 bdry += to_add
         bdry._reduce_rep()
         return bdry
@@ -512,13 +527,22 @@ class Cyclic_DGModule_element(DGModule_element):
 
     def __init__(self, data=None, torsion=None, order=None):
         # print("initializing as Cyclic_DGModule_element")
-    
-        # setting torsion/order even if none is passed makes it into __dict__        
+
+        # checking input data: dict with tuple of int keys
+        if data:
+            if not( isinstance(data, dict) and
+                    all(( isinstance(i, int) for i in 
+                    chain.from_iterable(data.keys()) ))
+                ):
+                raise ValueError('data type must be dict'+
+                                 'with tuple of int keys')
+        # setting order
         n = order if order else type(self).default_order
         setattr(self, 'order', n)
 
-        super(Cyclic_DGModule_element, self).__init__(data=data, torsion=torsion)
-
+        #initializing element
+        super(Cyclic_DGModule_element, self).__init__(data=data, 
+                                                      torsion=torsion)
     def __str__(self):
         '''...'''
         s = super().__str__()
@@ -530,7 +554,7 @@ class Cyclic_DGModule_element(DGModule_element):
         or which are degenerate'''
         # print('reducing as Cyclic_DGModule_element')
         
-        # reducing elements in keys mod order 
+        # reducing keys mod order 
         if self.order != 'infinite':
             aux = list(self.items())
             self.clear()
@@ -569,7 +593,24 @@ class Barratt_Eccles_element(DGModule_element):
     def __init__(self, data=None, torsion=None):
         # print("initializing as Symmetric_Module_element")
 
-        # checking input and setting the attribute arity
+        # checking input data: dict with tuple of tuple of int keys
+        if data:
+            if not( isinstance(data, dict) and
+                    all(isinstance(x, tuple) for x in data.keys()) and
+                    all(isinstance(perm, tuple) for perm in 
+                    chain.from_iterable(data.keys())) and
+                    all(isinstance(i, int) for i in 
+                    chain.from_iterable(chain.from_iterable(data.keys())))
+                ):
+                raise TypeError('data type must be dict ' +
+                                'with tuple of tuple of int keys')
+            
+            if any((set(perm) != set(range(1,len(perm)+1)) for perm in
+                    chain.from_iterable(data.keys()))):
+                raise TypeError('keys must tuples of ' +
+                                'permutations of (1,2,...,r)')
+
+        # setting attribute arity 
         arity = None
         if data:
             arities = set()
@@ -587,6 +628,7 @@ class Barratt_Eccles_element(DGModule_element):
             arity = arities.pop()
         setattr(self, 'arity', arity)
 
+        # initializing element
         super(Barratt_Eccles_element, self).__init__(data=data, 
                                                      torsion=torsion)
     def domain(self):
@@ -715,7 +757,6 @@ class Barratt_Eccles_element(DGModule_element):
                 if not degenerate:
                     answer += Surjection_element({tuple(surjection):value}, 
                                                   torsion=self.torsion)
-        
         answer._reduce_rep()
         return answer
 
@@ -727,24 +768,32 @@ class Surjection_element(DGModule_element):
     def __init__(self, data=None, torsion=None):
         '''...'''
 
+        # checking input data: dict with tuple of int keys
+        if data:
+            if not( isinstance(data, dict) and
+                    all(isinstance(surj, tuple) for surj in data.keys()) and
+                    all(isinstance(i, int) for i in
+                    chain.from_iterable(data.keys()))
+                ):
+                raise TypeError('data type must be dict ' +
+                                'with tuple of int keys')
+
         # checking input and setting attribute arity
         arity = None
         if data:
             data_copy = dict(data)
             arities = set()
             for surj in data_copy.keys():
-                if not ( isinstance(surj, tuple) and
-                all(isinstance(i,int) for i in surj) ):
-                    raise ValueError(f'basis elements are tuple of int unlike {surj}')
-                if set(surj) != set(range(1, max(surj)+1)):
-                    del data[surj] # degenerate element
-                else:
+                if set(surj) == set(range(1, max(surj)+1)):
                     arities.add(max(surj))
+                else:
+                    del data[surj] # degenerate surjection
             if len(arities) != 1:
                 raise ValueError('keys must have the same arity')
             arity = arities.pop()
         setattr(self, 'arity', arity)
 
+        # initializing element
         super(Surjection_element, self).__init__(data=data, torsion=torsion)
 
     def compose(self, *others):
@@ -754,14 +803,16 @@ class Surjection_element(DGModule_element):
     def _reduce_rep(self):
         '''...'''
 
-        zeros = [k for k in self.keys() if set(k) != set(range(1,max(k)+1))]
+        zeros = (k for k in self.keys() if 
+                 set(k) != set(range(1, self.arity+1)))
         for k in zeros:
             del self[k]
 
         super()._reduce_rep()
 
     def to_Eilenber_Zilber_element(self, n):
-        '''I forgot how this function works. Bad documentation comes back to bite'''
+        '''I forgot how this function works. 
+        Bad documentation comes back to bite'''
 
         def _new_term(term, num_to_append, pos_to_append, k):
             tuple_to_replace = term['seq'][pos_to_append]+(num_to_append,)
@@ -775,9 +826,8 @@ class Surjection_element(DGModule_element):
             '''TBW: given a sequence of "step" of faces of (0,...,n) returns the associate
             sign following the Berger-Fresse convention'''
             return 1
-
         
-        answer = Eilenberg_Zilber_element()
+        answer = Eilenberg_Zilber_element().copy_attrs_from(self)
         for surj, coeff in self.items():
             after = [{'pos': 0, 
                       'seq': ((),)*(surj[0]-1) + ((0,),) + ((),)*(max(surj)-surj[0])}]
@@ -804,8 +854,9 @@ class Surjection_element(DGModule_element):
                 sign = _get_sign(term['seq'])
                 multioperator = tuple()
                 for seq in term['seq']:
-                    multioperator += (tuple(i for i in range(n+1) if i not in seq),)
-                answer += Eilenberg_Zilber_element({multioperator:sign*coeff})
+                    multioperator += ( tuple(i for i in range(n+1) if i not in seq),)
+                answer += Eilenberg_Zilber_element(
+                          {multioperator:sign*coeff}).copy_attrs_from(answer)
 
         return answer
 
@@ -814,8 +865,39 @@ class Surjection_element(DGModule_element):
 class Eilenberg_Zilber_element(Module_element):
     '''...'''
 
+    def __init__(self, data=None, torsion=None):
+        '''...'''
+        
+        # checking input and setting attribute arity
+        arity = None # arity of the 0 element
+        if data:
+            # cheking input: dict of tuple of tuple of int
+            if not( all((isinstance(multiop, tuple)) for multiop in 
+                        data.keys()) and
+                    all((isinstance(op, tuple) for op in 
+                        chain.from_iterable(data.keys()))) and
+                    all((isinstance(i, int) for i in 
+                        chain.from_iterable(chain.from_iterable(data.keys()))))
+                    ):
+                raise TypeError('keys must be tuple of tuple of int')  
+        
+            # setting arity
+            arities = set(len(multiop) for multiop in data.keys())
+            if len(arities) != 1:
+                raise TypeError('keys must have same arity')
+            else:
+                arity = arities.pop()        
+
+        setattr(self, 'arity', arity)
+
+        # initialize object
+        super(Eilenberg_Zilber_element, self).__init__(data=data, torsion=torsion)
+
     def __str__(self):
         '''...'''
+        if not self:
+            return '0'
+
         string = ''
         for multiop, coeff in self.items():
             if coeff != 1:
@@ -833,20 +915,18 @@ class Eilenberg_Zilber_element(Module_element):
 
     def _reduce_rep(self):
         '''...'''
-        aux = list(self.items())
+        # print('reducing as Eilenberg_Zilber_element')
+
+        # order face maps in increasing value
+        self_data = dict(self)
         self.clear()
-        for multiop, coeff in aux:
+        for multiop, coeff in self_data.items():            
             ordered_multiop = tuple()
             for op in multiop:
-                # check input
-                if not(isinstance(multiop,tuple) and isinstance(op,tuple) and
-                       all([isinstance(i, int) for i in op])):
-                    raise TypeError('keys must be tuple of tuple of int')
-                # order input
-                deg_maps  = Eilenberg_Zilber_element._face_maps_sort(op)
-                ordered_multiop += (deg_maps,)
+                ordered_op  = Eilenberg_Zilber_element._face_maps_sort(op)
+                ordered_multiop += (ordered_op,)
             self[ordered_multiop] += coeff
-
+                
         super()._reduce_rep()
 
     @staticmethod

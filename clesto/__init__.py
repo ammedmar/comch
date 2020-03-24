@@ -795,7 +795,7 @@ class Surjection_element(DGModule_element):
 
         super()._reduce_rep()
 
-    def to_Eilenber_Zilber_element(self, n):
+    def interval_cut(self, n):
         '''I forgot how this function works. 
         Bad documentation comes back to bite'''
 

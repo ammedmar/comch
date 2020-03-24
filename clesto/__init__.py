@@ -3,8 +3,7 @@ from itertools import combinations, product, chain, permutations
 from math import floor, factorial
 
 # TODO: 
-# fix EZ_element
-# change psi, phi, and table_reduction to to_... methods
+# Finish Power_operation
 
 #_________________________________79_characters________________________________
 
@@ -361,7 +360,7 @@ class Cyclic_Module_element(Module_element):
 class Symmetric_Module_element(Module_element):
     '''...'''
 
-    def __init__(self, data=None, torsion=None):
+    def __init__(self, data=None, torsion=None, arity=None):
         #print("initializing as Symmetric_Module_element")
 
         # checking input data: dict with tuple of int keys
@@ -378,13 +377,13 @@ class Symmetric_Module_element(Module_element):
                 raise TypeError('keys must be permutations of (1,2,...,r)')
 
         # setting attribute arity
-        arity = None # arity of 0 element
         if data:
             arities = set(max(k) for k in data.keys())
             if len(arities) != 1:
                 raise TypeError('keys must have equal arity')  
             else:
                 arity = arities.pop()
+        
         setattr(self, 'arity', arity)
 
         # initialize element
@@ -431,21 +430,23 @@ class Symmetric_Module_element(Module_element):
                     answer[tuple(k1[i-1] for i in k2)] = v1*v2
             answer._reduce_rep()
             return answer
-            
+
     def compose(self, *others):
         '''...'''
+        # composing with 0 is 0
         if self == Symmetric_Module_element():
-            # composing with 0 is 0
             return Symmetric_Module_element()
 
-        if len(others) == 2 and isinstance(others[1], int): 
-            # partial composition
-            answer = Symmetric_Module_element()
-            for attr, value in self.__dict__.items():
-                setattr(answer, attr, value)
-
-            k = others[1]
-            other = others[0]
+        # partial composition
+        if len(others) == 2 and isinstance(others[1], int):
+            # unpacking and checking data
+            other, k = others
+            if self.torsion != other.torsion:
+                raise TypeError('elements must have equal torsion')
+            # initializing answer
+            comp = Symmetric_Module_element(torsion=self.torsion,
+                                            arity=self.arity+other.arity-1)
+            # using linearity to populate answer
             for perm1, coeff1 in self.items():
                 for perm2, coeff2 in other.items():
                     s = len(perm2)-1
@@ -454,26 +455,20 @@ class Symmetric_Module_element(Module_element):
                     shifted = tuple(map(lambda i: i+s if i>k else i, perm1))
                     inserted = shifted[:at] + to_insert + shifted[at+1:]
                     new_coeff = coeff1*coeff2
-                    to_add = Symmetric_Module_element({inserted:new_coeff})
-                    for attr, value in self.__dict__.items():
-                        setattr(to_add, attr, value)
-                    answer += to_add 
-            return answer
+                    to_add = Symmetric_Module_element({inserted:new_coeff}, 
+                                                      torsion=self.torsion)
+                    comp += to_add 
+            return comp
 
+        # total composition
         else: 
-            # total composition
             if len(others) != self.arity:
                 raise TypeError('the number of arguments must equal the arity '
                                 +f'of self, but {len(others)} != {self.arity}')
-
             answer = self
             for idx, other in reversed(list(enumerate(others))):
                 answer = answer.compose(other, idx+1)
             return answer
-            
-    @staticmethod
-    def all_elements(r):
-        pass
 
 #_________________________________79_characters________________________________
 
@@ -590,7 +585,7 @@ class Cyclic_DGModule_element(DGModule_element):
 
 class Barratt_Eccles_element(DGModule_element):
     '''...'''
-    def __init__(self, data=None, torsion=None):
+    def __init__(self, data=None, torsion=None, arity=None):
         # print("initializing as Symmetric_Module_element")
 
         # checking input data: dict with tuple of tuple of int keys
@@ -610,8 +605,7 @@ class Barratt_Eccles_element(DGModule_element):
                 raise TypeError('keys must tuples of ' +
                                 'permutations of (1,2,...,r)')
 
-        # setting attribute arity 
-        arity = None
+        # setting attribute 
         if data:
             arities = set()
             for k in data.keys():
@@ -621,35 +615,19 @@ class Barratt_Eccles_element(DGModule_element):
                         raise ValueError(f'the term {perm} is not a permutation')
                     arities_in_k.add(max(perm))
                 if len(arities_in_k) != 1:
-                    raise ValueError(f'the key {k} is not well formed')
+                    raise ValueError(f'the key {k} mixes permutation arities')
                 arities |= arities_in_k # in place union
             if len(arities) != 1:
                 raise ValueError('keys must have the same arity')
             arity = arities.pop()
+        
         setattr(self, 'arity', arity)
 
         # initializing element
         super(Barratt_Eccles_element, self).__init__(data=data, 
                                                      torsion=torsion)
-    def domain(self):
-        '''returns the integer r such that self is a linear combination 
-           of vector of permutations in Sigma_r'''
-           
-        perm_vect = list(self.keys())[0]
-        return len(perm_vect[0])
-    
-    def _int_to_bin(n):
-        '''returns a list representing n in binary'''
-        
-        if n == 0: return [0]
-        
-        result = []
-        while n > 0:
-            result.insert(0, n % 2)
-            n = n // 2
-        return result
-        
-    def _paths(p, q):
+
+    def _paths(p,q):
         '''returns as a list all increasing paths from (0,0) to (p,q)'''
         
         if (p,q) == (0,0): return [((0,0),)]
@@ -697,40 +675,47 @@ class Barratt_Eccles_element(DGModule_element):
                 diff = permutation[j] - permutation[i]
                 sgn = diff//abs(diff)
         return sgn
-    
+
     def compose(self, *others):
         '''...'''
         
+        # partial composition
         if len(others) == 2 and isinstance(others[1], int):
-            # partial composition
-            answer = Barratt_Eccles_element()
-            k = others[1]
-            other = others[0]
+            # unpaking and checking input
+            other, k = others
+            if self.torsion != other.torsion:
+                raise TypeError('not the same torsion')
+
+            # initializing answer
+            answer = Barratt_Eccles_element(torsion=self.torsion, 
+                                            arity=self.arity+other.arity-1)
+            # using linearity to populate answer
             for perm_vect1, coeff1 in self.items():
                 for perm_vect2, coeff2 in other.items():
-                    comp = Barratt_Eccles_element()
-                    d = len(perm_vect1)-1
-                    e = len(perm_vect2)-1
-                    for path in Barratt_Eccles_element._paths(d,e):
+                    comp = Barratt_Eccles_element().copy_attrs_from(answer)
+                    p,q = len(perm_vect1)-1, len(perm_vect2)-1
+                    # summands parametrized by paths from (0,0) to (p,q)
+                    for path in Barratt_Eccles_element._paths(p,q):
                         new_perm_vect = ()
                         for i,j in path:
                             perm1 = Symmetric_Module_element({perm_vect1[i]:1})
                             perm2 = Symmetric_Module_element({perm_vect2[j]:1})
                             partial_comp = perm1.compose(perm2, k)
-                            new_perm_vect += (list(partial_comp.keys())[0],)
+                            new_perm_vect += (tuple(partial_comp.keys())[0],)
                         sgn = Barratt_Eccles_element._sgn_of_path(path)
                         comp += Barratt_Eccles_element({new_perm_vect:sgn})
                     answer += coeff1*coeff2*comp
             return answer
+        # total composition
         else:
-            if not len(others) == self.domain():
+            if not len(others) == self.arity:
                 raise TypeError('the number of arguments must be equal to ' + 
-                                'the domain of self')
-                                
+                                'the arity of self')
             answer = self
             for idx, other in reversed(list(enumerate(others))):
                 answer = answer.compose(other, idx+1)
             return answer
+
 
     def table_reduction(self):
         '''given a set of basis element in the Barratt_Eccles operad, it returns 

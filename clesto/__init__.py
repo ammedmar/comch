@@ -953,10 +953,6 @@ class PowerOperation(object):
             raise TypeError('bockstein must be a boolean')
         if convention != 'chain' and convention != 'cochain':
             raise TypeError("convention must be either 'chain' or 'cochain'")
-        if n < 0 and convention == 'chain':
-            raise TypeError('chains are concentrated in non-neg degs')
-        if n > 0 and convention == 'cochain':
-            raise TypeError('cochains are concentrated in non-pos degs')
 
         # setting attributes
         self.p, self.s, self.n = p, s, n
@@ -970,7 +966,7 @@ class PowerOperation(object):
         if p == 2:
             setattr(self, 'coeff', 1)
             # chain: s-n & cochain: -n-s
-            setattr(self, 'd', (self.c)*(s-(self.c)*n))
+            setattr(self, 'd', (self.c)*(s-n))
 
         elif p > 2:
             # Serre convention: v(2j)=(-1)^j & v(2j+1)=v(2j)*m! w/ m=(p-1)/2
@@ -979,7 +975,7 @@ class PowerOperation(object):
                 coeff *= factorial((p-1)/2)
             setattr(self, 'coeff', int(coeff))
             # degree of e: chain (2s-n)(p-1)-b & cochain (n+2s)(p-1)-b
-            setattr(self, 'd', (self.c)*(2*s-(self.c)*n)*(p-1)-(self.b) )
+            setattr(self, 'd', (self.c)*(2*s-n)*(p-1)-(self.b) )
 
     def __str__(self):
         string = f'(P^{self.s})_{{{self.n}}}'
@@ -987,21 +983,18 @@ class PowerOperation(object):
             string = string.replace('(','(b')
         return string
 
-    def as_Cyclic_DGMolule_element(self):
+    def as_CyclicDGMolule_element(self):
         '''...'''
         # generator of W
         e = CyclicModule_element({0:1}, torsion=self.p, order=self.p)
-        # set to 0
-        if (self.d < 0 or
-            self.p == 2 and self.s < self.n or 
-            self.p > 2 and 2*self.s < self.n + self.b):
+        if self.d < 0: # set to e = 0
             e = CyclicModule_element(torsion=self.p, order=self.p)
 
         return (self.coeff)*e.psi(self.d)
 
     def as_BarrattEccles_element(self):
         '''...'''
-        return self.as_Cyclic_DGMolule_element().phi()
+        return self.as_CyclicDGMolule_element().phi()
 
     def as_Surjection_element(self):
         '''...'''
@@ -1010,4 +1003,3 @@ class PowerOperation(object):
     def as_EilenbergZilber_element(self):
         '''...'''
         return self.as_Surjection_element().interval_cut(-self.n)
-

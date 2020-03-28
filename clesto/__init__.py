@@ -1,11 +1,10 @@
 from collections import Counter
-from itertools import combinations, product, chain, permutations
+from itertools import combinations, product, chain, permutations, tee
 from math import floor, factorial
-import warnings
+
 
 # TODO: 
 # Write cells for Eilenberg-Zilber
-# Write cell for cochain convention
 
 #_________________________________79_characters________________________________
 
@@ -32,6 +31,12 @@ def partitions(n, k, smallest_value=1, largest_value=None, ordered=False):
                                    in unordered_partitions(n,k))
     if not ordered:
         return unordered_partitions(n,k)
+
+def pairwise(iterable):
+    "s -> (s0,s1), (s1,s2), (s2, s3), ..."
+    a, b = tee(iterable)
+    next(b, None)
+    return zip(a, b)
 
 #_________________________________79_characters________________________________
 
@@ -204,13 +209,6 @@ class Module_element(Counter):
         '''...'''
         if self.__dict__ != other.__dict__:
             raise AttributeError('not the same attributes')
-
-    def copy_attributes_to(self, other):
-        '''...'''
-        for attr, value in self.__dict__.items():
-            setattr(other, attr, value)
-        other._reduce_rep()
-        return(other)
 
     def copy_attrs_from(self, other):
         '''...'''
@@ -718,7 +716,6 @@ class BarrattEccles_element(DGModule_element):
                 answer = answer.compose(other, idx+1)
             return answer
 
-
     def table_reduction(self):
         '''given a set of basis element in the Barratt_Eccles operad, it returns 
         the set of surjections in its image via the table reduction morphism'''
@@ -797,54 +794,103 @@ class Surjection_element(DGModule_element):
 
         super()._reduce_rep()
 
+    # def interval_cut(self, n):
+    #     '''I forgot how this function works. 
+    #     Bad documentation comes back to bite'''
+
+    #     def _new_term(term, num_to_append, pos_to_append, k):
+    #         tuple_to_replace = term['seq'][pos_to_append]+(num_to_append,)
+
+    #         return {'pos': term['pos']+k, 
+    #                 'seq': term['seq'][:pos_to_append] 
+    #                         + (tuple_to_replace,)
+    #                         + term['seq'][pos_to_append+1:]}
+
+    #     def _get_sign(term):
+    #         '''TBW: given a sequence of "step" of faces of (0,...,n) returns the associate
+    #         sign following the Berger-Fresse convention'''
+    #         return 1
+        
+    #     answer = EilenbergZilber_element().copy_attrs_from(self)
+    #     for surj, coeff in self.items():
+    #         after = [{'pos': 0, 
+    #                   'seq': ((),)*(surj[0]-1) + ((0,),) + ((),)*(max(surj)-surj[0])}]
+            
+    #         for i in range(n+len(surj)-1):
+    #             before = after[:]
+    #             after = []
+    #             for term in before:
+    #                 if term['pos'] < len(surj)-1:
+    #                     num_to_append = term['seq'][surj[term['pos']]-1][-1]
+    #                     pos_to_append = surj[term['pos']+1]-1
+
+    #                     empty = bool(term['seq'][pos_to_append])
+    #                     if not empty or num_to_append != term['seq'][pos_to_append][-1]:
+    #                         after.append(_new_term(term, num_to_append, pos_to_append,1))
+
+    #                 if term['seq'][surj[term['pos']]-1][-1] < n:
+    #                     num_to_append = term['seq'][surj[term['pos']]-1][-1] + 1
+    #                     pos_to_append = surj[term['pos']]-1
+
+    #                     after.append(_new_term(term, num_to_append, pos_to_append,0))
+
+    #         for term in after:
+    #             sign = _get_sign(term['seq'])
+    #             multioperator = tuple()
+    #             for seq in term['seq']:
+    #                 multioperator += ( tuple(i for i in range(n+1) if i not in seq),)
+    #             answer += EilenbergZilber_element(
+    #                       {multioperator:sign*coeff}).copy_attrs_from(answer)
+
+    #     return answer
+
     def interval_cut(self, n):
-        '''I forgot how this function works. 
-        Bad documentation comes back to bite'''
+        '''...'''
+        def all_cuts(k, n):
+            '''(k,n) -> 0 = n0 <= n1 <= ... <= nk <= n'''
+            if k == 0:
+                yield (0,)
+            if k > 0:
+                for cut in all_cuts(k-1,n):
+                    for i in range(cut[-1], n+1):
+                        yield cut + (i,)
 
-        def _new_term(term, num_to_append, pos_to_append, k):
-            tuple_to_replace = term['seq'][pos_to_append]+(num_to_append,)
+        def constraints(surj):
+            '''...'''
+            for i in range(1, max(surj)+1):
+                preimage = (idx for idx, s in enumerate(surj) if s == i)
+                for s,t in pairwise(preimage):
+                    yield (s+1, t)
 
-            return {'pos': term['pos']+k, 
-                    'seq': term['seq'][:pos_to_append] 
-                            + (tuple_to_replace,)
-                            + term['seq'][pos_to_append+1:]}
+        def good_cut(cut, const):
+            '''...'''
+            return all(cut[i] != cut[ipp] for i, ipp in const)
 
-        def _get_sign(term):
-            '''TBW: given a sequence of "step" of faces of (0,...,n) returns the associate
-            sign following the Berger-Fresse convention'''
+        def cut2multioperator(cut, n):
+            '''...'''
+            multisimplex = {i:tuple() for i in range(1,max(surj)+1)}
+            for i, pair in enumerate(pairwise(cut)):
+                multisimplex[surj[i]] += tuple(range(pair[0], pair[1]+1))
+
+            std = set(range(n+1)) #{0,1,...,n}
+            return tuple(tuple(std.difference(set(spx)))
+                               for spx in multisimplex.values())
+
+        def cut_sign(term):
+            '''...'''
             return 1
         
         answer = EilenbergZilber_element().copy_attrs_from(self)
         for surj, coeff in self.items():
-            after = [{'pos': 0, 
-                      'seq': ((),)*(surj[0]-1) + ((0,),) + ((),)*(max(surj)-surj[0])}]
-            
-            for i in range(n+len(surj)-1):
-                before = after[:]
-                after = []
-                for term in before:
-                    if term['pos'] < len(surj)-1:
-                        num_to_append = term['seq'][surj[term['pos']]-1][-1]
-                        pos_to_append = surj[term['pos']+1]-1
-
-                        empty = bool(term['seq'][pos_to_append])
-                        if not empty or num_to_append != term['seq'][pos_to_append][-1]:
-                            after.append(_new_term(term, num_to_append, pos_to_append,1))
-
-                    if term['seq'][surj[term['pos']]-1][-1] < n:
-                        num_to_append = term['seq'][surj[term['pos']]-1][-1] + 1
-                        pos_to_append = surj[term['pos']]-1
-
-                        after.append(_new_term(term, num_to_append, pos_to_append,0))
-
-            for term in after:
-                sign = _get_sign(term['seq'])
-                multioperator = tuple()
-                for seq in term['seq']:
-                    multioperator += ( tuple(i for i in range(n+1) if i not in seq),)
+            const = set(constraints(surj))
+            k = len(surj)-1
+            good_cuts = (cut+(n,) for cut in all_cuts(k, n) 
+                                  if good_cut(cut+(n,), const))
+            for cut in good_cuts:
+                sign = cut_sign(cut)
+                multiop = cut2multioperator(cut, n)
                 answer += EilenbergZilber_element(
-                          {multioperator:sign*coeff}).copy_attrs_from(answer)
-
+                                {multiop: sign*coeff}).copy_attrs_from(answer)
         return answer
 
 #_________________________________79_characters________________________________

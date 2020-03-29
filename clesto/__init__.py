@@ -2,11 +2,6 @@ from collections import Counter
 from itertools import chain, permutations, tee
 from math import floor, factorial
 
-# TODO:
-# Write cells for Eilenberg-Zilber
-
-'''_______________________________79_characters_____________________________'''
-
 
 def partitions(n, k, smallest_value=1, largest_value=None, ordered=False):
     '''n is the integer to partition and k is the length of partitions.
@@ -38,9 +33,6 @@ def pairwise(iterable):
     a, b = tee(iterable)
     next(b, None)
     return zip(a, b)
-
-
-'''_______________________________79_characters_____________________________'''
 
 
 class Module_element(Counter):

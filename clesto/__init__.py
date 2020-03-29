@@ -1,6 +1,7 @@
 from collections import Counter
 from itertools import chain, permutations, tee
 from math import floor, factorial
+from operator import attrgetter
 
 # TODO:
 # Write cells for Eilenberg-Zilber
@@ -829,9 +830,45 @@ class Surjection_element(DGModule_element):
             return tuple(tuple(std.difference(set(spx)))
                          for spx in multisimplex.values())
 
-        def cut_sign(term):
-            '''...'''
-            return 1
+        def cut_sign(cut, surj):
+            
+            class LeveledInterval:
+                def __init__(self, start, end, level):
+                    self.start = start
+                    self.end = end
+                    self.level = level
+                    self.is_inner = True
+                    
+                def length(self):
+                    length = interval.end - interval.start
+                    if self.is_inner: 
+                        length += 1
+                    return length
+            
+            # transform cut to tuple of intervals
+            intervals = tuple(LeveledInterval(cut[i], cut[i+1], surj[i]) 
+                               for i in range(len(surj))) 
+            
+            # classify intervals: internal & final
+            for level in range(1, max(surj)+1):
+                for interval in reversed(intervals):
+                    if level == interval.level:
+                        interval.is_inner = False
+                        break
+        
+            # position sign is the sum of n_i over internal intervals (n_{i-1}, n_i)
+            position_sign_exp = sum(interval.end for interval in intervals
+                                                 if interval.is_inner)
+            
+            # permutation sign associated to ordering the surjection 
+            ordered = sorted(intervals, key=attrgetter('level'))
+            perm_sign_exp = sum( ordered[i].length()*ordered[j].length() 
+                                 for i in range(len(ordered))
+                                 for j in range(i, len(ordered)) 
+                                 if intervals.index(ordered[i]) > 
+                                    intervals.index(ordered[j]) ) 
+            
+            return (-1)**((position_sign_exp + perm_sign_exp)%2)
 
         answer = EilenbergZilber_element().copy_attrs_from(self)
         for surj, coeff in self.items():
@@ -840,7 +877,7 @@ class Surjection_element(DGModule_element):
             good_cuts = (cut + (n,) for cut in all_cuts(k, n)
                          if good_cut(cut + (n,), const))
             for cut in good_cuts:
-                sign = cut_sign(cut)
+                sign = cut_sign(cut, surj)
                 multiop = cut2multioperator(cut, n)
                 answer += EilenbergZilber_element(
                     {multiop: sign * coeff}).copy_attrs_from(answer)

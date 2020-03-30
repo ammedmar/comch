@@ -1041,4 +1041,4 @@ class PowerOperation(object):
 
     def as_EilenbergZilber_element(self):
         '''...'''
-        return self.as_Surjection_element().interval_cut(-self.n)
+        return self.as_Surjection_element().interval_cut(self.n)

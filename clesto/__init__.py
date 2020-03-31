@@ -9,7 +9,7 @@ from operator import attrgetter
 # Cell for composition of Permutations
 # Cell for composition of BE_element
 # Cell for cut_interval
-# Compose for Surjection_element
+# Composition for Surjection_element
 
 
 def partitions(n, k, smallest_value=1, largest_value=None, ordered=False):
@@ -976,7 +976,7 @@ class EilenbergZilber_element(Module_element):
         return tuple(face_maps)
 
 
-class PowerOperation(object):
+class SteenrodOperation(object):
     '''Models a chain level representative of P^s or bP^s over the prime p
     acting on an element of degree d'''
 

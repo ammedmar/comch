@@ -6,6 +6,7 @@ from operator import attrgetter
 
 # Todo
 # Composition of EZ_elements
+# Alexander-Whitney (iterated) coskeletal dg modules 
 # Cell for composition of Permutations
 # Cell for composition of BE_element
 # Cell for cut_interval
@@ -516,6 +517,23 @@ class DGModule_element(Module_element):
                 bdry += to_add
         bdry._reduce_rep()
         return bdry
+
+    def alexander_whitney(self, r=1):
+        '''...'''
+
+        def split(multispx):
+            a, b = multispx[0], multispx[1:]
+            return set((a[:i + 1], a[i:]) + b for i in range(len(a)))
+
+        answer = Module_element().copy_attrs_from(self)
+        for k, v in self.items():
+            to_add = set(((k,),))
+            for s in range(1, r + 1):
+                to_add = set.union(*(split(multispx) for multispx in to_add))
+            answer += Module_element(
+                {multispx: v for multispx in to_add}).copy_attrs_from(self)
+
+        return answer
 
 
 class CyclicDGModule_element(DGModule_element):

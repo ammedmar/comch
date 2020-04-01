@@ -4,9 +4,9 @@ from math import floor, factorial
 from operator import attrgetter
 
 
-# Todo
+# To-do
 # Composition of EZ_elements
-# Alexander-Whitney (iterated) coskeletal dg modules 
+# Improve str functions
 # Cell for composition of Permutations
 # Cell for composition of BE_element
 # Cell for cut_interval

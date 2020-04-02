@@ -11,6 +11,7 @@ from operator import attrgetter
 # Cell for composition of BE_element
 # Cell for cut_interval
 # Composition for Surjection_element
+# Revisit definition of EZ_elmt using n as a parameter
 
 
 def partitions(n, k, smallest_value=1, largest_value=None, ordered=False):
@@ -955,6 +956,15 @@ class EilenbergZilber_element(Module_element):
                 string += d + ')x('
             string = string[:-2] + ' + '
         return string[:-3]
+
+    def __call__(self, n):
+        '''...'''
+        answer = Module_element()
+        for k, v in self.items():
+            x = tuple(tuple(i for i in range(n + 1) if i not in op)
+                      for op in k)
+            answer[x] = v
+        return answer
 
     def _reduce_rep(self):
         '''...'''

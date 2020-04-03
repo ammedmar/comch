@@ -95,14 +95,16 @@ class Module_element(Counter):
             answer = ''
             for key, value in self.items():
                 if value < -1:
-                    answer += f'{value}{key}'
+                    answer += f' - {abs(value)}{key}'
                 elif value == -1:
-                    answer += f'-{key}'
+                    answer += f' - {key}'
                 elif value == 1:
-                    answer += f'+{key}'
+                    answer += f' + {key}'
                 elif value > 1:
-                    answer += f'+{value}{key}'
-            if answer[0] == '+':
+                    answer += f' + {value}{key}'
+            if answer[:2] == ' +':
+                answer = answer[3:]
+            if answer[:2] == ' -':
                 answer = answer[1:]
 
             return answer

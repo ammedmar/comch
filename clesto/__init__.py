@@ -1144,7 +1144,7 @@ class EilenbergZilber_element(Module_element):
 
 class SteenrodOperation(object):
     '''Models a chain level representative of P^s or bP^s over the prime p
-    acting on an element of degree d'''
+    acting on an element of degree n'''
 
     def __init__(self, p, s, n, bockstein=False, convention='chain'):
 
@@ -1207,4 +1207,11 @@ class SteenrodOperation(object):
 
     def as_EilenbergZilber_element(self):
         '''...'''
-        return self.as_Surjection_element().interval_cut(self.n)
+        if self.c != -1:
+            raise TypeError('EilenbergZilber uses cochain convention')
+        if self.p == 2:
+            return self.as_Surjection_element().interval_cut(
+                self.n + self.s)
+        if self.p > 2:
+            return self.as_Surjection_element().interval_cut(
+                self.n + (2 * self.s) * (self.p - 1) + self.b)

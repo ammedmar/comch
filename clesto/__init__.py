@@ -10,7 +10,6 @@ from operator import attrgetter
 # Cell for composition of Permutations
 # Cell for composition of BE_element
 # Cell for cut_interval
-# Composition for Surjection_element
 # Revisit definition of EZ_elmt using n as a parameter
 
 
@@ -105,7 +104,7 @@ class Module_element(Counter):
             if answer[0] == '+':
                 answer = answer[2:]
 
-            return answer
+            return answer[:-1]
 
     def __add__(self, other):
         '''The sum of two free module elements.
@@ -401,20 +400,26 @@ class SymmetricModule_element(Module_element):
             s = super().__str__()
             return s.replace(', ', ',')
 
+    # def __mul__(self, other):
+    #     '''...'''
+    #     self.compare_attributes(other)
+    #     answer = type(other)().copy_attrs_from(self)
+    #     for k1, v1 in self.items():
+    #         for k2, v2 in other.items():
+    #             answer[tuple(k1[i - 1] for i in k2)] += v1 * v2
+    #     answer._reduce_rep()
+    #     return answer
+
     def __mul__(self, other):
         '''...'''
-        self.compare_attributes(other)
-        answer = type(other)().copy_attrs_from(self)
-        for k1, v1 in self.items():
-            for k2, v2 in other.items():
-                answer[tuple(k1[i - 1] for i in k2)] += v1 * v2
-        answer._reduce_rep()
-        return answer
-
-    def __call__(self, other):
-        '''...'''
         if isinstance(other, SymmetricModule_element):
-            return self * other
+            self.compare_attributes(other)
+            answer = type(other)().copy_attrs_from(self)
+            for k1, v1 in self.items():
+                for k2, v2 in other.items():
+                    answer[tuple(k1[i - 1] for i in k2)] += v1 * v2
+            answer._reduce_rep()
+            return answer
 
         if isinstance(other, BarrattEccles_element):
             self.compare_attributes(other)
@@ -435,6 +440,22 @@ class SymmetricModule_element(Module_element):
                     answer[new_key] = v1 * v2
             answer._reduce_rep()
             return answer
+
+    def __rmul__(self, other):
+        '''...'''
+        if isinstance(other, BarrattEccles_element):
+            self.compare_attributes(other)
+            answer = type(other)().copy_attrs_from(other)
+            for k1, v1 in self.items():
+                for k2, v2 in other.items():
+                    new_key = tuple(tuple(x[i - 1] for i in k1) for x in k2)
+                    answer[new_key] = v1 * v2
+            answer._reduce_rep()
+            return answer
+
+    def __call__(self, other):
+        '''...'''
+        return self.__mul__(other)
 
     def compose(self, *others):
         '''...'''
@@ -768,6 +789,9 @@ class BarrattEccles_element(DGModule_element):
                                                  torsion=self.torsion)
         answer._reduce_rep()
         return answer
+
+
+p = 3
 
 
 class Surjection_element(DGModule_element):

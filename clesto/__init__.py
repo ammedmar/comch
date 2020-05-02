@@ -219,8 +219,6 @@ class Module_element(Counter):
             setattr(self, attr, value)
         self._reduce_rep()
         return(self)
-
-
 class CyclicModule_element(Module_element):
     '''Modeling elements in Z/mZ[C_n]'''
 
@@ -358,11 +356,10 @@ class CyclicModule_element(Module_element):
                 answer += to_add
         return answer
 
-
 class SymmetricModule_element(Module_element):
     '''...'''
 
-    def __init__(self, data=None, torsion=None, arity=None):
+    def __init__(self, data=None, torsion=None):
         # print("initializing as SymmetricModule_element")
 
         # check input data: dict with tuple of int keys
@@ -372,25 +369,26 @@ class SymmetricModule_element(Module_element):
                     all(isinstance(i, int) for i in
                         chain.from_iterable(data.keys()))
                     ):
-                raise TypeError('data type must be dict ' +
-                                'with tuple of int keys')
+                raise TypeError('data type must be dict with tuple of int keys')
 
             if any((set(k) != set(range(1, len(k) + 1)) for k in data.keys())):
                 raise TypeError('keys must be permutations of (1,2,...,r)')
 
-        # set attribute arity
-        if data:
-            arities = set(max(k) for k in data.keys())
-            if len(arities) != 1:
-                raise TypeError('keys must have equal arity')
-            else:
-                arity = arities.pop()
-
-        setattr(self, 'arity', arity)
-
         # initialize element
         super(SymmetricModule_element, self).__init__(data=data,
                                                       torsion=torsion)
+
+    @property
+    def arity(self):
+        '''...'''
+        if not self:
+            return None
+        
+        arities = set(max(k) for k in self.keys())
+        if len(arities) > 1:
+            return arities
+
+        return arities.pop()
 
     def __str__(self):
         '''...'''
@@ -399,16 +397,6 @@ class SymmetricModule_element(Module_element):
         else:
             s = super().__str__()
             return s.replace(', ', ',')
-
-    # def __mul__(self, other):
-    #     '''...'''
-    #     self.compare_attributes(other)
-    #     answer = type(other)().copy_attrs_from(self)
-    #     for k1, v1 in self.items():
-    #         for k2, v2 in other.items():
-    #             answer[tuple(k1[i - 1] for i in k2)] += v1 * v2
-    #     answer._reduce_rep()
-    #     return answer
 
     def __mul__(self, other):
         '''...'''
@@ -471,8 +459,7 @@ class SymmetricModule_element(Module_element):
                 raise TypeError('elements must have equal torsion')
 
             # initialize answer
-            comp = SymmetricModule_element(torsion=self.torsion,
-                                           arity=self.arity + other.arity - 1)
+            comp = SymmetricModule_element(torsion=self.torsion)
 
             # populate answer using linearity
             for perm1, coeff1 in self.items():
@@ -496,9 +483,7 @@ class SymmetricModule_element(Module_element):
             answer = self
             for idx, other in reversed(list(enumerate(others))):
                 answer = answer.compose(other, idx + 1)
-            return answer
-
-
+            # return answer
 class DGModule_element(Module_element):
     '''...'''
 
@@ -555,9 +540,7 @@ class DGModule_element(Module_element):
             answer += Module_element(
                 {multispx: v for multispx in to_add}).copy_attrs_from(self)
 
-        return answer
-
-
+        # return answer
 class CyclicDGModule_element(DGModule_element):
     '''...'''
 
@@ -623,14 +606,12 @@ class CyclicDGModule_element(DGModule_element):
         '''...'''
         setattr(self, 'order', r)
         self._reduce_rep()
-        return self
-
-
+        # return self
 class BarrattEccles_element(DGModule_element):
     '''...'''
 
-    def __init__(self, data=None, torsion=None, arity=None):
-        # print("initializing as SymmetricModule_element")
+    def __init__(self, data=None, torsion=None):
+        # print("initializing as BarrattEccles_element")
 
         # check input data: dict with tuple of tuple of int keys
         if data:
@@ -649,27 +630,24 @@ class BarrattEccles_element(DGModule_element):
                 raise TypeError('keys must tuples of ' +
                                 'permutations of (1,2,...,r)')
 
-        # set arity
-        if data:
-            arities = set()
-            for k in data.keys():
-                arities_in_k = set()
-                for perm in k:
-                    if len(perm) != max(perm):
-                        raise ValueError(f'{perm} is not a permutation')
-                    arities_in_k.add(max(perm))
-                if len(arities_in_k) != 1:
-                    raise ValueError(f'the key {k} mixes permutation arities')
-                arities |= arities_in_k  # in place union
-            if len(arities) != 1:
-                raise ValueError('keys must have the same arity')
-            arity = arities.pop()
-
-        setattr(self, 'arity', arity)
-
         # initializing element
         super(BarrattEccles_element, self).__init__(data=data,
                                                     torsion=torsion)
+    @property
+    def arity(self):
+        '''...'''
+        if not self:
+            return None
+
+        arities = set()
+        for k in self.keys():
+            arities_in_k = set(max(perm) for perm in k)
+            arities |= arities_in_k  # in place union
+
+        if len(arities) > 1:
+            return arities
+
+        return arities.pop()
 
     def _paths(p, q):
         '''returns as a list all increasing paths from (0,0) to (p,q)'''
@@ -731,8 +709,7 @@ class BarrattEccles_element(DGModule_element):
                 raise TypeError('not the same torsion')
 
             # initialize answer
-            answer = BarrattEccles_element(torsion=self.torsion,
-                                           arity=self.arity + other.arity - 1)
+            answer = BarrattEccles_element(torsion=self.torsion)
 
             # populate answer using linearity
             for perm_vect1, coeff1 in self.items():
@@ -767,7 +744,6 @@ class BarrattEccles_element(DGModule_element):
         the set of surjections in its image via the table reduction morphism'''
 
         answer = Surjection_element(torsion=self.torsion)
-        setattr(answer, 'arity', self.arity)
 
         for bar_ecc_element, value in self.items():
             d, a = len(bar_ecc_element) - 1, max(bar_ecc_element[0])
@@ -789,14 +765,12 @@ class BarrattEccles_element(DGModule_element):
                                                  torsion=self.torsion)
         answer._reduce_rep()
         return answer
-
-
 class Surjection_element(DGModule_element):
     '''...'''
 
     def __init__(self, data=None, torsion=None):
         '''...'''
-
+        # print('initializing as Surjection_element')
         # check input data: dict with tuple of int keys
         if data:
             if not (isinstance(data, dict) and
@@ -804,34 +778,41 @@ class Surjection_element(DGModule_element):
                     all(isinstance(i, int) for i in
                         chain.from_iterable(data.keys()))
                     ):
-                raise TypeError('data type must be dict ' +
-                                'with tuple of int keys')
-
-        # check input and set arity
-        arity = None
-        if data:
-            data_copy = dict(data)
-            arities = set()
-            for surj in data_copy.keys():
-                if set(surj) == set(range(1, max(surj) + 1)):
-                    arities.add(max(surj))
-                else:
-                    del data[surj]  # degenerate surjection
-            if len(arities) != 1:
-                raise ValueError('keys must have the same arity')
-            arity = arities.pop()
-        setattr(self, 'arity', arity)
+                raise TypeError('data type must be dict with tuple of int keys')
 
         # initialize element
         super(Surjection_element, self).__init__(data=data, torsion=torsion)
 
+    def _reduce_rep(self):
+        '''...'''
+        # print('reducing as Surjection_element')
+        zeros = list()
+        for surj in self.keys():
+            if set(surj) != set(range(1, max(surj) + 1)):
+                zeros.append(surj)
+        for k in zeros:
+            del self[k]
+
+        super()._reduce_rep()
+
+    @property
+    def arity(self):
+        if not self:
+            return None
+
+        arities = set(max(surj) for surj in self.keys())
+
+        if len(arities) > 1:
+            return arities
+        
+        return arities.pop()
+        
     def table_arrangement(surj, only_dict=False):
         '''Returns the table arrangement of a surjection, as a tuple.
-           If only_dict=True, it returns a dictionary dict such that
-           dict[index] is the table arrangement of surj where
-           surj[index] lies.
-
-           '''
+        If only_dict=True, it returns a dictionary dict such that
+        dict[index] is the table arrangement of surj where
+        surj[index] lies.
+        '''
         finals = set()
         for k in range(1, max(surj) + 1):
             for index in reversed(range(len(surj))):
@@ -884,7 +865,6 @@ class Surjection_element(DGModule_element):
         '''partial composition of Surjection_elements at place k'''
 
         result = Surjection_element(torsion=u.torsion)
-        result.arity = u.arity + v.arity - 1
         for surj1, coeff1 in u.items():
             for surj2, coeff2 in v.items():
                 # shift surj1 and surj2
@@ -964,16 +944,6 @@ class Surjection_element(DGModule_element):
             for idx, other in reversed(list(enumerate(others))):
                 answer = answer._pcompose(other, idx + 1)
             return answer
-
-    def _reduce_rep(self):
-        '''...'''
-
-        zeros = (k for k in self.keys() if
-                 set(k) != set(range(1, self.arity + 1)))
-        for k in zeros:
-            del self[k]
-
-        super()._reduce_rep()
 
     def interval_cut(self, n):
         '''...'''
@@ -1060,15 +1030,13 @@ class Surjection_element(DGModule_element):
                     {multiop: sign * coeff}).copy_attrs_from(answer)
         return answer
 
-
 class EilenbergZilber_element(Module_element):
     '''...'''
 
     def __init__(self, data=None, torsion=None):
         '''...'''
-
-        # check input and set arity
-        arity = None  # arity of the 0 element
+        # print('initializing as EilenbergZilber_element')
+        # check input
         if data:
             # check input data: dict of tuple of tuple of int
             if not (all((isinstance(multiop, tuple)) for multiop in
@@ -1081,18 +1049,16 @@ class EilenbergZilber_element(Module_element):
                     ):
                 raise TypeError('keys must be tuple of tuple of int')
 
-            # set arity
-            arities = set(len(multiop) for multiop in data.keys())
-            if len(arities) != 1:
-                raise TypeError('keys must have same arity')
-            else:
-                arity = arities.pop()
-
-        setattr(self, 'arity', arity)
-
         # initialize object
         super(EilenbergZilber_element, self).__init__(data=data,
                                                       torsion=torsion)
+
+    @ property    
+    def arity(self):
+        arities = set(len(multiop) for multiop in self.keys())
+        if len(arities) != 1:
+            raise TypeError('keys must have same arity')
+        return arities.pop()
 
     def __str__(self):
         '''...'''
@@ -1159,7 +1125,6 @@ class EilenbergZilber_element(Module_element):
             face_maps[position] = currentvalue
 
         return tuple(face_maps)
-
 
 class SteenrodOperation(object):
     '''Models a chain level representative of P^s or bP^s over the prime p

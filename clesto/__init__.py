@@ -791,9 +791,6 @@ class BarrattEccles_element(DGModule_element):
         return answer
 
 
-p = 3
-
-
 class Surjection_element(DGModule_element):
     '''...'''
 

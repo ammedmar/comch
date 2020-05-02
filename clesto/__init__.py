@@ -1,5 +1,6 @@
 from collections import Counter
-from itertools import chain, combinations, permutations, tee
+from itertools import chain, combinations, permutations, tee, product
+from functools import reduce
 from math import floor, factorial
 from operator import attrgetter
 
@@ -143,8 +144,7 @@ class Module_element(Counter):
             raise TypeError(f'can not act by non-int of type {type(c)}')
 
         scaled = {k: c * v for k, v in self.items()}
-        answer = type(self)(scaled).copy_attrs_from(self)
-        return answer
+        return type(self)(scaled).copy_attrs_from(self)
 
     def __neg__(self):
         '''The additive inverse of a free module element.
@@ -219,6 +219,8 @@ class Module_element(Counter):
             setattr(self, attr, value)
         self._reduce_rep()
         return(self)
+
+
 class CyclicModule_element(Module_element):
     '''Modeling elements in Z/mZ[C_n]'''
 
@@ -356,6 +358,34 @@ class CyclicModule_element(Module_element):
                 answer += to_add
         return answer
 
+    def as_BarrattEccles_element(self, d):
+        '''...'''
+        return self.psi(d)
+
+    def as_Surjection_element(self, d):
+        '''Uses the direct formula not the one involving the table_reduction morphism'''
+
+        m = self.torsion
+        assert isinstance(m, int), 'requires finite torsion'
+
+        n = int(d / 2)
+        start = tuple((0, 1))[: (d % 2) + 1]
+        shifted_keys = []
+        for prod in product(range(0, m), repeat=n):
+            middle = tuple()
+            for i in prod:
+                middle += (i, (i + 1) % m)
+            key = start + middle
+            key += tuple((i + key[-1]) % m for i in range(1, m))
+            shifted_keys.append(key)
+            
+        keys = [tuple(i + 1 for i in k) for k in shifted_keys]
+
+        rhos = (v * SymmetricModule_element.rho(m, k) for k, v in self.items())
+        coeff = reduce(lambda x, y: x+y, rhos).set_torsion(m) # sum of all rhos
+
+        return coeff * Surjection_element({key: 1 for key in keys}, torsion=m)
+
 class SymmetricModule_element(Module_element):
     '''...'''
 
@@ -430,7 +460,11 @@ class SymmetricModule_element(Module_element):
             return answer
 
     def __rmul__(self, other):
-        '''...'''
+        '''scaled by integers on the left and acts on the right'''
+
+        if isinstance(other, int):
+            return super().__rmul__(other)
+
         if isinstance(other, BarrattEccles_element):
             self.compare_attributes(other)
             answer = type(other)().copy_attrs_from(other)
@@ -483,7 +517,13 @@ class SymmetricModule_element(Module_element):
             answer = self
             for idx, other in reversed(list(enumerate(others))):
                 answer = answer.compose(other, idx + 1)
-            # return answer
+            return answer
+
+    @classmethod
+    def rho(self, arity, exponent):
+        key = tuple(i % arity + 1 for i in range(exponent, exponent + arity))
+        return SymmetricModule_element({key: 1})
+
 class DGModule_element(Module_element):
     '''...'''
 
@@ -523,6 +563,7 @@ class DGModule_element(Module_element):
                 to_add = type(self)(i_term).copy_attrs_from(bdry)
                 bdry += to_add
         bdry._reduce_rep()
+
         return bdry
 
     def alexander_whitney(self, r=1):
@@ -540,7 +581,8 @@ class DGModule_element(Module_element):
             answer += Module_element(
                 {multispx: v for multispx in to_add}).copy_attrs_from(self)
 
-        # return answer
+        return answer
+
 class CyclicDGModule_element(DGModule_element):
     '''...'''
 
@@ -606,7 +648,8 @@ class CyclicDGModule_element(DGModule_element):
         '''...'''
         setattr(self, 'order', r)
         self._reduce_rep()
-        # return self
+        return self
+
 class BarrattEccles_element(DGModule_element):
     '''...'''
 
@@ -765,6 +808,7 @@ class BarrattEccles_element(DGModule_element):
                                                  torsion=self.torsion)
         answer._reduce_rep()
         return answer
+
 class Surjection_element(DGModule_element):
     '''...'''
 
@@ -1029,6 +1073,7 @@ class Surjection_element(DGModule_element):
                 answer += EilenbergZilber_element(
                     {multiop: sign * coeff}).copy_attrs_from(answer)
         return answer
+
 
 class EilenbergZilber_element(Module_element):
     '''...'''

@@ -1,5 +1,6 @@
 from collections import Counter
 from itertools import chain, combinations, permutations, tee, product
+from more_itertools import distinct_permutations
 from functools import reduce
 from math import floor, factorial
 from operator import attrgetter
@@ -413,7 +414,7 @@ class SymmetricModule_element(Module_element):
         '''...'''
         if not self:
             return None
-        
+
         arities = set(max(k) for k in self.keys())
         if len(arities) > 1:
             return arities
@@ -738,7 +739,7 @@ class BarrattEccles_element(DGModule_element):
         for i in range(1, len(segments) + 1):
             for j in range(i + 1, len(segments) + 1):
                 diff = permutation[j] - permutation[i]
-                sgn = diff // abs(diff)
+                sgn *= diff // abs(diff)
         return sgn
 
     def compose(self, *others):
@@ -848,14 +849,12 @@ class Surjection_element(DGModule_element):
 
         if len(arities) > 1:
             return arities
-        
+
         return arities.pop()
-        
-    def table_arrangement(surj, only_dict=False):
-        '''Returns the table arrangement of a surjection, as a tuple.
-        If only_dict=True, it returns a dictionary dict such that
-        dict[index] is the table arrangement of surj where
-        surj[index] lies.
+
+    def _final_indices(surj):
+        '''Return the set of indices of elements in surj that are
+           the last occurence of a value. surj must be a tuple or a list.
         '''
         finals = set()
         for k in range(1, max(surj) + 1):
@@ -863,6 +862,15 @@ class Surjection_element(DGModule_element):
                 if surj[index] == k:
                     finals.add(index)
                     break
+        return finals
+
+    def table_arrangement(surj, only_dict=False):
+        '''Returns the table arrangement of a surjection, as a tuple.
+        If only_dict=True, it returns a dictionary dict such that
+        dict[index] is the table arrangement of surj where
+        surj[index] lies. surj must be a tuple or a list.
+        '''
+        finals = Surjection_element._final_indices(surj)
 
         if only_dict:
             result = dict()
@@ -891,7 +899,9 @@ class Surjection_element(DGModule_element):
         raise ValueError(f"{value} is not an element of {sequence}")
 
     def degrees(surj, pieces):
-        '''returns a tuple with the degree of the pieces in surj'''
+        '''returns a tuple with the degree of the pieces in surj.
+           surj must be a tuple or a list.
+        '''
 
         row = Surjection_element.table_arrangement(surj, only_dict=True)
         result = tuple()
@@ -903,6 +913,32 @@ class Surjection_element(DGModule_element):
             degree = row[end_index] - row[start_index]
             result = (degree,) + result
             remaining_surj = remaining_surj[0:start_index + 1]
+        return result
+
+    def boundary(self):
+        '''boundary of self'''
+
+        result = Surjection_element(torsion=self.torsion)
+
+        for surj, coeff in self.items():
+            final_indices = Surjection_element._final_indices(surj)
+            sgn_dict = {}
+            sgn = -1
+
+            for index, val in enumerate(surj):
+                num_occurrences_of_val = sum(1 for el in surj if el == val)
+
+                if num_occurrences_of_val >= 2:
+                    to_add = surj[:index] + surj[index+1:]
+
+                    if index in final_indices:
+                        sgn = sgn_dict[val] * (-1)
+                    else:
+                        sgn *= (-1)
+                        sgn_dict[val] = sgn
+
+                    result += Surjection_element({to_add: coeff * sgn}, torsion=self.torsion)
+
         return result
 
     def _pcompose(u, v, k):
@@ -1074,6 +1110,116 @@ class Surjection_element(DGModule_element):
                     {multiop: sign * coeff}).copy_attrs_from(answer)
         return answer
 
+    def _index_occurence(value, n, sequence):
+        '''returns the index of the n-th occurence of value in sequence
+        '''
+        count = 0
+        for index, element in enumerate(sequence):
+            if element == value:
+                count += 1
+                if count == n:
+                    return index
+                    
+    def tau_vertex(vertex, surj):
+        '''...'''
+        indices = [Surjection_element._index_occurence(val + 1, x + 1, surj)
+                   for val, x in enumerate(vertex)]
+        indices.sort()
+        return tuple(surj[i] for i in indices)
+        
+    def prism(surj):
+        '''...'''
+        r = max(surj)
+        num_occurences = [surj.count(k) for k in range(1, r + 1)]
+
+        # compute the base prism {0, ..., d1 - 1} x ... x {0, ..., dr - 1}
+        summands = [range(num_occurences[k]) for k in range(r)]
+        base_prism = product(*summands) 
+            # better to make summands a generator instead of using * ? 
+
+        base_prism = tuple(vertex for vertex in base_prism)
+        return base_prism
+
+    def tau(surj):
+        '''for prismatic decomposition'''
+
+        base_prism = Surjection_element.prism(surj)
+        image_prism = tuple(Surjection_element.tau_vertex(vertex, surj) for vertex in base_prism)   
+        return base_prism, image_prism
+        
+    def max_simplex(vect, r):
+        '''maximal simplex determined by the sequence
+           vect = (k0, ..., kd)
+        '''
+
+        result = tuple()
+        vertex = tuple(0 for l in range(r))
+        result = (vertex,)
+
+        for k in vect:
+            k = k - 1
+            vertex = vertex[:k] + (vertex[k] + 1,) + vertex[k+1:]
+            result = result + (vertex,)
+
+        return result
+
+    def table_collapse(self):
+        '''...'''
+      
+        result = BarrattEccles_element(torsion=self.torsion)
+        r = self.arity
+        
+        for surj, coeff in self.items():
+            d = len(surj) - r
+            finals = Surjection_element._final_indices(surj)
+            fund_vect = tuple(el for i, el in enumerate(surj)
+                                     if i not in finals)
+            fund_simplex = Surjection_element.max_simplex(fund_vect, r)
+            tau_fund_simplex = tuple(Surjection_element.tau_vertex(vx, surj)
+                                for vx in fund_simplex)
+            
+            # make a list with all the possibilities for indices k_i,
+            # including eventual repetitions
+            possibilities = []
+            for k in range(1, r + 1):
+                num_occurences = surj.count(k)
+                possibilities += [k] * (num_occurences - 1)
+                
+            # iterate over all tuples (k_0, ..., k_d), where each k_i
+            # has as many repetitions as it has in `possibilities`
+            # Note: distinct_permutations need the more_itertools module.
+            # We can replace it by ´set(permutations(possibilities))´,
+            # but it will compute much more than needed.
+            for vect in distinct_permutations(possibilities):
+                simplex = Surjection_element.max_simplex(vect, r)
+              
+                # compute the image of the simplex
+                tau_simplex = tuple(Surjection_element.tau_vertex(vx, surj)
+                                  for vx in simplex)
+                
+                # compute the sign of the simplex
+                sgn = 1
+                
+                for index, vertex in enumerate(tau_simplex):
+                    vertex_f = tau_fund_simplex[index]
+                    
+                    # find the permutation that takes vertex to vertex_f
+                    permutation = {}
+                    for idx, el in enumerate(vertex):
+                        permutation[idx] = vertex_f.index(el)
+                        
+                    # compute the sign of the permutation
+                    sgn_perm = 1
+                    for i in range(len(vertex)):
+                        for j in range(i + 1, len(vertex)):
+                            diff = permutation[j] - permutation[i]
+                            sgn_perm *= diff // abs(diff)
+                            
+                    sgn *= sgn_perm
+                            
+                result += BarrattEccles_element({tau_simplex: coeff * sgn},
+                                                torsion=self.torsion)
+        return result
 
 class EilenbergZilber_element(Module_element):
     '''...'''
@@ -1098,7 +1244,7 @@ class EilenbergZilber_element(Module_element):
         super(EilenbergZilber_element, self).__init__(data=data,
                                                       torsion=torsion)
 
-    @ property    
+    @ property
     def arity(self):
         arities = set(len(multiop) for multiop in self.keys())
         if len(arities) != 1:

@@ -4,6 +4,7 @@ from functools import reduce
 from math import floor, factorial
 from operator import attrgetter
 
+# Check compositions for finite torsion
 
 # To-do
 # Composition of EZ_elements
@@ -520,9 +521,9 @@ class SymmetricModule_element(Module_element):
             return answer
 
     @classmethod
-    def rho(self, arity, exponent):
+    def rho(self, arity, exponent=1, torsion='free'):
         key = tuple(i % arity + 1 for i in range(exponent, exponent + arity))
-        return SymmetricModule_element({key: 1})
+        return SymmetricModule_element({key: 1}, torsion=torsion)
 
 class DGModule_element(Module_element):
     '''...'''
@@ -556,10 +557,11 @@ class DGModule_element(Module_element):
 
     def boundary(self):
         '''...'''
+        sign = {0: 1, 1: -1}
         bdry = type(self)().copy_attrs_from(self)
         for spx, coeff in self.items():
             for i in range(len(spx)):
-                i_term = {tuple(spx[: i] + spx[i + 1:]): ((-1)**i) * coeff}
+                i_term = {tuple(spx[: i] + spx[i + 1:]): sign[i % 2] * coeff}
                 to_add = type(self)(i_term).copy_attrs_from(bdry)
                 bdry += to_add
         bdry._reduce_rep()
@@ -763,12 +765,12 @@ class BarrattEccles_element(DGModule_element):
                     for path in BarrattEccles_element._paths(p, q):
                         new_perm_vect = ()
                         for i, j in path:
-                            perm1 = SymmetricModule_element({perm_vect1[i]: 1})
-                            perm2 = SymmetricModule_element({perm_vect2[j]: 1})
+                            perm1 = SymmetricModule_element({perm_vect1[i]: 1}, torsion=self.torsion)
+                            perm2 = SymmetricModule_element({perm_vect2[j]: 1}, torsion=self.torsion)
                             partial_comp = perm1.compose(perm2, k)
                             new_perm_vect += (tuple(partial_comp.keys())[0],)
                         sgn = BarrattEccles_element._sgn_of_path(path)
-                        comp += BarrattEccles_element({new_perm_vect: sgn})
+                        comp += BarrattEccles_element({new_perm_vect: sgn}, torsion=self.torsion)
                     answer += coeff1 * coeff2 * comp
             return answer
 
@@ -850,7 +852,18 @@ class Surjection_element(DGModule_element):
             return arities
         
         return arities.pop()
-        
+    
+    @property
+    def complexity(self):
+        '''returns the complexity of an element in the Surjection operad'''
+        complexity = {1}
+        for surjection in self.keys():
+            for i, j in combinations(range(1, max(surjection)+1), 2):
+                r = tuple(k for k in surjection if k == i or k == j)
+                if all([i != j for i, j in pairwise(r)]) and len(r) > 1:
+                    complexity.add(len(r)-1)
+        return max(complexity)
+
     def table_arrangement(surj, only_dict=False):
         '''Returns the table arrangement of a surjection, as a tuple.
         If only_dict=True, it returns a dictionary dict such that
@@ -965,7 +978,7 @@ class Surjection_element(DGModule_element):
 
                     # add the new element to the result
                     new_coeff = coeff1 * coeff2 * sign
-                    result += Surjection_element({inserted: new_coeff})
+                    result += Surjection_element({inserted: new_coeff}, torsion=v.torsion)
         return result
 
     def compose(self, *others):
@@ -1125,13 +1138,16 @@ class EilenbergZilber_element(Module_element):
             string = string[:-2] + ' + '
         return string[:-3]
 
-    def __call__(self, n):
+    def __call__(self, other):
         '''...'''
-        answer = Module_element()
-        for k, v in self.items():
-            x = tuple(tuple(i for i in range(n + 1) if i not in op)
-                      for op in k)
-            answer[x] = v
+        if isinstance(other, int):
+            other = Module_element({tuple(range(other+1)):1}, torsion=self.torsion)
+        answer = Module_element(torsion=self.torsion)
+        for k1, v1 in self.items():
+            for k2, v2 in other.items():
+                indices = range(len(k2))
+                new_key = tuple(tuple(k2[i] for i in indices if not i in op) for op in k1)
+                answer += Module_element({new_key: v1 * v2}, torsion=self.torsion)
         return answer
 
     def _reduce_rep(self):
@@ -1170,6 +1186,7 @@ class EilenbergZilber_element(Module_element):
             face_maps[position] = currentvalue
 
         return tuple(face_maps)
+
 
 class SteenrodOperation(object):
     '''Models a chain level representative of P^s or bP^s over the prime p

@@ -1181,7 +1181,7 @@ class Surjection_element(DGModule_element):
 
         return result
 
-    def table_collapse(self):
+    def table_completion(self):
         '''...'''
 
         result = BarrattEccles_element(torsion=self.torsion)

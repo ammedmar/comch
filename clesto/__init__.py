@@ -50,6 +50,32 @@ def pairwise(iterable):
     return zip(a, b)
 
 
+def to_cycles(permutation, singletons=False):
+    '''(3,4,1,2) -> [[1,3], [2,4]]'''
+    p = list(permutation)
+    cycles = []
+    # Go through until we've considered every number between 1 and len(p)
+    for i in range(len(p)):
+        if p[i] is False:
+            continue
+        cycleFirst = i + 1
+        cycle = [cycleFirst]
+        p[i], next = False, p[i]
+        while next != cycleFirst:
+            cycle.append(next)
+            p[next - 1], next = False, p[next - 1]
+        # Add the cycle to the list of cycles
+        if singletons or len(cycle) > 1:
+            cycles.append(tuple(cycle))
+
+    return cycles
+
+
+def sign(permutation):
+    cycles = to_cycles(permutation)
+    return (-1)**sum(len(cycle) - 1 for cycle in cycles)
+
+
 class Module_element(Counter):
     """
     Counter with arithmetic improvements to handle (modular) integer values.
@@ -70,16 +96,14 @@ class Module_element(Counter):
 
         # check input data: dict with int values
         if data:
-            if not (isinstance(data, dict) and
-                    all((type(v) is int for v in data.values()))
-                    ):
+            if not (isinstance(data, dict)
+                    and all((type(v) is int for v in data.values()))):
                 raise TypeError('input must be dict with int values')
 
         # checking input torsion: positive int or 'free'
         if torsion is not None:
-            if not (isinstance(torsion, int) and torsion > 0 or
-                    torsion == 'free'
-                    ):
+            if not (isinstance(torsion, int) and torsion > 0
+                    or torsion == 'free'):
                 raise TypeError("torsion must be a positive int or 'free'")
 
         # setting torsion
@@ -821,6 +845,22 @@ class BarrattEccles_element(DGModule_element):
                     answer += Surjection_element({tuple(surjection): value},
                                                  torsion=self.torsion)
         answer._reduce_rep()
+
+        return answer
+
+    def orbit(self, representation='trivial'):
+        '''Orbit under the symmetric group action'''
+        if not self:
+            return self
+
+        answer = BarrattEccles_element(torsion=self.torsion)
+        for k, v in self.items():
+            inverse = tuple(k[0].index(i+1)+1 for i in range(len(k[0])))
+            permutation = SymmetricModule_element({inverse: 1}, torsion=self.torsion)
+            if representation == 'sign':
+                permutation = sign(k[0]) * permutation
+            answer += permutation * BarrattEccles_element({k: v}, torsion=self.torsion)
+
         return answer
 
 
@@ -1253,6 +1293,22 @@ class Surjection_element(DGModule_element):
                 result += BarrattEccles_element({tau_simplex: coeff * sgn},
                                                 torsion=self.torsion)
         return result
+
+    def orbit(self, representation='trivial'):
+
+        answer = Surjection_element(torsion=self.torsion)
+        for k, v in self.items():
+            seen = []
+            for i in k: 
+                if not i in seen:
+                    seen.append(i)
+            inverse = tuple(seen.index(i+1)+1 for i in range(len(seen)))
+            permutation = SymmetricModule_element({inverse: 1}, torsion=self.torsion)
+            if representation == 'sign':
+                permutation = sign(inverse) * permutation
+            answer += permutation * Surjection_element({k: v}, torsion=self.torsion)
+
+        return answer
 
 
 class EilenbergZilber_element(Module_element):

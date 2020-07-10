@@ -23,7 +23,7 @@ def partitions(n, k, smallest_value=1, largest_value=None, ordered=False):
     If ordered == True it returns all tuples if False it returns those
     in non-decreassing order
     '''
-    
+
     if largest_value is None:
         largest_value = n
 
@@ -381,13 +381,15 @@ class CyclicModule_element(Module_element):
             key = start + middle
             key += tuple((i + key[-1]) % m for i in range(1, m))
             shifted_keys.append(key)
-            
+
         keys = [tuple(i + 1 for i in k) for k in shifted_keys]
 
         rhos = (v * SymmetricModule_element.rho(m, k) for k, v in self.items())
-        coeff = reduce(lambda x, y: x+y, rhos).set_torsion(m) # sum of all rhos
+        # sum of all rhos
+        coeff = reduce(lambda x, y: x + y, rhos).set_torsion(m)
 
         return coeff * Surjection_element({key: 1 for key in keys}, torsion=m)
+
 
 class SymmetricModule_element(Module_element):
     '''...'''
@@ -402,7 +404,8 @@ class SymmetricModule_element(Module_element):
                     all(isinstance(i, int) for i in
                         chain.from_iterable(data.keys()))
                     ):
-                raise TypeError('data type must be dict with tuple of int keys')
+                raise TypeError(
+                    'data type must be dict with tuple of int keys')
 
             if any((set(k) != set(range(1, len(k) + 1)) for k in data.keys())):
                 raise TypeError('keys must be permutations of (1,2,...,r)')
@@ -527,6 +530,7 @@ class SymmetricModule_element(Module_element):
         key = tuple(i % arity + 1 for i in range(exponent, exponent + arity))
         return SymmetricModule_element({key: 1}, torsion=torsion)
 
+
 class DGModule_element(Module_element):
     '''...'''
 
@@ -586,6 +590,7 @@ class DGModule_element(Module_element):
                 {multispx: v for multispx in to_add}).copy_attrs_from(self)
 
         return answer
+
 
 class CyclicDGModule_element(DGModule_element):
     '''...'''
@@ -654,6 +659,7 @@ class CyclicDGModule_element(DGModule_element):
         self._reduce_rep()
         return self
 
+
 class BarrattEccles_element(DGModule_element):
     '''...'''
 
@@ -680,6 +686,7 @@ class BarrattEccles_element(DGModule_element):
         # initializing element
         super(BarrattEccles_element, self).__init__(data=data,
                                                     torsion=torsion)
+
     @property
     def arity(self):
         '''...'''
@@ -767,12 +774,15 @@ class BarrattEccles_element(DGModule_element):
                     for path in BarrattEccles_element._paths(p, q):
                         new_perm_vect = ()
                         for i, j in path:
-                            perm1 = SymmetricModule_element({perm_vect1[i]: 1}, torsion=self.torsion)
-                            perm2 = SymmetricModule_element({perm_vect2[j]: 1}, torsion=self.torsion)
+                            perm1 = SymmetricModule_element(
+                                {perm_vect1[i]: 1}, torsion=self.torsion)
+                            perm2 = SymmetricModule_element(
+                                {perm_vect2[j]: 1}, torsion=self.torsion)
                             partial_comp = perm1.compose(perm2, k)
                             new_perm_vect += (tuple(partial_comp.keys())[0],)
                         sgn = BarrattEccles_element._sgn_of_path(path)
-                        comp += BarrattEccles_element({new_perm_vect: sgn}, torsion=self.torsion)
+                        comp += BarrattEccles_element(
+                            {new_perm_vect: sgn}, torsion=self.torsion)
                     answer += coeff1 * coeff2 * comp
             return answer
 
@@ -813,6 +823,7 @@ class BarrattEccles_element(DGModule_element):
         answer._reduce_rep()
         return answer
 
+
 class Surjection_element(DGModule_element):
     '''...'''
 
@@ -826,7 +837,8 @@ class Surjection_element(DGModule_element):
                     all(isinstance(i, int) for i in
                         chain.from_iterable(data.keys()))
                     ):
-                raise TypeError('data type must be dict with tuple of int keys')
+                raise TypeError(
+                    'data type must be dict with tuple of int keys')
 
         # initialize element
         super(Surjection_element, self).__init__(data=data, torsion=torsion)
@@ -854,18 +866,20 @@ class Surjection_element(DGModule_element):
             return arities
 
         return arities.pop()
-    
+
     @property
     def complexity(self):
         '''returns the complexity of an element in the Surjection operad'''
-        complexity = {1}
+
+        complexities = [0]
         for surjection in self.keys():
-            for i, j in combinations(range(1, max(surjection)+1), 2):
+            for i, j in combinations(range(1, max(surjection) + 1), 2):
                 r = tuple(k for k in surjection if k == i or k == j)
-                if all([i != j for i, j in pairwise(r)]) and len(r) > 1:
-                    complexity.add(len(r)-1)
-        return max(complexity)
-      
+                cpxty = len([p for p, q in pairwise(r) if p != q])
+                complexities.append(cpxty)
+
+        return max(complexities)
+
     def _final_indices(surj):
         '''Return the set of indices of elements in surj that are
            the last occurence of a value. surj must be a tuple or a list.
@@ -943,7 +957,7 @@ class Surjection_element(DGModule_element):
                 num_occurrences_of_val = sum(1 for el in surj if el == val)
 
                 if num_occurrences_of_val >= 2:
-                    to_add = surj[:index] + surj[index+1:]
+                    to_add = surj[:index] + surj[index + 1:]
 
                     if index in final_indices:
                         sgn = sgn_dict[val] * (-1)
@@ -951,7 +965,8 @@ class Surjection_element(DGModule_element):
                         sgn *= (-1)
                         sgn_dict[val] = sgn
 
-                    result += Surjection_element({to_add: coeff * sgn}, torsion=self.torsion)
+                    result += Surjection_element({to_add: coeff * sgn},
+                                                 torsion=self.torsion)
 
         return result
 
@@ -1015,7 +1030,8 @@ class Surjection_element(DGModule_element):
 
                     # add the new element to the result
                     new_coeff = coeff1 * coeff2 * sign
-                    result += Surjection_element({inserted: new_coeff}, torsion=v.torsion)
+                    result += Surjection_element({inserted: new_coeff},
+                                                 torsion=v.torsion)
         return result
 
     def compose(self, *others):
@@ -1133,7 +1149,7 @@ class Surjection_element(DGModule_element):
                 count += 1
                 if count == n:
                     return index
-                  
+
     def tau_vertex(vertex, surj):
         '''...'''
         indices = [Surjection_element._index_occurence(val + 1, x + 1, surj)
@@ -1149,9 +1165,8 @@ class Surjection_element(DGModule_element):
         # compute the base prism {0, ..., d1 - 1} x ... x {0, ..., dr - 1}
         summands = [range(num_occurences[k]) for k in range(r)]
 
-        base_prism = product(*summands) 
-        # better to make summands a generator instead of using * ? 
-
+        base_prism = product(*summands)
+        # better to make summands a generator instead of using * ?
 
         base_prism = tuple(vertex for vertex in base_prism)
         return base_prism
@@ -1160,7 +1175,7 @@ class Surjection_element(DGModule_element):
         '''for prismatic decomposition'''
 
         base_prism = Surjection_element.prism(surj)
-        
+
         image_prism = tuple(Surjection_element.tau_vertex(vertex, surj)
                             for vertex in base_prism)
         return base_prism, image_prism
@@ -1176,7 +1191,7 @@ class Surjection_element(DGModule_element):
 
         for k in vect:
             k = k - 1
-            vertex = vertex[:k] + (vertex[k] + 1,) + vertex[k+1:]
+            vertex = vertex[:k] + (vertex[k] + 1,) + vertex[k + 1:]
             result = result + (vertex,)
 
         return result
@@ -1186,15 +1201,15 @@ class Surjection_element(DGModule_element):
 
         result = BarrattEccles_element(torsion=self.torsion)
         r = self.arity
-        
+
         for surj, coeff in self.items():
             d = len(surj) - r
             finals = Surjection_element._final_indices(surj)
             fund_vect = tuple(el for i, el in enumerate(surj)
-                                     if i not in finals)
+                              if i not in finals)
             fund_simplex = Surjection_element.max_simplex(fund_vect, r)
             tau_fund_simplex = tuple(Surjection_element.tau_vertex(vx, surj)
-                                for vx in fund_simplex)
+                                     for vx in fund_simplex)
 
             # make a list with all the possibilities for indices k_i,
             # including eventual repetitions
@@ -1210,17 +1225,17 @@ class Surjection_element(DGModule_element):
             # but it will compute much more than needed.
             for vect in distinct_permutations(possibilities):
                 simplex = Surjection_element.max_simplex(vect, r)
-              
+
                 # compute the image of the simplex
                 tau_simplex = tuple(Surjection_element.tau_vertex(vx, surj)
-                                  for vx in simplex)
-                
+                                    for vx in simplex)
+
                 # compute the sign of the simplex
                 sgn = 1
-                
+
                 for index, vertex in enumerate(tau_simplex):
                     vertex_f = tau_fund_simplex[index]
-                    
+
                     # find the permutation that takes vertex to vertex_f
                     permutation = {}
                     for idx, el in enumerate(vertex):
@@ -1232,12 +1247,13 @@ class Surjection_element(DGModule_element):
                         for j in range(i + 1, len(vertex)):
                             diff = permutation[j] - permutation[i]
                             sgn_perm *= diff // abs(diff)
-             
+
                     sgn *= sgn_perm
-              
+
                 result += BarrattEccles_element({tau_simplex: coeff * sgn},
                                                 torsion=self.torsion)
         return result
+
 
 class EilenbergZilber_element(Module_element):
     '''...'''
@@ -1292,13 +1308,16 @@ class EilenbergZilber_element(Module_element):
     def __call__(self, other):
         '''...'''
         if isinstance(other, int):
-            other = Module_element({tuple(range(other+1)):1}, torsion=self.torsion)
+            other = Module_element(
+                {tuple(range(other + 1)): 1}, torsion=self.torsion)
         answer = Module_element(torsion=self.torsion)
         for k1, v1 in self.items():
             for k2, v2 in other.items():
                 indices = range(len(k2))
-                new_key = tuple(tuple(k2[i] for i in indices if not i in op) for op in k1)
-                answer += Module_element({new_key: v1 * v2}, torsion=self.torsion)
+                new_key = tuple(
+                    tuple(k2[i] for i in indices if not i in op) for op in k1)
+                answer += Module_element({new_key: v1 * v2},
+                                         torsion=self.torsion)
         return answer
 
     def _reduce_rep(self):

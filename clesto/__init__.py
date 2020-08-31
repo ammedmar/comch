@@ -86,7 +86,7 @@ def distinct_permutations(iterable, r=None):
             # Swap the value of A[i] with that of A[j], then reverse the
             # sequence from A[i + 1] to form the new permutation
             A[i], A[j] = A[j], A[i]
-            A[i + 1 :] = A[: i - size : -1]  # A[i + 1:][::-1]
+            A[i + 1:] = A[: i - size: -1]  # A[i + 1:][::-1]
 
     # Algorithm: modified from the above
     def _partial(A, r):
@@ -124,9 +124,9 @@ def distinct_permutations(iterable, r=None):
                         break
 
             # Reverse head[i + 1:] and swap it with tail[:r - (i + 1)]
-            tail += head[: i - r : -1]  # head[i + 1:][::-1]
+            tail += head[: i - r: -1]  # head[i + 1:][::-1]
             i += 1
-            head[i:], tail[:] = tail[: r - i], tail[r - i :]
+            head[i:], tail[:] = tail[: r - i], tail[r - i:]
 
     items = sorted(iterable)
 
@@ -520,10 +520,10 @@ class SymmetricModule_element(Module_element):
 
         # check input data: dict with tuple of int keys
         if data:
-            if not (isinstance(data, dict) and
-                    all(isinstance(perm, tuple) for perm in data.keys()) and
-                    all(isinstance(i, int) for i in
-                        chain.from_iterable(data.keys()))
+            if not (isinstance(data, dict)
+                    and all(isinstance(perm, tuple) for perm in data.keys())
+                    and all(isinstance(i, int) for i in
+                            chain.from_iterable(data.keys()))
                     ):
                 raise TypeError(
                     'data type must be dict with tuple of int keys')
@@ -639,8 +639,8 @@ class SymmetricModule_element(Module_element):
         # total composition
         else:
             if len(others) != self.arity:
-                raise TypeError('argument number must equal the arity of' +
-                                f'self, but {len(others)} != {self.arity}')
+                raise TypeError('argument number must equal the arity of'
+                                + f'self, but {len(others)} != {self.arity}')
             answer = self
             for idx, other in reversed(list(enumerate(others))):
                 answer = answer.compose(other, idx + 1)
@@ -723,12 +723,12 @@ class CyclicDGModule_element(DGModule_element):
 
         # check input data: dict with tuple of int keys
         if data:
-            if not (isinstance(data, dict) and
-                    all((isinstance(i, int) for i in
-                         chain.from_iterable(data.keys())))
+            if not (isinstance(data, dict)
+                    and all((isinstance(i, int) for i in
+                             chain.from_iterable(data.keys())))
                     ):
-                raise ValueError('data type must be dict' +
-                                 'with tuple of int keys')
+                raise ValueError('data type must be dict'
+                                 + 'with tuple of int keys')
         # set order
         n = order if order else type(self).default_order
         setattr(self, 'order', n)
@@ -789,20 +789,20 @@ class BarrattEccles_element(DGModule_element):
 
         # check input data: dict with tuple of tuple of int keys
         if data:
-            if not (isinstance(data, dict) and
-                    all(isinstance(x, tuple) for x in data.keys()) and
-                    all(isinstance(perm, tuple) for perm in
-                        chain.from_iterable(data.keys())) and
-                    all(isinstance(i, int) for i in
-                        chain.from_iterable(chain.from_iterable(data.keys())))
+            if not (isinstance(data, dict)
+                    and all(isinstance(x, tuple) for x in data.keys())
+                    and all(isinstance(perm, tuple) for perm in
+                            chain.from_iterable(data.keys()))
+                    and all(isinstance(i, int) for i in
+                            chain.from_iterable(chain.from_iterable(data.keys())))
                     ):
-                raise TypeError('data type must be dict ' +
-                                'with tuple of tuple of int keys')
+                raise TypeError('data type must be dict '
+                                + 'with tuple of tuple of int keys')
 
             if any((set(perm) != set(range(1, len(perm) + 1)) for perm in
                     chain.from_iterable(data.keys()))):
-                raise TypeError('keys must tuples of ' +
-                                'permutations of (1,2,...,r)')
+                raise TypeError('keys must tuples of '
+                                + 'permutations of (1,2,...,r)')
 
         # initializing element
         super(BarrattEccles_element, self).__init__(data=data,
@@ -910,8 +910,8 @@ class BarrattEccles_element(DGModule_element):
         # total composition
         else:
             if not len(others) == self.arity:
-                raise TypeError('the number of arguments must be equal to ' +
-                                'the arity of self')
+                raise TypeError('the number of arguments must be equal to '
+                                + 'the arity of self')
             answer = self
             for idx, other in reversed(list(enumerate(others))):
                 answer = answer.compose(other, idx + 1)
@@ -952,7 +952,7 @@ class BarrattEccles_element(DGModule_element):
 
         answer = BarrattEccles_element(torsion=self.torsion)
         for k, v in self.items():
-            inverse = tuple(k[0].index(i+1)+1 for i in range(len(k[0])))
+            inverse = tuple(k[0].index(i + 1) + 1 for i in range(len(k[0])))
             permutation = SymmetricModule_element({inverse: 1}, torsion=self.torsion)
             if representation == 'sign':
                 permutation = sign(k[0]) * permutation
@@ -969,10 +969,10 @@ class Surjection_element(DGModule_element):
         # print('initializing as Surjection_element')
         # check input data: dict with tuple of int keys
         if data:
-            if not (isinstance(data, dict) and
-                    all(isinstance(surj, tuple) for surj in data.keys()) and
-                    all(isinstance(i, int) for i in
-                        chain.from_iterable(data.keys()))
+            if not (isinstance(data, dict)
+                    and all(isinstance(surj, tuple) for surj in data.keys())
+                    and all(isinstance(i, int) for i in
+                            chain.from_iterable(data.keys()))
                     ):
                 raise TypeError(
                     'data type must be dict with tuple of int keys')
@@ -1185,8 +1185,8 @@ class Surjection_element(DGModule_element):
         # total composition
         else:
             if not len(others) == self.arity:
-                raise TypeError('the number of arguments must be equal to ' +
-                                'the arity of self')
+                raise TypeError('the number of arguments must be equal to '
+                                + 'the arity of self')
             answer = self
             for idx, other in reversed(list(enumerate(others))):
                 answer = answer._pcompose(other, idx + 1)
@@ -1259,8 +1259,8 @@ class Surjection_element(DGModule_element):
             perm_sign_exp = sum(ordered[i].length() * ordered[j].length()
                                 for i in range(len(ordered))
                                 for j in range(i, len(ordered))
-                                if intervals.index(ordered[i]) >
-                                intervals.index(ordered[j]))
+                                if intervals.index(ordered[i])
+                                > intervals.index(ordered[j]))
 
             return (-1)**((position_sign_exp + perm_sign_exp) % 2)
 
@@ -1323,7 +1323,7 @@ class Surjection_element(DGModule_element):
         '''
 
         result = tuple()
-        vertex = tuple(0 for l in range(r))
+        vertex = tuple(0 for k in range(r))
         result = (vertex,)
 
         for k in vect:
@@ -1396,10 +1396,10 @@ class Surjection_element(DGModule_element):
         answer = Surjection_element(torsion=self.torsion)
         for k, v in self.items():
             seen = []
-            for i in k: 
-                if not i in seen:
+            for i in k:
+                if i not in seen:
                     seen.append(i)
-            inverse = tuple(seen.index(i+1)+1 for i in range(len(seen)))
+            inverse = tuple(seen.index(i + 1) + 1 for i in range(len(seen)))
             permutation = SymmetricModule_element({inverse: 1}, torsion=self.torsion)
             if representation == 'sign':
                 permutation = sign(inverse) * permutation
@@ -1418,12 +1418,12 @@ class EilenbergZilber_element(Module_element):
         if data:
             # check input data: dict of tuple of tuple of int
             if not (all((isinstance(multiop, tuple)) for multiop in
-                        data.keys()) and
-                    all((isinstance(op, tuple) for op in
-                         chain.from_iterable(data.keys()))) and
-                    all((isinstance(i, int) for i in
-                         chain.from_iterable(
-                         chain.from_iterable(data.keys()))))
+                        data.keys())
+                    and all((isinstance(op, tuple) for op in
+                             chain.from_iterable(data.keys())))
+                    and all((isinstance(i, int) for i in
+                             chain.from_iterable(
+                             chain.from_iterable(data.keys()))))
                     ):
                 raise TypeError('keys must be tuple of tuple of int')
 
@@ -1468,7 +1468,7 @@ class EilenbergZilber_element(Module_element):
             for k2, v2 in other.items():
                 indices = range(len(k2))
                 new_key = tuple(
-                    tuple(k2[i] for i in indices if not i in op) for op in k1)
+                    tuple(k2[i] for i in indices if i not in op) for op in k1)
                 answer += Module_element({new_key: v1 * v2},
                                          torsion=self.torsion)
         return answer
@@ -1500,8 +1500,8 @@ class EilenbergZilber_element(Module_element):
             currentvalue = face_maps[index]
             position = index
 
-            while (position > 0 and
-                   face_maps[position - 1] >= currentvalue):
+            while (position > 0
+                   and face_maps[position - 1] >= currentvalue):
 
                 face_maps[position] = face_maps[position - 1] + 1
                 position = position - 1
@@ -1518,8 +1518,8 @@ class SteenrodOperation(object):
     def __init__(self, p, s, n, bockstein=False, convention='chain'):
 
         # check input
-        if not (isinstance(p, int) and
-                isinstance(s, int) and isinstance(n, int)):
+        if not (isinstance(p, int)
+                and isinstance(s, int) and isinstance(n, int)):
             raise TypeError('initialize with three int p,s,n')
         if p == 2 and bockstein:
             raise TypeError('bP only defined for odd primes')

@@ -1,12 +1,14 @@
 Metadata-Version: 2.1
 Name: clesto
-Version: 0.0.2
+Version: 0.0.3
 Summary: A package to study Steenrodoperations at the chain level
 Home-page: UNKNOWN
 Author: Anibal M. Medina-Mardones
-Author-email: anibalm3@gmail.com
+Author-email: ammedmar@gmail.com
 License: UNKNOWN
-Description: # CLESTO: Chain LEvel STeenrod Operations
+Description: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/ammedmar/clesto/master?filepath=notebooks)
+        
+        # (C)hain (le)vel (St)eenrod (o)perations
         
 Platform: UNKNOWN
 Classifier: Programming Language :: Python :: 3

@@ -1,8 +1,9 @@
 from collections import Counter
-from itertools import chain, combinations, permutations, tee, product
+from itertools import chain, combinations, \
+    accumulate, permutations, tee, product
 from functools import reduce
 from math import floor, factorial
-from operator import attrgetter
+from operator import attrgetter, add
 
 # Check compositions for finite torsion
 
@@ -42,6 +43,27 @@ def partitions(n, k, smallest_value=1, largest_value=None, ordered=False):
                                    in unordered_partitions(n, k))
     if not ordered:
         return unordered_partitions(n, k)
+
+
+def decompositions(x, k):
+    '''Returns a set with all tuples
+    (x[:i_1+1], x[i_1: i_2+1], ..., x[i_{k-1}: i_k+1], x[i_k:])
+    with i_1 <= i_2 <= ... <= i_k
+
+    >>> sorted(decompositions((0, 1), 2))
+    [((0,), (0,), (0, 1)), ((0,), (0, 1), (1,)), ((0, 1), (1,), (1,))]
+
+    '''
+    if isinstance(x, int):
+        for part in partitions(x + k, k + 1, ordered=True):
+            augmented_desuspension = (0,) + tuple(i - 1 for i in part)
+            indices = tuple(accumulate(augmented_desuspension,
+                                       add))
+            pairs = tuple((i, j + 1) for i, j in pairwise(indices))
+            yield pairs
+    else:
+        for pairs in decompositions(len(x), k):
+            yield tuple(x[pair[0]: pair[1]] for pair in pairs)
 
 
 def distinct_permutations(iterable, r=None):
@@ -670,7 +692,8 @@ class CyclicModule_element(Module_element):
         return self.psi(d)
 
     def as_Surjection_element(self, d):
-        '''Uses the direct formula not the one involving the table_reduction morphism'''
+        '''Uses the direct formula not the one involving the 
+        table_reduction morphism'''
 
         m = self.torsion
         assert isinstance(m, int), 'requires finite torsion'
@@ -1049,7 +1072,14 @@ class Surjection_element(DGModule_element):
 
     @property
     def complexity(self):
-        '''returns the complexity of an element in the Surjection operad'''
+        '''returns the complexity of an element in the Surjection operad
+
+        >>> Surjection_element({(1, 2, 1, 3, 1, 3, 2, 3): 1}).complexity
+        3
+        >>> Surjection_element({(1, 2, 1):1, (1, 2): 1}).complexity
+        2
+
+        '''
         complexities = [0]
         for surjection in self.keys():
             for i, j in combinations(range(1, max(surjection) + 1), 2):
@@ -1062,16 +1092,31 @@ class Surjection_element(DGModule_element):
     def boundary(self):
         '''boundary of self
 
-        >>> s = Surjection_element({(1, 2, 1, 3, 1, 3, 2, 3): 1}, torsion='free')
+        >>> s = Surjection_element({(1, 2, 1, 3, 1, 3, 2, 3): 1}, torsion=2)
+        >>> print(s.boundary())
+        (2,1,3,1,3,2,3) + (1,2,3,1,3,2,3) + (1,2,1,3,1,2,3) + (1,2,1,3,1,3,2)
+        >>> s.boundary().boundary()
+        Surjection_element()
+
+        >>> s = Surjection_element({(1, 2, 1, 3, 1, 3, 2, 3): 1})
+        >>> print(s.boundary())
+        (2,1,3,1,3,2,3) + (1,2,3,1,3,2,3) + (1,2,1,3,1,2,3) - (1,2,1,3,1,3,2)
         >>> s.boundary().boundary()
         Surjection_element()
 
         '''
-
         answer = self.zero()
-        for k, v in self.items():
 
-            # determining signs
+        if self.torsion == 2:
+            for k in self.keys():
+                for idx in range(0, len(k)):
+                    bdry_summand = k[:idx] + k[idx + 1:]
+                    if k[idx] in bdry_summand:
+                        answer += self.create({bdry_summand: 1})
+            return answer
+
+        for k, v in self.items():
+            # determining the signs of the summands
             signs = {}
             alternating_sign = 1
             for idx, i in enumerate(k):
@@ -1084,10 +1129,11 @@ class Surjection_element(DGModule_element):
                 else:
                     signs[idx] = 0
 
-            # computing the basis elements
+            # computing the summands
             for idx in range(0, len(k)):
                 bdry_summand = k[:idx] + k[idx + 1:]
-                answer += self.create({bdry_summand: signs[idx] * v})
+                if k[idx] in bdry_summand:
+                    answer += self.create({bdry_summand: signs[idx] * v})
 
         return answer
 
@@ -1178,69 +1224,56 @@ class Surjection_element(DGModule_element):
             remaining_surj = remaining_surj[0:start_index + 1]
         return result
 
-    def _pcompose(u, v, k):
-        '''partial composition of Surjection_elements at place k'''
+    def _pcompose(self, other, k):
+        '''partial composition of Surjection_elements at place k
 
-        result = Surjection_element(torsion=u.torsion)
-        for surj1, coeff1 in u.items():
-            for surj2, coeff2 in v.items():
-                # shift surj1 and surj2
-                surj1_shifted = tuple(map(lambda i: i + v.arity - 1
-                                          if i > k else i, surj1))
-                surj2_shifted = tuple(el + k - 1 for el in surj2)
+        >>> u = Surjection_element({(1, 2, 1, 3): 1})
+        >>> v = Surjection_element({(1, 2, 1): 1})
+        >>> print(u._pcompose(v, 1))
+        - (1,2,1,3,1,4) + (1,3,1,2,1,4) - (1,2,3,2,1,4)
 
-                # find the occurences of k in surj1
-                occurences = tuple(index for index, el in enumerate(surj1)
-                                   if el == k)
+        >>> m = Surjection_element({(1, 2): 1}, torsion=2)
+        >>> br = Surjection_element({(1, 2, 1, 3, 1): 1}, torsion=2)
+        >>> print(br.compose(m, 1))
+        (1,3,1,2,4,2) + (1,2,3,2,4,2) + (1,3,1,4,1,2)
 
-                # cut surj1 at the positions contained in occurences
-                indices_to_cut_surj1 = (0,) + occurences + (len(surj1) - 1,)
+        '''
+        answer = self.zero()
+        for k1, coeff1 in self.items():
+            for k2, coeff2 in other.items():
+                occurences = tuple(i for i, el in enumerate(k1) if el == k)
 
-                surj1_cut = tuple()
-                for i in range(len(indices_to_cut_surj1) - 1):
-                    left = indices_to_cut_surj1[i]
-                    right = indices_to_cut_surj1[i + 1]
-                    surj1_cut += (surj1_shifted[left:right + 1],)
+                k2_shifted = tuple(el + k - 1 for el in k2)
+                k1_shifted = tuple(map(lambda i: i + other.arity - 1
+                                       if i > k else i, k1))
+                for k2_cut in decompositions(k2_shifted, len(occurences) - 1):
+                    k3 = list(k1_shifted)
+                    for x, idx in reversed(list(zip(k2_cut, occurences))):
+                        k3[idx: idx + 1] = x
 
-                # cut surj2 into len(occurences) - 1 pieces in
-                # all possible ways
-                num_pieces = len(occurences) - 1
-                cuts_for_surj2 = combinations(range(len(surj2)), num_pieces)
-                for indices_to_cut_surj2 in cuts_for_surj2:
-                    surj2_cut = tuple()
-                    inserted = surj1_shifted
-                    indices_to_cut_surj2 = (0,) + indices_to_cut_surj2
-                    indices_to_cut_surj2 += (len(surj2) - 1,)
-                    for i in reversed(range(len(indices_to_cut_surj2) - 1)):
-                        left = indices_to_cut_surj2[i]
-                        right = indices_to_cut_surj2[i + 1]
-                        to_insert = surj2_shifted[left:right + 1]
-                        surj2_cut = (to_insert,) + surj2_cut
-                        index = occurences[i]
-                        left_inserted = inserted[0:index]
-                        right_inserted = inserted[index + 1:len(inserted)]
-                        inserted = left_inserted + to_insert + right_inserted
+                    sign = 1
+                    if self.arity != 2:  # Signs done by others, check
+                        indices_to_cut_k1 = (0,) + occurences + (len(k1) - 1,)
+                        k1_cut = tuple()
+                        for i in range(len(indices_to_cut_k1) - 1):
+                            left = indices_to_cut_k1[i]
+                            right = indices_to_cut_k1[i + 1]
+                            k1_cut += (k1_shifted[left:right + 1],)
+                        deg1 = Surjection_element.degrees(k1_shifted, k1_cut)
+                        deg2 = Surjection_element.degrees(k2_shifted, k2_cut)
+                        sign_exp = 0
+                        for index2 in range(len(k2_cut)):
+                            deg_piece2 = deg2[index2]
+                            left = occurences[index2]
+                            right = len(k1_cut)
+                            deg_pieces1 = sum(deg1[index1]
+                                              for index1 in range(left, right))
+                            sign_exp += (deg_piece2 * deg_pieces1) % 2
+                        sign = (-1)**sign_exp
 
-                    # compute degrees of pieces of the cut of surj1
-                    deg1 = Surjection_element.degrees(surj1_shifted, surj1_cut)
-                    deg2 = Surjection_element.degrees(surj2_shifted, surj2_cut)
-
-                    # compute the sign of the permutation
-                    sign_exp = 0
-                    for index2 in range(len(surj2_cut)):
-                        deg_piece2 = deg2[index2]
-                        left = occurences[index2]
-                        right = len(surj1_cut)
-                        deg_pieces1 = sum(deg1[index1]
-                                          for index1 in range(left, right))
-                        sign_exp += (deg_piece2 * deg_pieces1) % 2
-                    sign = (-1)**sign_exp
-
-                    # add the new element to the result
                     new_coeff = coeff1 * coeff2 * sign
-                    result += Surjection_element({inserted: new_coeff},
-                                                 torsion=v.torsion)
-        return result
+                    answer += self.create({tuple(k3): new_coeff})
+        return answer
 
     def compose(self, *others):
         '''general composition of Surjection_elements'''
@@ -1471,7 +1504,6 @@ class Surjection_element(DGModule_element):
             iterated_diagonal = other
             for _ in range(self.degree + self.arity - 1):
                 iterated_diagonal = iterated_diagonal.coproduct()
-            # print(iterated_diagonal)
             for k1, v1 in self.items():
                 for k2, v2 in iterated_diagonal.items():
                     # sign

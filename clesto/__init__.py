@@ -69,8 +69,8 @@ def decompositions(x, k):
 def distinct_permutations(iterable, r=None):
     """Yield successive distinct permutations of the elements in *iterable*.
 
-        >>> sorted(distinct_permutations([1, 0, 1]))
-        [(0, 1, 1), (1, 0, 1), (1, 1, 0)]
+    >>> sorted(distinct_permutations([1, 0, 1]))
+    [(0, 1, 1), (1, 0, 1), (1, 1, 0)]
 
     Equivalent to ``set(permutations(iterable))``, except duplicates are not
     generated and thrown away. For larger input sequences this is much more
@@ -84,8 +84,8 @@ def distinct_permutations(iterable, r=None):
 
     If *r* is given, only the *r*-length permutations are yielded.
 
-        >>> sorted(distinct_permutations([1, 0, 1], r=3))
-        [(0, 1, 1), (1, 0, 1), (1, 1, 0)]
+    >>> sorted(distinct_permutations([1, 0, 1], r=3))
+    [(0, 1, 1), (1, 0, 1), (1, 1, 0)]
 
     """
     # Algorithm: https://w.wiki/Qai
@@ -945,7 +945,7 @@ class BarrattEccles_element(DGModule_element):
                 raise TypeError('not the same torsion')
 
             # initialize answer
-            answer = BarrattEccles_element(torsion=self.torsion)
+            answer = self.zeros()
 
             # populate answer using linearity
             for perm_vect1, coeff1 in self.items():
@@ -979,35 +979,53 @@ class BarrattEccles_element(DGModule_element):
             return answer
 
     def table_reduction(self):
-        '''given a set of basis element in the Barratt_Eccles operad, it returns
-        the set of surjections in its image via the table reduction morphism'''
+        '''Returns the image of the table refuction morphism applied to self
+
+
+        Berger-Fresse Example before Theorem 1.3.2:
+        >>> b = BarrattEccles_element({((1,2,3,4), (1,4,3,2), (1,2,4,3)): 1})
+        >>> print(b.table_reduction())
+        (1,2,4,2,4,3) + (1,2,4,3,2,3)
+
+        Chain map check:
+        >>> b = BarrattEccles_element({((1,2,3,4), (1,4,3,2)): 1, \
+                                       ((1,2,4,3), (3,4,2,1)): 2})
+        >>> dTR_b = b.table_reduction().boundary()
+        >>> TRd_b = b.boundary().table_reduction()
+        >>> dTR_b == TRd_b
+        True
+
+        '''
 
         answer = Surjection_element(torsion=self.torsion)
-
-        for bar_ecc_element, value in self.items():
-            d, a = len(bar_ecc_element) - 1, max(bar_ecc_element[0])
+        for k1, v in self.items():
+            d, a = len(k1) - 1, max(k1[0])
             for pi in partitions(d + a, d + 1, ordered=True):
-                surjection, removed = [], []
+                k2, removed = [], []
                 degenerate = False
                 for idx, i in enumerate(pi):
-                    filtered = [i for i in bar_ecc_element[idx]
+                    filtered = [i for i in k1[idx]
                                 if i not in removed]
-                    if idx > 0 and surjection[-1] == filtered[0]:
+                    if idx > 0 and k2[-1] == filtered[0]:
                         degenerate = True
                         break
                     if i > 1:
                         removed += filtered[: i - 1]
-                    surjection += filtered[: i]
+                    k2 += filtered[: i]
 
                 if not degenerate:
-                    answer += Surjection_element({tuple(surjection): value},
-                                                 torsion=self.torsion)
+                    answer += answer.create({tuple(k2): v})
+
         answer._reduce_rep()
 
         return answer
 
     def orbit(self, representation='trivial'):
-        '''Orbit under the symmetric group action'''
+        '''Orbit under the symmetric group action
+
+        SIGN PERMUTATIONS FAILING
+
+        '''
         if not self:
             return self
 
@@ -1092,13 +1110,13 @@ class Surjection_element(DGModule_element):
     def boundary(self):
         '''boundary of self
 
-        >>> s = Surjection_element({(1, 2, 1, 3, 1, 3, 2, 3): 1}, torsion=2)
+        >>> s = Surjection_element({(1,2,1,3,1,3,2,3): 1}, torsion=2)
         >>> print(s.boundary())
         (2,1,3,1,3,2,3) + (1,2,3,1,3,2,3) + (1,2,1,3,1,2,3) + (1,2,1,3,1,3,2)
         >>> s.boundary().boundary()
         Surjection_element()
 
-        >>> s = Surjection_element({(1, 2, 1, 3, 1, 3, 2, 3): 1})
+        >>> s = Surjection_element({(1,2,1,3,1,3,2,3): 1})
         >>> print(s.boundary())
         (2,1,3,1,3,2,3) + (1,2,3,1,3,2,3) + (1,2,1,3,1,2,3) - (1,2,1,3,1,3,2)
         >>> s.boundary().boundary()
@@ -1161,25 +1179,25 @@ class Surjection_element(DGModule_element):
 
         return answer
 
-    def _final_indices(surj):
-        '''Return the set of indices of elements in surj that are
-           the last occurence of a value. surj must be a tuple or a list.
-        '''
-        finals = set()
-        for k in range(1, max(surj) + 1):
-            for index in reversed(range(len(surj))):
-                if surj[index] == k:
-                    finals.add(index)
-                    break
-        return finals
-
     def table_arrangement(surj, only_dict=False):
         '''Returns the table arrangement of a surjection, as a tuple.
         If only_dict=True, it returns a dictionary dict such that
         dict[index] is the table arrangement of surj where
         surj[index] lies. surj must be a tuple or a list.
         '''
-        finals = Surjection_element._final_indices(surj)
+        def _final_indices(surj):
+            '''Return the set of indices of elements in surj that are
+               the last occurence of a value. surj must be a tuple or a list.
+            '''
+            finals = set()
+            for k in range(1, max(surj) + 1):
+                for index in reversed(range(len(surj))):
+                    if surj[index] == k:
+                        finals.add(index)
+                        break
+            return finals
+
+        finals = _final_indices(surj)
 
         if only_dict:
             result = dict()
@@ -1225,7 +1243,7 @@ class Surjection_element(DGModule_element):
         return result
 
     def _pcompose(self, other, k):
-        '''partial composition of Surjection_elements at place k
+        '''partial composition self o_k other
 
         >>> u = Surjection_element({(1, 2, 1, 3): 1})
         >>> v = Surjection_element({(1, 2, 1): 1})
@@ -1236,6 +1254,17 @@ class Surjection_element(DGModule_element):
         >>> br = Surjection_element({(1, 2, 1, 3, 1): 1}, torsion=2)
         >>> print(br.compose(m, 1))
         (1,3,1,2,4,2) + (1,2,3,2,4,2) + (1,3,1,4,1,2)
+
+        >>> u = Surjection_element({(1, 2, 1, 3): 1})
+        >>> du = u.boundary()
+        >>> v = Surjection_element({(1, 2, 1): 1})
+        >>> dv = v.boundary()
+        >>> du_v = du.compose(v, 1)
+        >>> u_dv = u.compose(dv, 1)
+        >>> uv = u._pcompose(v, 1)
+        >>> duv = uv.boundary()
+        >>> du_v - u_dv == duv
+        True
 
         '''
         answer = self.zero()
@@ -1494,10 +1523,38 @@ class Surjection_element(DGModule_element):
                                                 torsion=self.torsion)
         return result
 
+    @staticmethod
+    def basis(degree, arity, complexity=None):
+        ''' Returns the list of tuples forming the basis of the surjection
+        operad in the given degree, arity and complexity
+
+        >>> basis = sorted(Surjection_element.basis(5, 3, 3))
+        >>> for s in basis:
+        ...     print(s)
+        (1, 2, 1, 3, 1, 3, 2, 3)
+        (1, 3, 1, 2, 1, 2, 3, 2)
+        (2, 1, 2, 3, 2, 3, 1, 3)
+        (2, 3, 2, 1, 2, 1, 3, 1)
+        (3, 1, 3, 2, 3, 2, 1, 2)
+        (3, 2, 3, 1, 3, 1, 2, 1)
+        '''
+
+        if complexity is None:
+            complexity = degree + 1
+        d, a, c = degree, arity, complexity
+        basis = []
+        for s in product(range(1, a + 1), repeat=a + d):
+            surj = Surjection_element({s: 1})
+            if surj and surj.complexity <= c:
+                basis.append(s)
+
+        return basis
+
     def __call__(self, other):
         '''...'''
         assert self.torsion == other.torsion, "defined for the same ring"
         assert isinstance(self.degree, int) and self.arity, "defined for homogeneous surjections"
+
         if isinstance(other, CubicalEilenbergZilber_element):
             assert other.arity == 1, "defined for chains on a single cube"
             answer = other.zero()
@@ -1508,9 +1565,9 @@ class Surjection_element(DGModule_element):
                 for k2, v2 in iterated_diagonal.items():
                     # sign
                     odds = [i for i, x in enumerate(k2) if x.count('e') % 2]
-                    sign = v1 * v2
+                    coeff = v1 * v2
                     for idx, i in enumerate(odds):
-                        sign *= (-1)**len([j for j in odds[idx + 1:] if k1[i] > k1[j]])
+                        coeff *= (-1)**len([j for j in odds[idx + 1:] if k1[i] > k1[j]])
                     # elements
                     elements = []
                     for s in range(1, max(k1) + 1):

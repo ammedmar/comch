@@ -455,34 +455,32 @@ class SymmetricModule_element(Module_element):
         SymmetricModule_element({(4, 1, 2, 3): 2, (1, 4, 3, 2): 1})
 
         '''
+
+        if self.torsion != other.torsion:
+            raise TypeError('same torsion required')
+
         if isinstance(other, SymmetricModule_element):
-            self.compare_attributes(other)
             answer = other.zero()
             for k1, v1 in self.items():
                 for k2, v2 in other.items():
                     answer[tuple(k1[i - 1] for i in k2)] += v1 * v2
-            answer._reduce_rep()
-            return answer
 
         if isinstance(other, BarrattEccles_element):
-            self.compare_attributes(other)
             answer = other.zero()
             for k1, v1 in self.items():
                 for k2, v2 in other.items():
                     new_key = tuple(tuple(k1[i - 1] for i in x) for x in k2)
                     answer[new_key] = v1 * v2
-            answer._reduce_rep()
-            return answer
 
         if isinstance(other, Surjection_element):
-            self.compare_attributes(other)
             answer = other.zero()
             for k1, v1 in self.items():
                 for k2, v2 in other.items():
                     new_key = tuple(k1[i - 1] for i in k2)
                     answer[new_key] = v1 * v2
-            answer._reduce_rep()
-            return answer
+
+        answer._reduce_rep()
+        return answer
 
     def __rmul__(self, other):
         '''scaled by integers on the left and acts on the right'''
@@ -1043,7 +1041,7 @@ class BarrattEccles_element(DGModule_element):
 class Surjection_element(DGModule_element):
     '''...'''
 
-    def __init__(self, data=None, torsion=None):
+    def __init__(self, data=None, torsion=None, convention='Berger-Fresse'):
         '''...'''
         # check input data: dict with tuple of int keys
         if data:
@@ -1055,7 +1053,12 @@ class Surjection_element(DGModule_element):
                 raise TypeError(
                     'data type must be dict with tuple of int keys')
 
+        if convention not in {'Berger-Fresse', 'McClure-Smith'}:
+            raise TypeError(
+                'convention must be either Berger-Fresse or McClure-Smith')
+
         # initialize element
+        self.convention = convention
         super(Surjection_element, self).__init__(data=data, torsion=torsion)
 
     def _reduce_rep(self):
@@ -1113,14 +1116,22 @@ class Surjection_element(DGModule_element):
         >>> s = Surjection_element({(1,2,1,3,1,3,2,3): 1}, torsion=2)
         >>> print(s.boundary())
         (2,1,3,1,3,2,3) + (1,2,3,1,3,2,3) + (1,2,1,3,1,2,3) + (1,2,1,3,1,3,2)
-        >>> s.boundary().boundary()
-        Surjection_element()
+        >>> print(s.boundary().boundary())
+        0
 
         >>> s = Surjection_element({(1,2,1,3,1,3,2,3): 1})
         >>> print(s.boundary())
         (2,1,3,1,3,2,3) + (1,2,3,1,3,2,3) + (1,2,1,3,1,2,3) - (1,2,1,3,1,3,2)
-        >>> s.boundary().boundary()
-        Surjection_element()
+        >>> print(s.boundary().boundary())
+        0
+
+        >>> s = Surjection_element({(1,2,1,3,1,3,2,3): 1},
+        ...                        convention='McClure-Smith')
+        >>> print(s.boundary())
+        (2,1,3,1,3,2,3) - (1,2,3,1,3,2,3) + (1,2,1,3,1,2,3) - (1,2,1,3,1,3,2)
+        >>> print(s.boundary().boundary())
+        0
+
 
         '''
         answer = self.zero()
@@ -1133,25 +1144,35 @@ class Surjection_element(DGModule_element):
                         answer += self.create({bdry_summand: 1})
             return answer
 
-        for k, v in self.items():
-            # determining the signs of the summands
-            signs = {}
-            alternating_sign = 1
-            for idx, i in enumerate(k):
-                if i in k[idx + 1:]:
-                    signs[idx] = alternating_sign
-                    alternating_sign *= (-1)
-                elif i in k[:idx]:
-                    occurs = (pos for pos, j in enumerate(k[:idx]) if i == j)
-                    signs[idx] = signs[max(occurs)] * (-1)
-                else:
-                    signs[idx] = 0
+        if self.convention == 'Berger-Fresse':
+            for k, v in self.items():
+                # determining the signs of the summands
+                signs = {}
+                alternating_sign = 1
+                for idx, i in enumerate(k):
+                    if i in k[idx + 1:]:
+                        signs[idx] = alternating_sign
+                        alternating_sign *= (-1)
+                    elif i in k[:idx]:
+                        occurs = (pos for pos, j in enumerate(k[:idx]) if i == j)
+                        signs[idx] = signs[max(occurs)] * (-1)
+                    else:
+                        signs[idx] = 0
 
-            # computing the summands
-            for idx in range(0, len(k)):
-                bdry_summand = k[:idx] + k[idx + 1:]
-                if k[idx] in bdry_summand:
-                    answer += self.create({bdry_summand: signs[idx] * v})
+                # computing the summands
+                for idx in range(0, len(k)):
+                    bdry_summand = k[:idx] + k[idx + 1:]
+                    if k[idx] in bdry_summand:
+                        answer += self.create({bdry_summand: signs[idx] * v})
+
+        if self.convention == 'McClure-Smith':
+            for k, v in self.items():
+                sign = 1
+                for i in range(1, max(k) + 1):
+                    for idx in (idx for idx, j in enumerate(k) if j == i):
+                        answer += answer.create({k[:idx] + k[idx + 1:]: v * sign})
+                        sign *= -1
+                    sign *= -1
 
         return answer
 
@@ -1165,19 +1186,25 @@ class Surjection_element(DGModule_element):
         Surjection_element({(1, 2, 3): -1})
 
         '''
-        answer = Surjection_element(torsion=self.torsion)
-        for k, v in self.items():
-            seen = []
-            for i in k:
-                if i not in seen:
-                    seen.append(i)
-            inverse = Symmetric_element(seen.index(i + 1) + 1 for i in range(len(seen)))
-            permutation = SymmetricModule_element({inverse: 1}, torsion=self.torsion)
-            if representation == 'sign':
-                permutation = inverse.sign * permutation
-            answer += permutation * Surjection_element({k: v}, torsion=self.torsion)
+        if self.convention == 'Berger-Fresse':
+            answer = self.zero()
+            for k, v in self.items():
+                seen = []
+                for i in k:
+                    if i not in seen:
+                        seen.append(i)
+                inverse_gen = (seen.index(i + 1) + 1 for i in range(len(seen)))
+                inverse = Symmetric_element(inverse_gen)
+                permutation = SymmetricModule_element({inverse: 1},
+                                                      torsion=self.torsion)
+                if representation == 'sign':
+                    permutation = inverse.sign * permutation
+                answer += permutation * self.create({k: v})
 
-        return answer
+            return answer
+
+        if self.convention == 'McClure-Smith':
+            raise NotImplementedError
 
     def table_arrangement(surj, only_dict=False):
         '''Returns the table arrangement of a surjection, as a tuple.
@@ -1185,6 +1212,7 @@ class Surjection_element(DGModule_element):
         dict[index] is the table arrangement of surj where
         surj[index] lies. surj must be a tuple or a list.
         '''
+
         def _final_indices(surj):
             '''Return the set of indices of elements in surj that are
                the last occurence of a value. surj must be a tuple or a list.

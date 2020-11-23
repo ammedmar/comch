@@ -8,7 +8,7 @@ class TorsionError(Exception):
         message : explanation of the error
     """
 
-    def __init__(self, message='attribute torsion must be the same for all'):
+    def __init__(self, message='attribute torsion must be the same'):
         self.message = message
         super(TorsionError, self).__init__(message)
 
@@ -77,7 +77,7 @@ class Module_element(Counter):
         '''
         if self.torsion != other.torsion:
             raise TorsionError
-        answer = type(self)(self).copy_attrs_from(self)
+        answer = self.create(self)
         answer.update(other)
         answer._reduce_rep()
         return answer
@@ -91,7 +91,7 @@ class Module_element(Counter):
         '''
         if self.torsion != other.torsion:
             raise TorsionError
-        answer = type(self)(self).copy_attrs_from(self)
+        answer = self.create(self)
         answer.subtract(other)
         answer._reduce_rep()
         return answer
@@ -107,7 +107,7 @@ class Module_element(Counter):
             raise TypeError(f'can not act by non-int of type {type(c)}')
 
         scaled = {k: c * v for k, v in self.items()}
-        return type(self)(scaled).copy_attrs_from(self)
+        return self.create(scaled)
 
     def __neg__(self):
         '''The additive inverse of a free module element.
@@ -168,26 +168,19 @@ class Module_element(Counter):
         for key in zeros:
             del self[key]
 
-    def set_torsion(self, m):
+    def set_torsion(self, torsion):
         '''...'''
-        setattr(self, 'torsion', m)
+        setattr(self, 'torsion', torsion)
         self._reduce_rep()
         return self
 
-    def copy_attrs_from(self, other):
+    def create(self, other=None):
         '''...'''
-        for attr, value in other.__dict__.items():
-            setattr(self, attr, value)
-        self._reduce_rep()
-        return(self)
+        return type(self)(other, torsion=self.torsion)
 
     def zero(self):
         '''...'''
-        return type(self)().copy_attrs_from(self)
-
-    def create(self, other):
-        '''...'''
-        return type(self)(other).copy_attrs_from(self)
+        return self.create()
 
     def summands(self):
         '''...'''

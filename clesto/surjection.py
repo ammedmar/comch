@@ -27,11 +27,22 @@ class Surjection_element(Module_element):
 
         # initialize element
         self.convention = convention
+
         super(Surjection_element, self).__init__(data=data, torsion=torsion)
 
     def __str__(self):
         string = super().__str__()
         return string.replace(', ', ',')
+
+    def zero(self):
+        '''...'''
+        return type(self)(torsion=self.torsion,
+                          convention=self.convention)
+
+    def create(self, other):
+        '''...'''
+        return type(self)(other, torsion=self.torsion,
+                          convention=self.convention)
 
     @property
     def arity(self):
@@ -620,13 +631,30 @@ class Surjection_element(Module_element):
 
 
 class Surjection():
-    '''...'''
+    '''Class producing Surjection elements of special interest.'''
 
     @staticmethod
     def steenrod_product(arity, degree, torsion=None,
                          convention='Berger-Fresse'):
         '''Returns a surjection element representing the Steenrod
         product in the given arity and degree.
+
+        Constructed recursively by mapping the minimal resolution W(r) 
+        of Z[S_r] to Surj(r). We use the chain homotopy equivalence 
+        of Surj(r) and Z defined using the chain contraction (i, p, s) 
+        relating Surj(r-1) and Surj(r).
+
+        Parameters
+        ----------
+        arity : int 
+        Arity of the complex considered, Surj(arity).
+        
+        degree : int
+        degree of the element considered Surj(arity)_degree.
+
+
+        Examples
+        --------
 
         # chain map checks:
 
@@ -642,10 +670,10 @@ class Surjection():
         >>> print(x == y)
         True
 
-        >>> t = SymmetricModule.transposition_element(6)
-        >>> x = Surjection.steenrod_product(6, 3, \
+        >>> t = SymmetricModule.transposition_element(5)
+        >>> x = Surjection.steenrod_product(5, 3, \
             convention='McClure-Smith').boundary()
-        >>> y = t * Surjection.steenrod_product(6, 2, \
+        >>> y = t * Surjection.steenrod_product(5, 2, \
             convention='McClure-Smith')
         >>> print(x == y)
         True

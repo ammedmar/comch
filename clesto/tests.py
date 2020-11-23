@@ -19,7 +19,7 @@ z = EilenbergZilber_element({((0, 1, 2), (0,)): 1,
 
 # print(z.boundary())
 
-print(Simplex(()).dimension)
+# print(Simplex(()).dimension)
 
 # print(x.boundary().codegeneracy(1))
 # print(x.codegeneracy(1))
@@ -27,3 +27,5 @@ print(Simplex(()).dimension)
 
 # print(EilenbergZilber.boundary(3))
 # print(EilenbergZilber.coproduct(3))
+
+# print(Module_element({'a': 1, 'b': 2}))

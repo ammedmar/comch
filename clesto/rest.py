@@ -8,297 +8,297 @@ from functools import reduce
 from math import floor, factorial
 
 
-class CyclicModule_element(Module_element):
-    '''Modeling elements in Z/mZ[C_n]
+# class CyclicModule_element(Module_element):
+#     '''Modeling elements in Z/mZ[C_n]
 
-    '''
+#     '''
 
-    default_order = 'infinite'
+#     default_order = 'infinite'
 
-    def __init__(self, data=None, torsion=None, order=None):
+#     def __init__(self, data=None, torsion=None, order=None):
 
-        # check input data: dict with int keys
-        if data:
-            if not (isinstance(data, dict) and
-                    all((type(k) is int for k in data.keys()))
-                    ):
-                raise TypeError('data type must be dict with int keys')
+#         # check input data: dict with int keys
+#         if data:
+#             if not (isinstance(data, dict) and
+#                     all((type(k) is int for k in data.keys()))
+#                     ):
+#                 raise TypeError('data type must be dict with int keys')
 
-        # checking input order: positive int or 'infinite'
-        if order is not None:
-            if not (isinstance(order, int) and order > 0 or
-                    order != 'infinite'
-                    ):
-                raise TypeError("order must be a positive int or 'infinite'")
+#         # checking input order: positive int or 'infinite'
+#         if order is not None:
+#             if not (isinstance(order, int) and order > 0 or
+#                     order != 'infinite'
+#                     ):
+#                 raise TypeError("order must be a positive int or 'infinite'")
 
-        # setting order
-        n = order if order else type(self).default_order
-        setattr(self, 'order', n)
+#         # setting order
+#         n = order if order else type(self).default_order
+#         setattr(self, 'order', n)
 
-        # initializing element
-        super(CyclicModule_element, self).__init__(data=data, torsion=torsion)
+#         # initializing element
+#         super(CyclicModule_element, self).__init__(data=data, torsion=torsion)
 
-    def __str__(self):
-        '''...'''
-        if not self:
-            return '0'
-        else:
-            answer = ''
-            for exponent, coefficient in self.items():
-                if coefficient != 1 or exponent == 0:
-                    answer += f'+{coefficient}q^{exponent}'
-                else:
-                    answer += f'+q^{exponent}'
-            if answer[0] == '+':
-                answer = answer[1:]
+#     def __str__(self):
+#         '''...'''
+#         if not self:
+#             return '0'
+#         else:
+#             answer = ''
+#             for exponent, coefficient in self.items():
+#                 if coefficient != 1 or exponent == 0:
+#                     answer += f'+{coefficient}q^{exponent}'
+#                 else:
+#                     answer += f'+q^{exponent}'
+#             if answer[0] == '+':
+#                 answer = answer[1:]
 
-            return answer.replace('q^0', '').replace('q^1', 'q')
+#             return answer.replace('q^0', '').replace('q^1', 'q')
 
-    def __mul__(self, other):
-        '''...'''
-        self.compare_attributes(other)
-        answer = type(self)().copy_attrs_from(self)
-        for k1, v1 in self.items():
-            for k2, v2 in other.items():
-                answer[k1 + k2] += v1 * v2
-        answer._reduce_rep()
-        return answer
+#     def __mul__(self, other):
+#         '''...'''
+#         self.compare_attributes(other)
+#         answer = type(self)().copy_attrs_from(self)
+#         for k1, v1 in self.items():
+#             for k2, v2 in other.items():
+#                 answer[k1 + k2] += v1 * v2
+#         answer._reduce_rep()
+#         return answer
 
-    def __call__(self, other):
-        '''...'''
-        if isinstance(other, CyclicModule_element):
-            return self.__mul__(other)
+#     def __call__(self, other):
+#         '''...'''
+#         if isinstance(other, CyclicModule_element):
+#             return self.__mul__(other)
 
-        if isinstance(other, CyclicDGModule_element):
-            self.compare_attributes(other)
-            answer = type(other)()
-            for attr, value in other.__dict__.items():
-                setattr(answer, attr, value)
-            for k, v1 in self.items():
-                for x, v2 in other.items():
-                    y = tuple(k + i for i in x)
-                    answer[y] += v1 * v2
-            answer._reduce_rep()
-            return answer
+#         if isinstance(other, CyclicDGModule_element):
+#             self.compare_attributes(other)
+#             answer = type(other)()
+#             for attr, value in other.__dict__.items():
+#                 setattr(answer, attr, value)
+#             for k, v1 in self.items():
+#                 for x, v2 in other.items():
+#                     y = tuple(k + i for i in x)
+#                     answer[y] += v1 * v2
+#             answer._reduce_rep()
+#             return answer
 
-    def _reduce_rep(self):
-        '''in place mod p reduction of the keys'''
+#     def _reduce_rep(self):
+#         '''in place mod p reduction of the keys'''
 
-        # reducing keys mod order
-        if self.order != 'infinite':
-            aux = list(self.items())
-            self.clear()
-            for k, v in aux:
-                self[k % self.order] += v
-        super()._reduce_rep()
+#         # reducing keys mod order
+#         if self.order != 'infinite':
+#             aux = list(self.items())
+#             self.clear()
+#             for k, v in aux:
+#                 self[k % self.order] += v
+#         super()._reduce_rep()
 
-    def set_order(self, n):
-        setattr(self, 'order', n)
-        self._reduce_rep()
-        return(self)
+#     def set_order(self, n):
+#         setattr(self, 'order', n)
+#         self._reduce_rep()
+#         return(self)
 
-    @staticmethod
-    def transposition_element(torsion=None, order=None):
-        '''...'''
-        return CyclicModule_element({1: 1, 0: -1},
-                                    torsion=torsion, order=order)
+#     @staticmethod
+#     def transposition_element(torsion=None, order=None):
+#         '''...'''
+#         return CyclicModule_element({1: 1, 0: -1},
+#                                     torsion=torsion, order=order)
 
-    @classmethod
-    def norm_element(self, torsion=None, order=None):
-        '''...'''
-        if order is None:
-            order = self.default_order
+#     @classmethod
+#     def norm_element(self, torsion=None, order=None):
+#         '''...'''
+#         if order is None:
+#             order = self.default_order
 
-        if order == 'infinite':
-            raise TypeError('norm element not define for infinite order')
+#         if order == 'infinite':
+#             raise TypeError('norm element not define for infinite order')
 
-        return CyclicModule_element({i: 1 for i in range(order)},
-                                    torsion=torsion, order=order)
+#         return CyclicModule_element({i: 1 for i in range(order)},
+#                                     torsion=torsion, order=order)
 
-    def psi(self, d):
-        '''...'''
-        # recursive function to find psi(e_d)
-        def _psi_on_generator(d):
-            if d <= 0:
-                return CyclicDGModule_element({(0,): 1}, torsion=self.torsion,
-                                              order=self.order)
-            else:
-                operators = {
-                    0: CyclicModule_element.norm_element(torsion=self.torsion,
-                                                         order=self.order),
-                    1: CyclicModule_element.transposition_element(
-                        torsion=self.torsion, order=self.order)}
+#     def psi(self, d):
+#         '''...'''
+#         # recursive function to find psi(e_d)
+#         def _psi_on_generator(d):
+#             if d <= 0:
+#                 return CyclicDGModule_element({(0,): 1}, torsion=self.torsion,
+#                                               order=self.order)
+#             else:
+#                 operators = {
+#                     0: CyclicModule_element.norm_element(torsion=self.torsion,
+#                                                          order=self.order),
+#                     1: CyclicModule_element.transposition_element(
+#                         torsion=self.torsion, order=self.order)}
 
-                op_psi = operators[d % 2](_psi_on_generator(d - 1))
+#                 op_psi = operators[d % 2](_psi_on_generator(d - 1))
 
-                return CyclicDGModule_element(
-                    {(0,) + k: v for k, v in op_psi.items()},
-                    torsion=self.torsion, order=self.order)
+#                 return CyclicDGModule_element(
+#                     {(0,) + k: v for k, v in op_psi.items()},
+#                     torsion=self.torsion, order=self.order)
 
-        # Compute psi knowing psi(e_d)
-        answer = CyclicDGModule_element().copy_attrs_from(self)
-        for k1 in _psi_on_generator(d).keys():
-            for k2, v2 in self.items():
-                to_add = CyclicDGModule_element(
-                    {tuple(k2 + i for i in k1): v2},
-                    torsion=self.torsion, order=self.order)
-                answer += to_add
-        return answer
+#         # Compute psi knowing psi(e_d)
+#         answer = CyclicDGModule_element().copy_attrs_from(self)
+#         for k1 in _psi_on_generator(d).keys():
+#             for k2, v2 in self.items():
+#                 to_add = CyclicDGModule_element(
+#                     {tuple(k2 + i for i in k1): v2},
+#                     torsion=self.torsion, order=self.order)
+#                 answer += to_add
+#         return answer
 
-    def as_BarrattEccles_element(self, d):
-        '''...'''
-        return self.psi(d)
+#     def as_BarrattEccles_element(self, d):
+#         '''...'''
+#         return self.psi(d)
 
-    def as_Surjection_element(self, d):
-        '''Uses the direct formula not the one involving the
-        table_reduction morphism'''
+#     def as_Surjection_element(self, d):
+#         '''Uses the direct formula not the one involving the
+#         table_reduction morphism'''
 
-        m = self.torsion
-        assert isinstance(m, int), 'requires finite torsion'
+#         m = self.torsion
+#         assert isinstance(m, int), 'requires finite torsion'
 
-        n = int(d / 2)
-        start = tuple((0, 1))[: (d % 2) + 1]
-        shifted_keys = []
-        for prod in product(range(0, m), repeat=n):
-            middle = tuple()
-            for i in prod:
-                middle += (i, (i + 1) % m)
-            key = start + middle
-            key += tuple((i + key[-1]) % m for i in range(1, m))
-            shifted_keys.append(key)
+#         n = int(d / 2)
+#         start = tuple((0, 1))[: (d % 2) + 1]
+#         shifted_keys = []
+#         for prod in product(range(0, m), repeat=n):
+#             middle = tuple()
+#             for i in prod:
+#                 middle += (i, (i + 1) % m)
+#             key = start + middle
+#             key += tuple((i + key[-1]) % m for i in range(1, m))
+#             shifted_keys.append(key)
 
-        keys = [tuple(i + 1 for i in k) for k in shifted_keys]
+#         keys = [tuple(i + 1 for i in k) for k in shifted_keys]
 
-        rhos = (v * SymmetricModule_element.rho(m, k) for k, v in self.items())
-        # sum of all rhos
-        coeff = reduce(lambda x, y: x + y, rhos).set_torsion(m)
+#         rhos = (v * SymmetricModule_element.rho(m, k) for k, v in self.items())
+#         # sum of all rhos
+#         coeff = reduce(lambda x, y: x + y, rhos).set_torsion(m)
 
-        return coeff * Surjection_element({key: 1 for key in keys}, torsion=m)
-
-
-class DGModule_element(Module_element):
-    '''...'''
-
-    def __init__(self, data=None, torsion=None):
-
-        # check input data: dict with tuple keys
-        if data:
-            if not all((isinstance(x, tuple) for x in data.keys())):
-                raise ValueError('data type must be dict with tuple keys')
-
-        # initializing element
-        super(DGModule_element, self).__init__(data=data, torsion=torsion)
-
-    def __str__(self):
-        string = super().__str__()
-        return string.replace(', ', ',')
-
-    def _reduce_rep(self):
-        '''deletes degenerate keys and reduces as Module_element'''
-
-        # removes degenerate simplices
-        for simplex, v in self.items():
-            for i in range(len(simplex) - 1):
-                if simplex[i] == simplex[i + 1]:
-                    self[simplex] = 0
-
-        super()._reduce_rep()
-
-    def boundary(self):
-        '''...'''
-        sign = {0: 1, 1: -1}
-        bdry = type(self)().copy_attrs_from(self)
-        for spx, coeff in self.items():
-            for i in range(len(spx)):
-                i_term = {tuple(spx[: i] + spx[i + 1:]): sign[i % 2] * coeff}
-                to_add = type(self)(i_term).copy_attrs_from(bdry)
-                bdry += to_add
-        bdry._reduce_rep()
-
-        return bdry
-
-    def alexander_whitney(self, r=1):
-        '''...'''
-
-        def split(multispx):
-            a, b = multispx[0], multispx[1:]
-            return set((a[:i + 1], a[i:]) + b for i in range(len(a)))
-
-        answer = Module_element().copy_attrs_from(self)
-        for k, v in self.items():
-            to_add = set(((k,),))
-            for s in range(1, r + 1):
-                to_add = set.union(*(split(multispx) for multispx in to_add))
-            answer += Module_element(
-                {multispx: v for multispx in to_add}).copy_attrs_from(self)
-
-        return answer
+#         return coeff * Surjection_element({key: 1 for key in keys}, torsion=m)
 
 
-class CyclicDGModule_element(DGModule_element):
-    '''...'''
+# class DGModule_element(Module_element):
+#     '''...'''
 
-    default_order = 'infinite'
+#     def __init__(self, data=None, torsion=None):
 
-    def __init__(self, data=None, torsion=None, order=None):
+#         # check input data: dict with tuple keys
+#         if data:
+#             if not all((isinstance(x, tuple) for x in data.keys())):
+#                 raise ValueError('data type must be dict with tuple keys')
 
-        # check input data: dict with tuple of int keys
-        if data:
-            if not (isinstance(data, dict)
-                    and all((isinstance(i, int) for i in
-                             chain.from_iterable(data.keys())))
-                    ):
-                raise ValueError('data type must be dict'
-                                 + 'with tuple of int keys')
-        # set order
-        n = order if order else type(self).default_order
-        setattr(self, 'order', n)
+#         # initializing element
+#         super(DGModule_element, self).__init__(data=data, torsion=torsion)
 
-        # initialize element
-        super(CyclicDGModule_element, self).__init__(data=data,
-                                                     torsion=torsion)
+#     def __str__(self):
+#         string = super().__str__()
+#         return string.replace(', ', ',')
 
-    def __str__(self):
-        '''...'''
-        s = super().__str__()
-        s = s.replace(', ', ',')
-        return s.replace('(', 'q^(')
+#     def _reduce_rep(self):
+#         '''deletes degenerate keys and reduces as Module_element'''
 
-    def _reduce_rep(self):
-        '''reduces mod p the keys and values and deletes keys with 0 value
-        or which are degenerate'''
+#         # removes degenerate simplices
+#         for simplex, v in self.items():
+#             for i in range(len(simplex) - 1):
+#                 if simplex[i] == simplex[i + 1]:
+#                     self[simplex] = 0
 
-        # reducing keys mod order
-        if self.order != 'infinite':
-            aux = list(self.items())
-            self.clear()
-            for x, v in aux:
-                y = tuple(i % self.order for i in x)
-                self[y] += v
+#         super()._reduce_rep()
 
-        super()._reduce_rep()
+#     def boundary(self):
+#         '''...'''
+#         sign = {0: 1, 1: -1}
+#         bdry = type(self)().copy_attrs_from(self)
+#         for spx, coeff in self.items():
+#             for i in range(len(spx)):
+#                 i_term = {tuple(spx[: i] + spx[i + 1:]): sign[i % 2] * coeff}
+#                 to_add = type(self)(i_term).copy_attrs_from(bdry)
+#                 bdry += to_add
+#         bdry._reduce_rep()
 
-    def phi(self):
-        '''from Cyclic_DGModule to Barrat_Eccles'''
+#         return bdry
 
-        if self.order == 'infinite':
-            raise('phi is not define for elements of infinite order')
+#     def alexander_whitney(self, r=1):
+#         '''...'''
 
-        r = self.order
-        answer = {}
-        for k, v in self.items():
-            x = []
-            for i in k:
-                x.append(tuple(j % r + 1 for j in range(i, r + i)))
-            answer[tuple(x)] = v
+#         def split(multispx):
+#             a, b = multispx[0], multispx[1:]
+#             return set((a[:i + 1], a[i:]) + b for i in range(len(a)))
 
-        return BarrattEccles_element(answer, torsion=self.torsion)
+#         answer = Module_element().copy_attrs_from(self)
+#         for k, v in self.items():
+#             to_add = set(((k,),))
+#             for s in range(1, r + 1):
+#                 to_add = set.union(*(split(multispx) for multispx in to_add))
+#             answer += Module_element(
+#                 {multispx: v for multispx in to_add}).copy_attrs_from(self)
 
-    def set_order(self, r):
-        '''...'''
-        setattr(self, 'order', r)
-        self._reduce_rep()
-        return self
+#         return answer
+
+
+# class CyclicDGModule_element(DGModule_element):
+#     '''...'''
+
+#     default_order = 'infinite'
+
+#     def __init__(self, data=None, torsion=None, order=None):
+
+#         # check input data: dict with tuple of int keys
+#         if data:
+#             if not (isinstance(data, dict)
+#                     and all((isinstance(i, int) for i in
+#                              chain.from_iterable(data.keys())))
+#                     ):
+#                 raise ValueError('data type must be dict'
+#                                  + 'with tuple of int keys')
+#         # set order
+#         n = order if order else type(self).default_order
+#         setattr(self, 'order', n)
+
+#         # initialize element
+#         super(CyclicDGModule_element, self).__init__(data=data,
+#                                                      torsion=torsion)
+
+#     def __str__(self):
+#         '''...'''
+#         s = super().__str__()
+#         s = s.replace(', ', ',')
+#         return s.replace('(', 'q^(')
+
+#     def _reduce_rep(self):
+#         '''reduces mod p the keys and values and deletes keys with 0 value
+#         or which are degenerate'''
+
+#         # reducing keys mod order
+#         if self.order != 'infinite':
+#             aux = list(self.items())
+#             self.clear()
+#             for x, v in aux:
+#                 y = tuple(i % self.order for i in x)
+#                 self[y] += v
+
+#         super()._reduce_rep()
+
+#     def phi(self):
+#         '''from Cyclic_DGModule to Barrat_Eccles'''
+
+#         if self.order == 'infinite':
+#             raise('phi is not define for elements of infinite order')
+
+#         r = self.order
+#         answer = {}
+#         for k, v in self.items():
+#             x = []
+#             for i in k:
+#                 x.append(tuple(j % r + 1 for j in range(i, r + i)))
+#             answer[tuple(x)] = v
+
+#         return BarrattEccles_element(answer, torsion=self.torsion)
+
+#     def set_order(self, r):
+#         '''...'''
+#         setattr(self, 'order', r)
+#         self._reduce_rep()
+#         return self
 
 
 class CubicalEilenbergZilber_element(Module_element):
@@ -438,112 +438,6 @@ class CubicalEilenbergZilber_element(Module_element):
             return answer
 
 
-class CubicalEilenbergZilber_element(Module_element):
-    '''...'''
-
-    def __init__(self, data=None, torsion=None):
-        '''...'''
-
-        # check input data: dict with tuple of int keys
-        if data:
-            if not (isinstance(data, dict)
-                    and all(isinstance(x, tuple) for x in data.keys())
-                    and all(isinstance(i, str) for i in
-                            chain.from_iterable(data.keys()))
-                    ):
-                raise TypeError(
-                    'data type must be dict with tuple of str keys')
-
-        # initialize element
-        super(type(self), self).__init__(data=data, torsion=torsion)
-
-    @ property
-    def arity(self):
-        if not self:
-            return None
-
-        arities = set(len(x) for x in self.keys())
-
-        if len(arities) > 1:
-            return arities
-
-        return arities.pop()
-
-    def coproduct(self):
-        def _coproduct_mod2(x, answer=set()):
-            '''mod 2 version'''
-            if len(x) == 0:
-                return {('', '')}
-
-            if x[0] == 'e':
-                answer = {('0' + pair[0], 'e' + pair[1])
-                          for pair in _coproduct_mod2(x[1:], answer)} \
-                    ^ {('e' + pair[0], '1' + pair[1])
-                       for pair in _coproduct_mod2(x[1:], answer)}
-            else:
-                answer = {(x[0] + pair[0], x[0] + pair[1])
-                          for pair in _coproduct_mod2(x[1:], answer)}
-            return answer
-
-        def _sign(pair):
-            num_transps = 0
-            for i, x in enumerate(pair[0]):
-                if x == 'e':
-                    num_transps += len([y for y in pair[1][:i + 1] if y == 'e'])
-            return (-1)**num_transps
-
-        answer = self.zero()
-        if self.arity == 1:
-            for k, v in self.items():
-                for pair in _coproduct_mod2(k[0]):
-                    answer += type(self)(
-                        {pair: _sign(pair) * v}, torsion=self.torsion)
-            return answer
-        else:
-            for k, v in self.items():
-                x = type(self)(
-                    {(k[0],): v}, torsion=self.torsion).coproduct()
-                answer += type(self)(
-                    {m + k[1:]: w for m, w in x.items()}, torsion=self.torsion)
-            return answer
-
-    def product(self, other=None):
-        '''...'''
-
-        def _product(self, other):
-            '''...'''
-            assert self.torsion == other.torsion, 'defined for equal torsion'
-            assert self.arity == other.arity == 1, 'defined for arity 1'
-
-            answer = other.zero()
-            if not self or not other:
-                return answer
-
-            _ast = {'01': 'e', '10': 'e'}
-            for k1, v1 in self.items():
-                for k2, v2 in other.items():
-                    x, y = k1[0], k2[0]
-                    expected_degree = x.count('e') + y.count('e') + 1
-                    for i, pair in enumerate(zip(x, y)):
-                        try:
-                            new_summand = y[:i] + _ast[pair[0] + pair[1]] + x[i + 1:]
-                            if new_summand.count('e') == expected_degree:
-                                answer += self.create({
-                                    (new_summand,): v1 * v2 * (-1)**x.count('e')})
-                        except KeyError:
-                            pass
-            return answer
-
-        if other:
-            return _product(self, other)
-
-        answer = self.zero()
-        for k, v in self.items():
-            elements = [self.create({(a,): 1}) for a in k]
-            answer += v * reduce(lambda x, y: x.product(y), elements)
-        return answer
-
-
 class EilenbergZilber_element(Module_element):
     '''...'''
 
@@ -608,21 +502,6 @@ class EilenbergZilber_element(Module_element):
                 answer += Module_element({new_key: v1 * v2},
                                          torsion=self.torsion)
         return answer
-
-    def _reduce_rep(self):
-        '''...'''
-
-        # order face maps in increasing value
-        self_data = dict(self)
-        self.clear()
-        for multiop, coeff in self_data.items():
-            ordered_multiop = tuple()
-            for op in multiop:
-                ordered_op = EilenbergZilber_element._face_maps_sort(op)
-                ordered_multiop += (ordered_op,)
-            self[ordered_multiop] += coeff
-
-        super()._reduce_rep()
 
     @ staticmethod
     def _face_maps_sort(face_maps):

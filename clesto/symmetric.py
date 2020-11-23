@@ -146,6 +146,7 @@ class SymmetricModule_element(Module_element):
     '''
 
     def __init__(self, data=None, torsion=None):
+
         if data:
             if not (isinstance(data, dict)
                     and all(isinstance(perm, tuple) for perm in data.keys())

@@ -19,37 +19,32 @@ class Module_element(Counter):
 
     Class constructed to model free module elements over the ring Z or Z/nZ.
 
+    Parameters
+    ----------
+    data : dict
+
     Attributes
     ----------
-    default_torsion : non-negative int or string 'free'.
+    torsion : non-negative int or string 'free'.
 
     '''
 
     default_torsion = 'free'
 
     def __init__(self, data=None, torsion=None):
-        # check input data: dict with int values
-        if data:
-            if not (isinstance(data, dict)
-                    and all((type(v) is int for v in data.values()))):
-                raise TypeError('input must be dict with int values')
+        '''...'''
 
-        # checking input torsion: positive int or 'free'
-        if torsion is not None:
-            if not (isinstance(torsion, int) and torsion > 0
-                    or torsion == 'free'):
-                raise TypeError("torsion must be a positive int or 'free'")
+        if torsion is None:
+            torsion = type(self).default_torsion
+        self.torsion = torsion
 
-        # setting torsion
-        m = torsion if torsion else type(self).default_torsion
-        setattr(self, 'torsion', m)
-
-        # initialize element
         super(Module_element, self).__init__(data)
 
         self._reduce_rep()
 
     def __str__(self):
+        '''...'''
+
         if not self:
             return '0'
         else:
@@ -77,10 +72,8 @@ class Module_element(Counter):
         '''
         if self.torsion != other.torsion:
             raise TorsionError
-        answer = self.create(self)
-        answer.update(other)
-        answer._reduce_rep()
-        return answer
+        self.update(other)
+        return type(self)(self)
 
     def __sub__(self, other):
         '''The substraction of two free module elements.
@@ -91,10 +84,8 @@ class Module_element(Counter):
         '''
         if self.torsion != other.torsion:
             raise TorsionError
-        answer = self.create(self)
-        answer.subtract(other)
-        answer._reduce_rep()
-        return answer
+        self.subtract(other)
+        return type(self)(self)
 
     def __rmul__(self, c):
         '''The scaling by c of a free module element.

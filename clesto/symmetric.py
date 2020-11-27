@@ -1,5 +1,5 @@
-from clesto.module_element import Module_element, TorsionError
-from itertools import chain
+from module import Module_element, TorsionError
+from itertools import chain, product
 
 
 class ArityError(Exception):
@@ -9,7 +9,7 @@ class ArityError(Exception):
         message : explanation of the error
     """
 
-    def __init__(self, message='attribute arity must be the same for all'):
+    def __init__(self, message='attribute arity must be the same'):
         self.message = message
         super(ArityError, self).__init__(message)
 
@@ -76,6 +76,17 @@ class SymmetricGroup_element(tuple):
         '''
         return max(self)
 
+    def inverse(self):
+        '''Returns the inverse of the given symmetric group element.
+
+        >>> pi = SymmetricGroup_element((2,3,1))
+        >>> print(pi.inverse())
+        (3,1,2)
+
+        '''
+        inverse = tuple(self.index(i + 1) + 1 for i in range(self.arity))
+        return SymmetricGroup_element(inverse)
+
     def __mul__(self, other):
         '''product in the symmetric group: self * other ordered as bijections.
 
@@ -85,6 +96,9 @@ class SymmetricGroup_element(tuple):
         (2,1,3)
 
         '''
+        if not isinstance(other, SymmetricGroup_element):
+            self = SymmetricModule_element({self: 1}, torsion=other.torsion)
+            return other.__rmul__(self)
 
         if self.arity != other.arity:
             raise TypeError('must have the same arity')
@@ -99,7 +113,6 @@ class SymmetricGroup_element(tuple):
         (1,2,3,4,5)
 
         '''
-
         if times == 0:
             return SymmetricGroup_element(tuple(range(1, max(self) + 1)))
         answer = self
@@ -118,7 +131,6 @@ class SymmetricGroup_element(tuple):
         (2,1,4,3)
 
         '''
-
         # partial composition
         if len(others) == 2 and isinstance(others[1], int):
             other, j = others
@@ -205,9 +217,8 @@ class SymmetricModule_element(Module_element):
             raise TorsionError
 
         answer = self.zero()
-        for k1, v1 in self.items():
-            for k2, v2 in other.items():
-                answer[tuple(k1[i - 1] for i in k2)] += v1 * v2
+        for (k1, v1), (k2, v2) in product(self.items(), other.items()):
+            answer[tuple(k1[i - 1] for i in k2)] += v1 * v2
 
         answer._reduce_rep()
         return answer
@@ -244,12 +255,11 @@ class SymmetricModule_element(Module_element):
                 raise TypeError('elements must have equal torsion')
 
             answer = self.zero()
-            for k1, v1 in self.items():
-                for k2, v2 in other.items():
-                    new_k = k1.compose(k2, j)
-                    new_v = v1 * v2
-                    to_add = self.create({new_k: new_v})
-                    answer += to_add
+            for (k1, v1), (k2, v2) in product(self.items(), other.items()):
+                new_k = k1.compose(k2, j)
+                new_v = v1 * v2
+                to_add = self.create({new_k: new_v})
+                answer += to_add
             return answer
 
         # total composition

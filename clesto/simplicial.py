@@ -1,9 +1,7 @@
-from clesto.module_element import Module_element, TorsionError
-# from clesto.symmetric import SymmetricGroup_element, \
-#     SymmetricModule_element, SymmetricModule, ArityError
-from clesto.utils import pairwise, decompositions, distinct_permutations
-from itertools import chain, combinations, product
-from operator import attrgetter
+from module import Module_element, TorsionError
+from symmetric import SymmetricModule_element, ArityError
+from _utils import pairwise
+from itertools import chain, product, combinations_with_replacement
 
 
 class Simplex(tuple):
@@ -34,10 +32,12 @@ class Simplex(tuple):
 
         return tuple(s_i(i, j) for j in self)
 
-    def is_degenerate(spx):
+    def is_degenerate(self):
         '''...'''
 
-        return any([i == j for i, j in pairwise(spx)])
+        has_consecutive_values = any([i == j for i, j in pairwise(self)])
+        empty_simplex = (self.dimension == -1)
+        return empty_simplex or has_consecutive_values
 
 
 class EilenbergZilber_element(Module_element):
@@ -75,12 +75,20 @@ class EilenbergZilber_element(Module_element):
         '''...'''
         return self.create()
 
-    @ property
+    @property
     def arity(self):
         arities = set(len(multispx) for multispx in self.keys())
         if len(arities) != 1:
             return None
         return arities.pop()
+
+    @property
+    def degree(self):
+
+        degs = {sum(spx.dimension for spx in k) for k in self.keys()}
+        if len(degs) != 1:
+            return None
+        return degs.pop()
 
     def boundary(self):
         '''...'''
@@ -96,8 +104,53 @@ class EilenbergZilber_element(Module_element):
                     answer += answer.create({new_k: new_v})
         return answer
 
+    def __rmul__(self, other):
+        '''Left action by the appropriate symmetric group ring.
+
+        # chain map checks:
+
+        >>> rho = SymmetricModule.rotation_element(3)
+        >>> multispx = EilenbergZilber_element({((0, 1), (0,), (0, 1, 2, 3)): 1})
+        >>> x, y = (rho * multispx).boundary(), rho * multispx.boundary()
+        >>> x == y
+        True
+
+        '''
+        def sign(perm, multispx):
+            signs = {0: 1, 1: -1}
+            weights = [spx.dimension % 2 for spx in k1]
+            answer = 0
+            for idx, i in enumerate(perm):
+                right = [weights[perm.index(j)] for
+                         j in perm[idx + 1:] if i > j]
+                answer += sum(right) * weights[idx]
+            return signs[answer % 2]
+
+        if isinstance(other, int):
+            return super().__rmul__(other)
+
+        if not isinstance(other, SymmetricModule_element):
+            raise TypeError(f'right mult. by type int or \
+                SymmetricModule_element not {type(other)}')
+
+        if self.torsion != other.torsion:
+            raise TorsionError
+
+        if self.arity != other.arity:
+            raise ArityError
+
+        answer = self.zero()
+        for (k1, v1), (k2, v2) in product(self.items(), other.items()):
+            new_key = tuple(k1[k2.index(i + 1) - 1] for i in range(self.arity))
+            new_sign = sign(k2, k1)
+            answer += self.create({new_key: new_sign * v1 * v2})
+        return answer
+
     def codegeneracy(self, i):
-        '''...'''
+        '''Covariant action of the i-th codegeneracy. It is the zero map
+        on any element in the Eilenberg-Zilber operad.
+
+        '''
         if i > self.dimension - 1:
             raise TypeError('codegeneracy out of range')
 
@@ -108,7 +161,7 @@ class EilenbergZilber_element(Module_element):
         return answer
 
     def coface(self, i):
-        '''...'''
+        '''Covariant action of the i-th coface.'''
 
         if i > self.dimension:
             raise TypeError('coface out of range')
@@ -120,7 +173,7 @@ class EilenbergZilber_element(Module_element):
         return answer
 
     def _reduce_rep(self):
-        '''...'''
+        '''Sets to 0 the summands with degenerate simplices.'''
 
         for k, v in self.items():
             if any([spx.is_degenerate() for spx in k]):
@@ -128,11 +181,43 @@ class EilenbergZilber_element(Module_element):
 
         super()._reduce_rep()
 
+    def iterated_diagonal(self, n=1):
+        '''Alexander-Whitney chain approximation to the diagonal applied
+        n-times.
+
+        Examples
+        --------
+
+        chain map check:
+        >>> x = EilenbergZilber_element({((0, 1, 2), ): 1})
+        >>> dx = x.boundary()
+        >>> dx.iterated_diagonal(3) == x.iterated_diagonal(3).boundary()
+        True
+
+        '''
+
+        if self.degree is None:
+            raise TypeError(f'only for homogeneous elements')
+
+        if self.arity != 1:
+            raise TypeError(f'only for arity 1 elements')
+
+        answer = self.zero()
+        for k, v in self.items():
+            spx = k[0]
+            for p in combinations_with_replacement(range(self.degree + 1), n):
+                p = (0,) + p + (self.degree,)
+                new_k = []
+                for i, j in pairwise(p):
+                    new_k.append(Simplex(spx[i:j + 1]))
+                answer += self.create({tuple(new_k): v})
+        return answer
+
 
 class EilenbergZilber():
     '''Class producing Eilenberg-Zilber elements of special interest.'''
 
-    def boundary(n, torsion=None):
+    def boundary_element(n, torsion=None):
         '''...'''
 
         sign = {0: 1, 1: -1}
@@ -143,7 +228,7 @@ class EilenbergZilber():
             answer += answer.create({new_k: sign[i % 2]})
         return answer
 
-    def coproduct(n, torsion=None):
+    def coproduct_element(n, torsion=None):
         '''...'''
 
         answer = EilenbergZilber_element(dimension=n, torsion=torsion)
@@ -152,3 +237,8 @@ class EilenbergZilber():
             new_k = (spx[:i], spx[i - 1:])
             answer += answer.create({new_k: 1})
         return answer
+
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()

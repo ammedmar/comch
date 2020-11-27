@@ -1,8 +1,8 @@
-from clesto.module_element import Module_element, TorsionError
-from clesto.symmetric import SymmetricGroup_element, SymmetricModule_element,\
+from module import Module_element, TorsionError
+from symmetric import SymmetricGroup_element, SymmetricModule_element,\
     ArityError, SymmetricModule
-from clesto.surjection import Surjection_element
-from clesto.utils import partitions
+from surjection import Surjection_element
+from _utils import partitions
 from itertools import chain
 
 
@@ -124,10 +124,9 @@ class BarrattEccles_element(Module_element):
             raise ArityError
 
         answer = self.zero()
-        for k1, v1 in self.items():
-            for k2, v2 in other.items():
-                new_k = tuple(k2 * pi for pi in k1)
-                answer += self.create({new_k: v1 * v2})
+        for (k1, v1), (k2, v2) in product(self.items(), other.items()):
+            new_k = tuple(k2 * pi for pi in k1)
+            answer += self.create({new_k: v1 * v2})
         return answer
 
     def compose(self, *others):

@@ -1,12 +1,14 @@
-from clesto.module_element import Module_element
-from clesto.symmetric import SymmetricGroup_element, \
+from module import Module_element, TorsionError
+from symmetric import SymmetricGroup_element, \
     SymmetricModule_element, SymmetricModule
-from clesto.barratt_eccles import BarrattEccles_element, BarrattEccles
-from clesto.surjection import Surjection_element, Surjection
-from clesto.simplicial import Simplex, EilenbergZilber, EilenbergZilber_element
+from barratt_eccles import BarrattEccles_element, BarrattEccles
+from surjection import Surjection_element, Surjection
+from simplicial import Simplex, EilenbergZilber, EilenbergZilber_element
+from cubical import CubicalEilenbergZilber_element
 
 __all__ = [
     'Module_element',
+    'TorsionError',
     'SymmetricGroup_element',
     'SymmetricModule_element',
     'SymmetricModule',
@@ -16,5 +18,6 @@ __all__ = [
     'Surjection',
     'Simplex',
     'EilenbergZilber',
-    'EilenbergZilber_element'
+    'EilenbergZilber_element',
+    'CubicalEilenbergZilber_element'
 ]

@@ -1,9 +1,12 @@
-from clesto.module_element import Module_element, TorsionError
-from clesto.symmetric import SymmetricGroup_element, \
+from module import Module_element, TorsionError
+from symmetric import SymmetricGroup_element, \
     SymmetricModule_element, SymmetricModule, ArityError
-from clesto.utils import pairwise, decompositions, distinct_permutations
+from simplicial import Simplex, EilenbergZilber_element
+from cubical import CubicalEilenbergZilber_element
+from _utils import pairwise
 from itertools import chain, combinations, product
-from operator import attrgetter
+from operator import itemgetter
+from functools import reduce
 
 
 class Surjection_element(Module_element):
@@ -170,7 +173,6 @@ class Surjection_element(Module_element):
         True
 
         '''
-
         def sign(perm, surj, convention):
             if convention == 'Berger-Fresse':
                 return 1
@@ -188,8 +190,12 @@ class Surjection_element(Module_element):
         if isinstance(other, int):
             return super().__rmul__(other)
 
+        if isinstance(other, SymmetricGroup_element):
+            return SymmetricModule_element({other: 1}, torsion=self.torsion)
+
         if not isinstance(other, SymmetricModule_element):
-            raise NotImplementedError
+            raise TypeError(f'right mult. by type int or \
+                SymmetricModule_element not {type(other)}')
 
         if self.torsion != other.torsion:
             raise TorsionError
@@ -198,11 +204,10 @@ class Surjection_element(Module_element):
             raise ArityError
 
         answer = self.zero()
-        for k1, v1 in self.items():
-            for k2, v2 in other.items():
-                new_key = tuple(k2[i - 1] for i in k1)
-                new_sign = sign(k2, k1, self.convention)
-                answer += self.create({new_key: new_sign * v1 * v2})
+        for (k1, v1), (k2, v2) in product(self.items(), other.items()):
+            new_key = tuple(k2[i - 1] for i in k1)
+            new_sign = sign(k2, k1, self.convention)
+            answer += self.create({new_key: new_sign * v1 * v2})
         return answer
 
     def orbit(self, representation='trivial'):
@@ -214,29 +219,134 @@ class Surjection_element(Module_element):
         >>> print(s.orbit(representation='sign'))
         - (1,2,3)
 
+        >>> s = Surjection_element({(2, 1, 2, 1): 1}, \
+                                    convention='McClure-Smith')
+        >>> print(s.orbit())
+        - (1,2,1,2)
+
         '''
-        if self.convention == 'Berger-Fresse':
-            answer = self.zero()
-            for k, v in self.items():
-                seen = []
-                for i in k:
-                    if i not in seen:
-                        seen.append(i)
-                inverse = tuple(seen.index(i + 1) + 1 for i in range(len(seen)))
-                inverse = SymmetricGroup_element(inverse)
-                permutation = SymmetricModule_element({inverse: 1},
-                                                      torsion=self.torsion)
-                if representation == 'sign':
-                    permutation = inverse.sign * permutation
-                answer += permutation * self.create({k: v})
+        def sign(permutation, representation):
+            if representation == 'trivial':
+                return 1
+            if representation == 'sign':
+                return permutation.sign
 
-            return answer
+        answer = self.zero()
+        for k, v in self.items():
+            seen = []
+            for i in k:
+                if i not in seen:
+                    seen.append(i)
+            permutation = SymmetricGroup_element(seen).inverse()
+            new_v = sign(permutation, representation) * v
+            answer += permutation * self.create({k: new_v})
 
-        if self.convention == 'McClure-Smith':
-            raise NotImplementedError
+        return answer
+
+    def _cubical_action(self, other):
+        pass
+
+    def _simplicial_action(self, other):
+        '''...
+
+        >>> s = Surjection_element({(3, 2, 1, 3, 1, 2): 1}, convention='McClure-Smith')
+        >>> x = EilenbergZilber_element({((0, 1, 2, 3), ): 1})
+        >>> ds_x = s.boundary()(x)
+        >>> d_sx = s(x).boundary()
+        >>> sdx = s(x.boundary())
+        >>> d_sx - ((-1)**(s.degree)) * sdx == ds_x
+        True
+
+        '''
+        def ordering_sign(permu, weights):
+            '''Returns the exponent of the Koszul sign of the given permutation
+            acting on the elements of degrees given by the list of weights
+
+            '''
+            sign_exp = 0
+            for idx, j in enumerate(permu):
+                to_add = [weights[permu.index(i)] for
+                          i in permu[idx + 1:] if i < j]
+                sign_exp += weights[idx] * sum(to_add)
+            return sign_exp % 2
+
+        def action_sign(ordered_k1, ordered_weights):
+            '''Given a ordered tuple o_k1 = [1,..,1, 2,...,2, ..., r,...,r]
+            and weights [w_1, w_2, ..., w_{r+d}] of the same length, returns
+            the kozul sign obtained by inserting from the left a weight 1
+            operator between equal consecutive elements in o_k1.
+
+            '''
+            sign_exp = 0
+            for idx, (i, j) in enumerate(pairwise(ordered_k1)):
+                if i == j:
+                    sign_exp += sum(ordered_weights[:idx + 1])
+            return sign_exp % 2
+
+        def ms_sign(k1, k2):
+            '''returns the McClure-Smith sign.
+
+            '''
+            sign_exp = 0
+            weights = [spx.dimension % 2 for spx in k2]
+            inv_ordering_permu = [pair[0] for pair in
+                                  sorted(enumerate(k1), key=itemgetter(1))]
+            ordering_permu = tuple(inv_ordering_permu.index(i)
+                                   for i in range(len(inv_ordering_permu)))
+            sign_exp += ordering_sign(ordering_permu, weights)
+            ordered_k1 = list(sorted(k1))
+            ordered_weights = [weights[i] for i in inv_ordering_permu]
+            sign_exp += action_sign(ordered_k1, ordered_weights)
+            return (-1)**sign_exp
+
+        answer = other.zero()
+        pre_join = other.iterated_diagonal(self.arity + self.degree - 1)
+        for (k1, v1), (k2, v2) in product(self.items(), pre_join.items()):
+            new_k = []
+            zero_summand = False
+            for i in range(1, max(k1) + 1):
+                to_join = (spx for idx, spx in enumerate(k2) if k1[idx] == i)
+                joined = Simplex(reduce(lambda x, y: x + y, to_join))
+                if joined.is_degenerate():
+                    zero_summand = True
+                    break
+                new_k.append(joined)
+
+            if not zero_summand:  # sign computation
+                if self.torsion == 2:
+                    sign = 1
+                elif self.convention == 'McClure-Smith':
+                    sign = ms_sign(k1, k2)
+                else:
+                    raise NotImplementedError
+
+                answer += answer.create({tuple(new_k): sign * v1 * v2})
+        return answer
+
+    def __call__(self, other):
+        '''...
+
+        '''
+        if not self or not other:
+            return other.zero()
+
+        if other.arity != 1:
+            raise TypeError(f'action only on arity 1, not {other.arity}')
+
+        if self.degree is None or self.arity is None:
+            raise TypeError("defined for homogeneous surjections")
+
+        if self.torsion != other.torsion:
+            raise TorsionError
+
+        if isinstance(other, CubicalEilenbergZilber_element):
+            return self._cubical_action(other)
+
+        if isinstance(other, EilenbergZilber_element):
+            return self._simplicial_action(other)
 
     def _reduce_rep(self):
-
+        '''Sets to 0 all degenerate surjections.'''
         # remove non-surjections
         zeros = list()
         for k in self.keys():
@@ -253,382 +363,6 @@ class Surjection_element(Module_element):
 
         super()._reduce_rep()
 
-    def table_arrangement(surj, only_dict=False):
-        '''Returns the table arrangement of a surjection, as a tuple.
-        If only_dict=True, it returns a dictionary dict such that
-        dict[index] is the table arrangement of surj where
-        surj[index] lies. surj must be a tuple or a list.
-        '''
-
-        def _final_indices(surj):
-            '''Return the set of indices of elements in surj that are
-               the last occurence of a value. surj must be a tuple or a list.
-            '''
-            finals = set()
-            for k in range(1, max(surj) + 1):
-                for index in reversed(range(len(surj))):
-                    if surj[index] == k:
-                        finals.add(index)
-                        break
-            return finals
-
-        finals = _final_indices(surj)
-
-        if only_dict:
-            result = dict()
-            row = 0
-            for index, el in enumerate(surj):
-                result[index] = row
-                if index not in finals or index == len(surj) - 1:
-                    row += 1
-            return result
-
-        result = tuple()
-        new_row = tuple()
-        for index, el in enumerate(surj):
-            new_row += (el,)
-            if index not in finals or index == len(surj) - 1:
-                result += (new_row,)
-                new_row = tuple()
-        return result
-
-    def last_index(value, sequence):
-        '''returns the index of the last occurence of a value in a sequence'''
-
-        for index, element in reversed(list(enumerate(sequence))):
-            if value == element:
-                return index
-        raise ValueError(f"{value} is not an element of {sequence}")
-
-    def degrees(surj, pieces):
-        '''returns a tuple with the degree of the pieces in surj.
-           surj must be a tuple or a list.
-
-        '''
-        row = Surjection_element.table_arrangement(surj, only_dict=True)
-        result = tuple()
-        remaining_surj = surj
-        for piece in reversed(pieces):
-            end = piece[-1]
-            end_index = Surjection_element.last_index(end, remaining_surj)
-            start_index = end_index - len(piece) + 1
-            degree = row[end_index] - row[start_index]
-            result = (degree,) + result
-            remaining_surj = remaining_surj[0:start_index + 1]
-        return result
-
-    def _pcompose(self, other, k):
-        '''partial composition self o_k other
-
-        >>> u = Surjection_element({(1, 2, 1, 3): 1})
-        >>> v = Surjection_element({(1, 2, 1): 1})
-        >>> print(u._pcompose(v, 1))
-        - (1,2,1,3,1,4) + (1,3,1,2,1,4) - (1,2,3,2,1,4)
-
-        >>> m = Surjection_element({(1, 2): 1}, torsion=2)
-        >>> br = Surjection_element({(1, 2, 1, 3, 1): 1}, torsion=2)
-        >>> print(br.compose(m, 1))
-        (1,3,1,2,4,2) + (1,2,3,2,4,2) + (1,3,1,4,1,2)
-
-        # chain map check
-
-        >>> u = Surjection_element({(1, 2, 1, 3): 1})
-        >>> du = u.boundary()
-        >>> v = Surjection_element({(1, 2, 1): 1})
-        >>> dv = v.boundary()
-        >>> du_v = du.compose(v, 1)
-        >>> u_dv = u.compose(dv, 1)
-        >>> uv = u._pcompose(v, 1)
-        >>> duv = uv.boundary()
-        >>> du_v - u_dv == duv
-        True
-
-        '''
-        answer = self.zero()
-        for k1, coeff1 in self.items():
-            for k2, coeff2 in other.items():
-                occurences = tuple(i for i, el in enumerate(k1) if el == k)
-
-                k2_shifted = tuple(el + k - 1 for el in k2)
-                k1_shifted = tuple(map(lambda i: i + other.arity - 1
-                                       if i > k else i, k1))
-                for k2_cut in decompositions(k2_shifted, len(occurences) - 1):
-                    k3 = list(k1_shifted)
-                    for x, idx in reversed(list(zip(k2_cut, occurences))):
-                        k3[idx: idx + 1] = x
-
-                    sign = 1
-                    if self.arity != 2:  # Signs done by others, check
-                        indices_to_cut_k1 = (0,) + occurences + (len(k1) - 1,)
-                        k1_cut = tuple()
-                        for i in range(len(indices_to_cut_k1) - 1):
-                            left = indices_to_cut_k1[i]
-                            right = indices_to_cut_k1[i + 1]
-                            k1_cut += (k1_shifted[left:right + 1],)
-                        deg1 = Surjection_element.degrees(k1_shifted, k1_cut)
-                        deg2 = Surjection_element.degrees(k2_shifted, k2_cut)
-                        sign_exp = 0
-                        for index2 in range(len(k2_cut)):
-                            deg_piece2 = deg2[index2]
-                            left = occurences[index2]
-                            right = len(k1_cut)
-                            deg_pieces1 = sum(deg1[index1]
-                                              for index1 in range(left, right))
-                            sign_exp += (deg_piece2 * deg_pieces1) % 2
-                        sign = (-1)**sign_exp
-
-                    new_coeff = coeff1 * coeff2 * sign
-                    answer += self.create({tuple(k3): new_coeff})
-        return answer
-
-    def compose(self, *others):
-        '''general composition of Surjection_elements'''
-
-        # partial composition
-        if len(others) == 2 and isinstance(others[1], int):
-            # unpaking and checking input
-            other, k = others
-            if self.torsion != other.torsion:
-                raise TypeError('not the same torsion')
-            return self._pcompose(other, k)
-        # total composition
-        else:
-            if not len(others) == self.arity:
-                raise TypeError('the number of arguments must be equal to '
-                                + 'the arity of self')
-            answer = self
-            for idx, other in reversed(list(enumerate(others))):
-                answer = answer._pcompose(other, idx + 1)
-            return answer
-
-    def interval_cut(self, n):
-        '''...'''
-        def all_cuts(k, n):
-            '''(k,n) -> 0 = n0 <= n1 <= ... <= nk <= n'''
-            if k == 0:
-                yield (0,)
-            if k > 0:
-                for cut in all_cuts(k - 1, n):
-                    for i in range(cut[-1], n + 1):
-                        yield cut + (i,)
-
-        def constraints(surj):
-            '''...'''
-            for i in range(1, max(surj) + 1):
-                preimage = (idx for idx, s in enumerate(surj) if s == i)
-                for s, t in pairwise(preimage):
-                    yield (s + 1, t)
-
-        def good_cut(cut, const):
-            '''...'''
-            return all(cut[i] != cut[ipp] for i, ipp in const)
-
-        def cut2multioperator(cut, n):
-            '''...'''
-            multisimplex = {i: tuple() for i in range(1, max(surj) + 1)}
-            for i, pair in enumerate(pairwise(cut)):
-                multisimplex[surj[i]] += tuple(range(pair[0], pair[1] + 1))
-
-            std = set(range(n + 1))  # {0,1,...,n}
-            return tuple(tuple(std.difference(set(spx)))
-                         for spx in multisimplex.values())
-
-        def cut_sign(cut, surj):
-
-            class LeveledInterval:
-                def __init__(self, start, end, level):
-                    self.start = start
-                    self.end = end
-                    self.level = level
-                    self.is_inner = True
-
-                def length(self):
-                    length = interval.end - interval.start
-                    if self.is_inner:
-                        length += 1
-                    return length
-
-            # transform cut to tuple of intervals
-            intervals = tuple(LeveledInterval(cut[i], cut[i + 1], surj[i])
-                              for i in range(len(surj)))
-
-            # classify intervals: internal & final
-            for level in range(1, max(surj) + 1):
-                for interval in reversed(intervals):
-                    if level == interval.level:
-                        interval.is_inner = False
-                        break
-
-            # position sign = sum of n_i over internal intervals (n_{i-1}, n_i)
-            position_sign_exp = sum(interval.end for interval in intervals
-                                    if interval.is_inner)
-
-            # permutation sign associated to ordering the surjection
-            ordered = sorted(intervals, key=attrgetter('level'))
-            perm_sign_exp = sum(ordered[i].length() * ordered[j].length()
-                                for i in range(len(ordered))
-                                for j in range(i, len(ordered))
-                                if intervals.index(ordered[i])
-                                > intervals.index(ordered[j]))
-
-            return (-1)**((position_sign_exp + perm_sign_exp) % 2)
-
-        answer = EilenbergZilber_element().copy_attrs_from(self)
-        for surj, coeff in self.items():
-            const = set(constraints(surj))
-            k = len(surj) - 1
-            good_cuts = (cut + (n,) for cut in all_cuts(k, n)
-                         if good_cut(cut + (n,), const))
-            for cut in good_cuts:
-                sign = cut_sign(cut, surj)
-                multiop = cut2multioperator(cut, n)
-                answer += EilenbergZilber_element(
-                    {multiop: sign * coeff}).copy_attrs_from(answer)
-        return answer
-
-    def _index_occurence(value, n, sequence):
-        '''returns the index of the n-th occurence of value in sequence
-        '''
-        count = 0
-        for index, element in enumerate(sequence):
-            if element == value:
-                count += 1
-                if count == n:
-                    return index
-
-    def tau_vertex(vertex, surj):
-        '''...'''
-        indices = [Surjection_element._index_occurence(val + 1, x + 1, surj)
-                   for val, x in enumerate(vertex)]
-        indices.sort()
-        return tuple(surj[i] for i in indices)
-
-    def prism(surj):
-        '''...'''
-        r = max(surj)
-        num_occurences = [surj.count(k) for k in range(1, r + 1)]
-
-        # compute the base prism {0, ..., d1 - 1} x ... x {0, ..., dr - 1}
-        summands = [range(num_occurences[k]) for k in range(r)]
-
-        base_prism = product(*summands)
-        # better to make summands a generator instead of using * ?
-
-        base_prism = tuple(vertex for vertex in base_prism)
-        return base_prism
-
-    def tau(surj):
-        '''for prismatic decomposition'''
-
-        base_prism = Surjection_element.prism(surj)
-
-        image_prism = tuple(Surjection_element.tau_vertex(vertex, surj)
-                            for vertex in base_prism)
-        return base_prism, image_prism
-
-    def max_simplex(vect, r):
-        '''maximal simplex determined by the sequence
-           vect = (k0, ..., kd)
-        '''
-
-        result = tuple()
-        vertex = tuple(0 for k in range(r))
-        result = (vertex,)
-
-        for k in vect:
-            k = k - 1
-            vertex = vertex[:k] + (vertex[k] + 1,) + vertex[k + 1:]
-            result = result + (vertex,)
-
-        return result
-
-    def table_completion(self):
-        '''...'''
-
-        result = BarrattEccles_element(torsion=self.torsion)
-        r = self.arity
-
-        for surj, coeff in self.items():
-            finals = Surjection_element._final_indices(surj)
-            fund_vect = tuple(el for i, el in enumerate(surj)
-                              if i not in finals)
-            fund_simplex = Surjection_element.max_simplex(fund_vect, r)
-            tau_fund_simplex = tuple(Surjection_element.tau_vertex(vx, surj)
-                                     for vx in fund_simplex)
-
-            # make a list with all the possibilities for indices k_i,
-            # including eventual repetitions
-            possibilities = []
-            for k in range(1, r + 1):
-                num_occurences = surj.count(k)
-                possibilities += [k] * (num_occurences - 1)
-
-            # iterate over all tuples (k_0, ..., k_d), where each k_i
-            # has as many repetitions as it has in `possibilities`
-            # Note: distinct_permutations need the more_itertools module.
-            # We can replace it by ´set(permutations(possibilities))´,
-            # but it will compute much more than needed.
-            for vect in distinct_permutations(possibilities):
-                simplex = Surjection_element.max_simplex(vect, r)
-
-                # compute the image of the simplex
-                tau_simplex = tuple(Surjection_element.tau_vertex(vx, surj)
-                                    for vx in simplex)
-
-                # compute the sign of the simplex
-                sgn = 1
-
-                for index, vertex in enumerate(tau_simplex):
-                    vertex_f = tau_fund_simplex[index]
-
-                    # find the permutation that takes vertex to vertex_f
-                    permutation = {}
-                    for idx, el in enumerate(vertex):
-                        permutation[idx] = vertex_f.index(el)
-
-                    # compute the sign of the permutation
-                    sgn_perm = 1
-                    for i in range(len(vertex)):
-                        for j in range(i + 1, len(vertex)):
-                            diff = permutation[j] - permutation[i]
-                            sgn_perm *= diff // abs(diff)
-
-                    sgn *= sgn_perm
-
-                result += BarrattEccles_element({tau_simplex: coeff * sgn},
-                                                torsion=self.torsion)
-        return result
-
-    def __call__(self, other):
-        '''...'''
-        assert self.torsion == other.torsion, "defined for the same ring"
-        assert isinstance(self.degree, int) and self.arity, "defined for homogeneous surjections"
-
-        if isinstance(other, CubicalEilenbergZilber_element):
-            assert other.arity == 1, "defined for chains on a single cube"
-            answer = other.zero()
-            iterated_diagonal = other
-            for _ in range(self.degree + self.arity - 1):
-                iterated_diagonal = iterated_diagonal.coproduct()
-            for k1, v1 in self.items():
-                for k2, v2 in iterated_diagonal.items():
-                    # sign
-                    odds = [i for i, x in enumerate(k2) if x.count('e') % 2]
-                    coeff = v1 * v2
-                    for idx, i in enumerate(odds):
-                        coeff *= (-1)**len([j for j in odds[idx + 1:] if k1[i] > k1[j]])
-                    # elements
-                    elements = []
-                    for s in range(1, max(k1) + 1):
-                        element = other.create({tuple(k2[i] for i, s_i in enumerate(k1)
-                                                      if s_i == s): 1})
-                        elements.append(element.product())
-                    if all(elements):
-                        for multipair in product(*(element.items() for element in elements)):
-                            new_key = tuple(pair[0][0] for pair in multipair)
-                            answer += answer.create({new_key: coeff})
-            return answer
-
 
 class Surjection():
     '''Class producing Surjection elements of special interest.'''
@@ -639,16 +373,16 @@ class Surjection():
         '''Returns a surjection element representing the Steenrod
         product in the given arity and degree.
 
-        Constructed recursively by mapping the minimal resolution W(r) 
-        of Z[S_r] to Surj(r). We use the chain homotopy equivalence 
-        of Surj(r) and Z defined using the chain contraction (i, p, s) 
+        Constructed recursively by mapping the minimal resolution W(r)
+        of Z[S_r] to Surj(r). We use the chain homotopy equivalence
+        of Surj(r) and Z defined using the chain contraction (i, p, s)
         relating Surj(r-1) and Surj(r).
 
         Parameters
         ----------
-        arity : int 
+        arity : int
         Arity of the complex considered, Surj(arity).
-        
+
         degree : int
         degree of the element considered Surj(arity)_degree.
 
@@ -784,3 +518,5 @@ class Surjection():
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
+
+print('ok')

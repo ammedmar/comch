@@ -44,7 +44,6 @@ class Module_element(Counter):
 
     def __str__(self):
         '''...'''
-
         if not self:
             return '0'
         else:
@@ -73,7 +72,7 @@ class Module_element(Counter):
         if self.torsion != other.torsion:
             raise TorsionError
         self.update(other)
-        return type(self)(self)
+        return type(self)(self, torsion=self.torsion)
 
     def __sub__(self, other):
         '''The substraction of two free module elements.
@@ -85,7 +84,7 @@ class Module_element(Counter):
         if self.torsion != other.torsion:
             raise TorsionError
         self.subtract(other)
-        return type(self)(self)
+        return type(self)(self, torsion=self.torsion)
 
     def __rmul__(self, c):
         '''The scaling by c of a free module element.

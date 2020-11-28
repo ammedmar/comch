@@ -1,5 +1,5 @@
 from module import Module_element, TorsionError
-from symmetric import SymmetricModule_element, ArityError
+from symmetric import SymmetricModule_element, SymmetricModule, ArityError
 from _utils import pairwise
 from itertools import chain, product, combinations_with_replacement
 
@@ -18,6 +18,11 @@ class Simplex(tuple):
 
         return Simplex(self[:i] + self[i + 1:])
 
+    def degeneracy(self, i):
+        '''...'''
+
+        return Simplex(self[:i + 1] + self[i:])
+
     def coface(self, i):
         '''...'''
 
@@ -35,9 +40,9 @@ class Simplex(tuple):
     def is_degenerate(self):
         '''...'''
 
-        has_consecutive_values = any([i == j for i, j in pairwise(self)])
+        has_conse_values = any([i == j for i, j in pairwise(self)])
         empty_simplex = (self.dimension == -1)
-        return empty_simplex or has_consecutive_values
+        return empty_simplex or has_conse_values
 
 
 class EilenbergZilber_element(Module_element):
@@ -84,15 +89,23 @@ class EilenbergZilber_element(Module_element):
 
     @property
     def degree(self):
-
+        '''...'''
         degs = {sum(spx.dimension for spx in k) for k in self.keys()}
         if len(degs) != 1:
             return None
         return degs.pop()
 
     def boundary(self):
-        '''...'''
-        sign = {0: 1, 1: -1}
+        '''Boundary of an element in a tensor product of the standard
+        chains.
+
+        # squares to zero
+
+        >>> elmt = EilenbergZilber_element({((0, 1), (0,), (0, 1, 2, 3)): 1})
+        >>> print(elmt.boundary().boundary())
+        0
+
+        '''
         answer = self.zero()
         for k, v in self.items():
             for idx, spx in enumerate(k):
@@ -100,8 +113,8 @@ class EilenbergZilber_element(Module_element):
                 for i in range(spx.dimension + 1):
                     new_spx = spx.face(i)
                     new_k = k[:idx] + (new_spx,) + k[idx + 1:]
-                    new_v = v * sign[acc_dim % 2] * sign[i % 2]
-                    answer += answer.create({new_k: new_v})
+                    sign_exp = (acc_dim + i) % 2
+                    answer += answer.create({new_k: v * (-1)**sign_exp})
         return answer
 
     def __rmul__(self, other):
@@ -110,8 +123,8 @@ class EilenbergZilber_element(Module_element):
         # chain map checks:
 
         >>> rho = SymmetricModule.rotation_element(3)
-        >>> multispx = EilenbergZilber_element({((0, 1), (0,), (0, 1, 2, 3)): 1})
-        >>> x, y = (rho * multispx).boundary(), rho * multispx.boundary()
+        >>> elmt = EilenbergZilber_element({((0, 1), (0,), (0, 1, 2, 3)): 1})
+        >>> x, y = (rho * elmt).boundary(), rho * elmt.boundary()
         >>> x == y
         True
 
@@ -188,7 +201,8 @@ class EilenbergZilber_element(Module_element):
         Examples
         --------
 
-        chain map check:
+        # chain map check:
+        
         >>> x = EilenbergZilber_element({((0, 1, 2), ): 1})
         >>> dx = x.boundary()
         >>> dx.iterated_diagonal(3) == x.iterated_diagonal(3).boundary()

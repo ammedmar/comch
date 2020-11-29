@@ -1,5 +1,6 @@
 from module import Module_element
-from itertools import product, combinations
+from itertools import combinations, product
+from _utils import pairwise
 
 
 class Cube(tuple):
@@ -28,15 +29,22 @@ class Cube(tuple):
 class CubicalEilenbergZilber_element(Module_element):
     '''...'''
 
+    dimenion: int = None
+
     def __init__(self, data=None, torsion=None):
         '''...'''
 
         if data:
             new_data = {}
             for k, v in data.items():
+                dim_k = set(len(cube) for cube in k)
+                if len(dim_k) != 1:
+                    raise TypeError('some faces have different length')
                 new_k = tuple(Cube(cube) for cube in k)
                 new_data[new_k] = v
             data = new_data
+            dimension = dim_k.pop()  # they are all equal, using last.
+            self.dimension = dimension
 
         super(CubicalEilenbergZilber_element, self).__init__(
             data=data, torsion=torsion)
@@ -100,13 +108,18 @@ class CubicalEilenbergZilber_element(Module_element):
 
         '''
         def sign(p):
-            '''Counts the number of pairs appearing in reversed order.'''
+            '''Counts the number of pairs appearing in reversed order.
+
+            '''
             to_count = filter(lambda x: x[0] > x[1], combinations(p, 2))
             sign_exp = sum(1 for _ in to_count) % 2
             return (-1)**sign_exp
 
-        def splitted(fixed, i):
-            '''...'''
+        def elementary_summand(fixed, i):
+            '''Models as a function the element 0,...,0,2,1,...,1 appearing
+            as one of the summands of the iterated diagonal of an interval.
+
+            '''
             if i < fixed:
                 return 0
             elif i == fixed:
@@ -125,16 +138,97 @@ class CubicalEilenbergZilber_element(Module_element):
             cube = k[0]
             intervals = cube.intervals
             base = [i for idx, i in enumerate(cube) if idx not in intervals]
-            for p in product(range(n), repeat=self.degree):
-                multibase = [list(base) for _ in range(n)]
+            for p in product(range(n + 1), repeat=self.degree):
+                multibase = [list(base) for _ in range(n + 1)]
                 for idx, fixed in enumerate(p):
                     at = intervals[idx]
                     for i, new_base in enumerate(multibase):
-                        to_insert = splitted(fixed, i)
+                        to_insert = elementary_summand(fixed, i)
                         new_base.insert(at, to_insert)
                 new_k = tuple(Cube(x) for x in multibase)
                 answer += answer.create({new_k: v * sign(p)})
         return answer
+
+    def join(self):
+        '''Join of an element in the cubical EZ operad thought of
+        as an element in the tensor product, computed using the left
+        comb. (I suspect it is associative product though.)
+
+        Examples
+        --------
+
+        # boundary of the join
+
+        >>> x = CubicalEilenbergZilber_element({((0, 0, 1), \
+                                                 (1, 0, 0)): 1})
+        >>> print(x.join().boundary() + x.boundary().join())
+        ((1,0,0),) - ((0,0,1),)
+
+        '''
+        def is_zero(left, right):
+            '''Two conditions need to be satisfied for a triple
+            (cube1, cube2, i) give a nonzero i-join: no intervals
+            in cube1 can have indices greater or equal to i, and
+            no intervals in cube2 can have indices less than or
+            equal to i.
+
+            '''
+            if left == tuple() or right == tuple():
+                return False
+            if isinstance(right, int):
+                return right <= max(left)
+            if isinstance(left, int):
+                return left >= min(right)
+
+        def _join(i, cube1, cube2, sign_exp):
+            '''the i-th elementary join keeping track of signs.
+
+            '''
+            cube = Cube(cube1[:i] + (2,) + cube2[i + 1:])
+            p, q = cube1[i], cube2[i]
+            if (p, q) == (0, 1):
+                return cube, sign_exp
+            elif (p, q) == (1, 0):
+                return cube, (1 + sign_exp) % 2
+            else:
+                return None, None
+
+        if not self:
+            return self
+
+        if self.degree is None:
+            raise TypeError(f'only for homogeneous elements')
+
+        answer = self.zero()
+        for k, v in self.items():
+            for inds in combinations(range(self.dimension), self.arity - 1):
+                skip = False
+                for i, (cube1, cube2) in zip(inds, pairwise(k)):
+                    if (is_zero(cube1.intervals, i) or
+                            is_zero(i, cube2.intervals)):
+                        skip = True
+                        break
+                if not skip:
+                    non_zero = True
+                    sign_exp = 0
+                    cube = k[0]
+                    for i, next_cube in zip(inds, k[1:]):
+                        cube, sign_exp = _join(i, cube, next_cube, sign_exp)
+                        if cube is None:
+                            non_zero = False
+                            break
+                    if non_zero:
+                        answer += answer.create({(cube, ): (-1)**sign_exp})
+
+        return answer
+
+
+class CubicalEilenbergZilber:
+    '''..'''
+
+    def standard_element(n, torsion=None):
+        '''...'''
+        return CubicalEilenbergZilber_element({((2,) * n, ): 1}, torsion=torsion)
 
 
 if __name__ == "__main__":

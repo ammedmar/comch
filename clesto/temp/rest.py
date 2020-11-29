@@ -1,6 +1,4 @@
-from module import Module_element
-from symmetric import SymmetricGroup_element, SymmetricModule_element
-from surjection import Surjection_element
+from clesto import *
 from _utils import partitions
 
 from itertools import chain, combinations, product

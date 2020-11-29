@@ -202,7 +202,7 @@ class EilenbergZilber_element(Module_element):
         --------
 
         # chain map check:
-        
+
         >>> x = EilenbergZilber_element({((0, 1, 2), ): 1})
         >>> dx = x.boundary()
         >>> dx.iterated_diagonal(3) == x.iterated_diagonal(3).boundary()
@@ -230,6 +230,10 @@ class EilenbergZilber_element(Module_element):
 
 class EilenbergZilber():
     '''Class producing Eilenberg-Zilber elements of special interest.'''
+
+    def standard_element(n, torsion=None):
+        return EilenbergZilber_element({(tuple(range(n + 1)), ): 1},
+                                       torsion=torsion)
 
     def boundary_element(n, torsion=None):
         '''...'''

@@ -4,7 +4,7 @@ from symmetric import SymmetricGroup_element, \
 from barratt_eccles import BarrattEccles_element, BarrattEccles
 from surjection import Surjection_element, Surjection
 from simplicial import Simplex, EilenbergZilber, EilenbergZilber_element
-from cubical import CubicalEilenbergZilber_element
+from cubical import CubicalEilenbergZilber_element, CubicalEilenbergZilber
 
 __all__ = [
     'Module_element',
@@ -19,5 +19,6 @@ __all__ = [
     'Simplex',
     'EilenbergZilber',
     'EilenbergZilber_element',
-    'CubicalEilenbergZilber_element'
+    'CubicalEilenbergZilber_element',
+    'CubicalEilenbergZilber'
 ]

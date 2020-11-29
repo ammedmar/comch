@@ -324,7 +324,9 @@ class Surjection_element(Module_element):
         return answer
 
     def __call__(self, other):
-        '''...
+        '''Action on an basis element in the normalized chains of a standard
+        cube or simplex represented by an arity 1 element in the (cubical)
+        Eilenberg-Zilber operad.
 
         '''
         if not self or not other:

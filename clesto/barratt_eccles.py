@@ -3,7 +3,7 @@ from symmetric import SymmetricGroup_element, SymmetricModule_element,\
     ArityError, SymmetricModule
 from surjection import Surjection_element
 from _utils import partitions
-from itertools import chain
+from itertools import chain, product
 
 
 class BarrattEccles_element(Module_element):

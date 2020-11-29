@@ -138,8 +138,8 @@ class CubicalEilenbergZilber_element(Module_element):
             cube = k[0]
             intervals = cube.intervals
             base = [i for idx, i in enumerate(cube) if idx not in intervals]
-            for p in product(range(n), repeat=self.degree):
-                multibase = [list(base) for _ in range(n)]
+            for p in product(range(n + 1), repeat=self.degree):
+                multibase = [list(base) for _ in range(n + 1)]
                 for idx, fixed in enumerate(p):
                     at = intervals[idx]
                     for i, new_base in enumerate(multibase):
@@ -169,11 +169,11 @@ class CubicalEilenbergZilber_element(Module_element):
             '''Two conditions need to be satisfied for a triple
             (cube1, cube2, i) give a nonzero i-join: no intervals
             in cube1 can have indices greater or equal to i, and
-            no intervals in cube2 can have indices less than or 
+            no intervals in cube2 can have indices less than or
             equal to i.
 
             '''
-            if not left or not right:
+            if left == tuple() or right == tuple():
                 return False
             if isinstance(right, int):
                 return right <= max(left)
@@ -181,7 +181,7 @@ class CubicalEilenbergZilber_element(Module_element):
                 return left >= min(right)
 
         def _join(i, cube1, cube2, sign_exp):
-            '''the i-th join keeping track of signs.
+            '''the i-th elementary join keeping track of signs.
 
             '''
             cube = Cube(cube1[:i] + (2,) + cube2[i + 1:])
@@ -221,6 +221,14 @@ class CubicalEilenbergZilber_element(Module_element):
                         answer += answer.create({(cube, ): (-1)**sign_exp})
 
         return answer
+
+
+class CubicalEilenbergZilber:
+    '''..'''
+
+    def standard_element(n, torsion=None):
+        '''...'''
+        return CubicalEilenbergZilber_element({((2,) * n, ): 1}, torsion=torsion)
 
 
 if __name__ == "__main__":

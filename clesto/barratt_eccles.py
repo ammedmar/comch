@@ -1,8 +1,8 @@
-from module import Module_element, TorsionError
-from symmetric import SymmetricGroup_element, SymmetricModule_element,\
-    ArityError, SymmetricModule
-from surjection import Surjection_element
-from _utils import partitions
+from .module import Module_element, TorsionError
+from .symmetric import SymmetricGroup_element, ArityError
+from .symmetric import SymmetricModule_element, SymmetricModule
+from .surjection import Surjection_element
+from ._utils import partitions
 from itertools import chain, product
 
 

@@ -1,4 +1,4 @@
-from module import Module_element, TorsionError
+from .module import Module_element, TorsionError
 from itertools import chain, product
 
 

@@ -1,6 +1,6 @@
-from module import Module_element
+from .module import Module_element
+from ._utils import pairwise
 from itertools import combinations, product
-from _utils import pairwise
 
 
 class Cube(tuple):

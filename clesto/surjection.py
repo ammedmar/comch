@@ -1,9 +1,9 @@
-from module import Module_element, TorsionError
-from symmetric import SymmetricGroup_element, \
-    SymmetricModule_element, SymmetricModule, ArityError
-from simplicial import Simplex, EilenbergZilber_element, EilenbergZilber
-from cubical import CubicalEilenbergZilber_element, CubicalEilenbergZilber
-from _utils import pairwise
+from .module import Module_element, TorsionError
+from .symmetric import SymmetricGroup_element, ArityError
+from .symmetric import SymmetricModule_element, SymmetricModule
+from .simplicial import Simplex, EilenbergZilber_element, EilenbergZilber
+from .cubical import CubicalEilenbergZilber_element, CubicalEilenbergZilber
+from ._utils import pairwise
 from itertools import chain, combinations, product
 from operator import itemgetter
 from functools import reduce
@@ -562,5 +562,3 @@ class Surjection():
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
-
-print('done')

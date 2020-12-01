@@ -7,6 +7,7 @@ from ._utils import pairwise
 from itertools import chain, combinations, product
 from operator import itemgetter
 from functools import reduce
+from math import floor, factorial
 
 
 class Surjection_element(Module_element):
@@ -430,7 +431,6 @@ class Surjection():
         degree : int
         degree of the element considered Surj(arity)_degree.
 
-
         Examples
         --------
 
@@ -531,6 +531,38 @@ class Surjection():
             integral_answer.set_torsion(torsion)
         return integral_answer
 
+    def steenrod_operation(p, s, q, bockstein=False):
+        '''Models a chain level representative of P_s or bP_s over the prime p
+        acting on an element of degree n'''
+
+        # input check
+        if not all(isinstance(i, int) for i in {p, s, q}):
+            raise TypeError('initialize with three int p,s,n')
+        if not isinstance(bockstein, bool):
+            raise TypeError('bockstein must be a boolean')
+        if p == 2 and bockstein:
+            raise TypeError('bP only defined for odd primes')
+
+        if p == 2:
+            coeff = 1
+            d = s - q
+            if d < 0:
+                return Surjection_element(torsion=p)
+
+        else:
+            b = int(bockstein)
+            # Serre convention: v(2j)=(-1)^j & v(2j+1)=v(2j)*m! w/ m=(p-1)/2
+            coeff = (-1)**(floor(q / 2) + s)
+            if q / 2 - floor(q / 2):
+                coeff *= factorial((p - 1) / 2)
+            # degree of the element: (2s-q)(p-1)-b
+            d = (2 * s - q) * (p - 1) - b
+            if d < 0:
+                return Surjection_element(torsion=p)
+
+        return int(coeff) * Surjection.steenrod_product(
+            p, d, torsion=p, convention='McClure-Smith')
+
     @staticmethod
     def basis(arity, degree, complexity=None):
         ''' Returns the list of tuples forming the basis of the surjection
@@ -557,8 +589,3 @@ class Surjection():
                 basis.append(s)
 
         return basis
-
-
-if __name__ == "__main__":
-    import doctest
-    doctest.testmod()

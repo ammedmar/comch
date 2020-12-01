@@ -1,5 +1,5 @@
 from .module import Module_element, TorsionError
-from .symmetric import SymmetricModule_element, SymmetricModule, ArityError
+from .symmetric import SymmetricModule_element, ArityError
 from ._utils import pairwise
 from itertools import chain, product, combinations_with_replacement
 
@@ -71,6 +71,28 @@ class EilenbergZilber_element(Module_element):
         string = super().__str__()
         return string.replace(', ', ',')
 
+    def _latex_(self):
+        '''Representation in Latex.
+
+        Example
+        -------
+
+        >>> x = EilenbergZilber_element({((0,), (0, 1, 2)): 1, \
+                                       ((0, 1), (1, 2)): 1, \
+                                       ((0, 1, 2), (2,)): 1})
+        >>> print(x._latex_())
+        [0] \otimes [0,1,2] + [0,1] \otimes [1,2] + [0,1,2] \otimes [2]
+
+        '''
+        string = str(self)
+        string = string.replace(',),(', '] \otimes [')
+        string = string.replace('),(', '] \otimes [')
+        string = string.replace('((', '[')
+        string = string.replace(',))', ']').replace('),)', ']')
+        string = string.replace('))', ']')
+
+        return string
+
     def create(self, data=None):
         '''...'''
         return type(self)(data, torsion=self.torsion,
@@ -122,7 +144,7 @@ class EilenbergZilber_element(Module_element):
 
         # chain map checks:
 
-        >>> rho = SymmetricModule.rotation_element(3)
+        >>> rho = SymmetricModule_element({(2, 3, 1): 1})
         >>> elmt = EilenbergZilber_element({((0, 1), (0,), (0, 1, 2, 3)): 1})
         >>> x, y = (rho * elmt).boundary(), rho * elmt.boundary()
         >>> x == y
@@ -255,8 +277,3 @@ class EilenbergZilber():
             new_k = (spx[:i], spx[i - 1:])
             answer += answer.create({new_k: 1})
         return answer
-
-
-if __name__ == "__main__":
-    import doctest
-    doctest.testmod()

@@ -176,8 +176,3 @@ class Module_element(Counter):
         '''...'''
         for k, v in self.items():
             yield self.create({k: v})
-
-
-if __name__ == "__main__":
-    import doctest
-    doctest.testmod()

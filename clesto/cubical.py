@@ -1,6 +1,6 @@
-from module import Module_element
+from .module import Module_element
+from ._utils import pairwise
 from itertools import combinations, product
-from _utils import pairwise
 
 
 class Cube(tuple):
@@ -51,7 +51,28 @@ class CubicalEilenbergZilber_element(Module_element):
 
     def __str__(self):
         string = super().__str__()
-        return string.replace(', ', ',').replace('2', 'e')
+        return string.replace(', ', ',')
+
+    def _latex_(self):
+        '''Representation in Latex.
+
+        Example
+        -------
+
+        >>> x = CubicalEilenbergZilber_element({((2,), (1,)): 1, ((0,), (2,)): 1})
+        >>> print(x._latex_())
+        [01] \otimes 1 + 0 \otimes [01]
+
+        '''
+        string = str(self)
+        string = string.replace(',2', '[01]').replace('2,', '[01]')
+        string = string.replace(',),(', ' \otimes ')
+        string = string.replace('),(', ' \otimes ')
+        string = string.replace(')', '').replace('((', '')
+        string = string.replace(')', '').replace('))', '')
+        string = string.replace(',', '')
+
+        return string
 
     @property
     def arity(self):
@@ -229,8 +250,3 @@ class CubicalEilenbergZilber:
     def standard_element(n, torsion=None):
         '''...'''
         return CubicalEilenbergZilber_element({((2,) * n, ): 1}, torsion=torsion)
-
-
-if __name__ == "__main__":
-    import doctest
-    doctest.testmod()

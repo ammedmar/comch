@@ -1,9 +1,10 @@
-from module import Module_element, TorsionError
-from symmetric import SymmetricGroup_element, SymmetricModule_element,\
-    ArityError, SymmetricModule
-from surjection import Surjection_element
-from _utils import partitions
+from .module import Module_element, TorsionError
+from .symmetric import SymmetricGroup_element, ArityError
+from .symmetric import SymmetricModule_element, SymmetricModule
+from .surjection import Surjection_element
+from ._utils import partitions
 from itertools import chain, product
+from math import floor, factorial
 
 
 class BarrattEccles_element(Module_element):
@@ -337,8 +338,3 @@ class BarrattEccles():
         if torsion:
             integral_answer.set_torsion(torsion)
         return integral_answer
-
-
-if __name__ == "__main__":
-    import doctest
-    doctest.testmod()

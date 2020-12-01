@@ -1,4 +1,4 @@
-from module import Module_element, TorsionError
+from .module import Module_element, TorsionError
 from itertools import chain, product
 
 
@@ -302,8 +302,3 @@ class SymmetricModule():
         for i in range(arity):
             answer += rho**i
         return answer
-
-
-if __name__ == "__main__":
-    import doctest
-    doctest.testmod()

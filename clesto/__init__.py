@@ -1,8 +1,7 @@
-from .module import Module_element
-
-from .symmetric import SymmetricGroup_element
-from .symmetric import SymmetricModule
-from .symmetric import SymmetricModule_element
+from .basics import Module_element
+from .basics import SymmetricGroup_element
+from .basics import SymmetricModule
+from .basics import SymmetricModule_element
 
 from .barratt_eccles import BarrattEccles
 from .barratt_eccles import BarrattEccles_element
@@ -10,13 +9,13 @@ from .barratt_eccles import BarrattEccles_element
 from .surjection import Surjection
 from .surjection import Surjection_element
 
-from .simplicial import Simplex
-from .simplicial import EilenbergZilber
-from .simplicial import EilenbergZilber_element
+from .eilenberg_zilber import Simplex
+from .eilenberg_zilber import EilenbergZilber
+from .eilenberg_zilber import EilenbergZilber_element
 
-from .cubical import Cube
-from .cubical import CubicalEilenbergZilber
-from .cubical import CubicalEilenbergZilber_element
+from .eilenberg_zilber import Cube
+from .eilenberg_zilber import CubicalEilenbergZilber
+from .eilenberg_zilber import CubicalEilenbergZilber_element
 
 __all__ = [
     'Module_element',

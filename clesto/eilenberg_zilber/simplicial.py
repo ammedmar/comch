@@ -1,6 +1,6 @@
-from .module import Module_element, TorsionError
-from .symmetric import SymmetricModule_element, ArityError
-from ._utils import pairwise
+from ..basics import Module_element, TorsionError
+from ..basics import SymmetricModule_element, ArityError
+from ..utils import pairwise
 from itertools import chain, product, combinations_with_replacement
 
 

@@ -1,6 +1,11 @@
 # notebooks
 .ipynb_checkpoints
+
+# Compiled python modules.
+*.pyc
+
 # cache
-clesto/__pycache__
+__pycache__/
+
 .DS_Store
 *.pkl

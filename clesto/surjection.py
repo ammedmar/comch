@@ -11,7 +11,9 @@ from math import floor, factorial
 
 
 class Surjection_element(Module_element):
-    '''...'''
+    '''...
+
+    '''
 
     def __init__(self, data=None, torsion=None, convention='Berger-Fresse'):
         '''...'''
@@ -492,7 +494,8 @@ class Surjection():
                 return p(p(surj, iterate=iterate - 1))
 
         def s(surj):
-            '''Chain homotopy from the identity to the composition pi.'''
+            '''Chain homotopy from the identity to the composition pi, i.e.
+            id - ip = ds + sd'''
 
             answer = surj.zero()
             for k, v in surj.items():
@@ -500,7 +503,7 @@ class Surjection():
             return answer
 
         def h(surj):
-            '''Chain homotopy from i...i p..p to the identiy in Surj(r)
+            '''Chain homotopy from the identiy to i...i p..p in Surj(r)
             realizing its contractibility to Surj(1).
 
             '''
@@ -514,19 +517,19 @@ class Surjection():
             1: SymmetricModule.transposition_element(arity)
         }
 
-        def _psi(arity, degree, convention=convention):
-            '''Recursive definition over the integers.'''
+        def psi(arity, degree, convention=convention):
+            '''Recursive definition of the steenrod product over the integers.'''
 
             if degree == 0:
                 return Surjection_element({tuple(range(1, arity + 1)): 1},
                                           convention=convention)
             else:
-                previous = _psi(arity, degree - 1, convention=convention)
+                previous = psi(arity, degree - 1, convention=convention)
                 acted_on = operators[degree % 2] * previous
                 answer = h(acted_on)
                 return answer
 
-        integral_answer = _psi(arity, degree, convention=convention)
+        integral_answer = psi(arity, degree, convention=convention)
         if torsion:
             integral_answer.set_torsion(torsion)
         return integral_answer

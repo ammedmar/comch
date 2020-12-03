@@ -40,9 +40,9 @@ class Simplex(tuple):
     def is_degenerate(self):
         '''...'''
 
-        has_conse_values = any([i == j for i, j in pairwise(self)])
+        conseq_values = any([i == j for i, j in pairwise(self)])
         empty_simplex = (self.dimension == -1)
-        return empty_simplex or has_conse_values
+        return empty_simplex or conseq_values
 
 
 class EilenbergZilber_element(Module_element):

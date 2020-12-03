@@ -5,7 +5,7 @@ from ..basics import SymmetricModule_element, SymmetricModule
 from ..surjection import Surjection_element
 from ..utils import partitions
 from itertools import chain, product
-from math import floor, factorial
+from math import factorial
 
 
 class BarrattEccles_element(Module_element):

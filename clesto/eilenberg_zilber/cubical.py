@@ -1,12 +1,10 @@
-from .module import Module_element
-from ._utils import pairwise
+from ..basics import Module_element
+from ..utils import pairwise
 from itertools import combinations, product
 
 
 class Cube(tuple):
-    '''...
-
-    '''
+    '''...'''
     intervals: tuple
 
     def __init__(self, data):
@@ -65,6 +63,7 @@ class CubicalEilenbergZilber_element(Module_element):
 
         '''
         string = str(self)
+        string = string.replace('1', '[1]').replace('0', '[0]')
         string = string.replace(',2', '[01]').replace('2,', '[01]')
         string = string.replace(',),(', ' \otimes ')
         string = string.replace('),(', ' \otimes ')

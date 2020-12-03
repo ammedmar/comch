@@ -435,6 +435,13 @@ class Surjection_element(Module_element):
             return tuple(tuple(std.difference(set(spx)))
                          for spx in multisimplex.values())
 
+        def cut2multispx(cut, n):  # added by me
+            '''...'''
+            multisimplex = {i: Simplex() for i in range(1, max(surj) + 1)}
+            for i, pair in enumerate(pairwise(cut)):
+                multisimplex[surj[i]] += Simplex(range(pair[0], pair[1] + 1))
+            return tuple(multisimplex.values())
+
         def cut_sign(cut, surj):
 
             class LeveledInterval:
@@ -475,7 +482,7 @@ class Surjection_element(Module_element):
 
             return (-1)**((position_sign_exp + perm_sign_exp) % 2)
 
-        answer = EilenbergZilber_element().copy_attrs_from(self)
+        answer = Module_element(torsion=self.torsion)
         for surj, coeff in self.items():
             const = set(constraints(surj))
             k = len(surj) - 1
@@ -483,9 +490,12 @@ class Surjection_element(Module_element):
                          if good_cut(cut + (n,), const))
             for cut in good_cuts:
                 sign = cut_sign(cut, surj)
-                multiop = cut2multioperator(cut, n)
-                answer += EilenbergZilber_element(
-                    {multiop: sign * coeff}).copy_attrs_from(answer)
+                # by Djian
+                # multiop = cut2multioperator(cut, n)
+                # answer += answer.create({multiop: sign * coeff})
+                # by me
+                multispx = cut2multispx(cut, n)
+                answer += answer.create({multispx: sign * coeff})
         return answer
 
     def _index_occurence(value, n, sequence):

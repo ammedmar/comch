@@ -1,8 +1,9 @@
-from .module import Module_element, TorsionError
-from .symmetric import SymmetricGroup_element, ArityError
-from .symmetric import SymmetricModule_element, SymmetricModule
-from .surjection import Surjection_element
-from ._utils import partitions
+from ..basics import Module_element, TorsionError
+from ..basics import SymmetricGroup_element, ArityError
+from ..basics import SymmetricModule_element, SymmetricModule
+
+from ..surjection import Surjection_element
+from ..utils import partitions
 from itertools import chain, product
 from math import floor, factorial
 

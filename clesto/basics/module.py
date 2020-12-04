@@ -166,7 +166,9 @@ class Module_element(Counter):
 
     def create(self, other=None):
         '''...'''
-        return type(self)(other, torsion=self.torsion)
+        answer = type(self)(other)
+        answer.__dict__ = self.__dict__
+        return answer
 
     def zero(self):
         '''...'''

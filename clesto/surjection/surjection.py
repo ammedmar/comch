@@ -13,12 +13,11 @@ from math import floor, factorial
 
 
 class Surjection_element(Module_element):
-    '''...
+    """...
 
-    '''
+    """
 
-    def __init__(self, data=None, torsion=None, convention='Berger-Fresse'):
-        '''...'''
+    def __init__(self, data=None, torsion=None, convention='McClure-Smith'):
         # check input data: dict with tuple of int keys
         if data:
             if not (isinstance(data, dict)
@@ -42,19 +41,20 @@ class Surjection_element(Module_element):
         string = super().__str__()
         return string.replace(', ', ',')
 
-    def zero(self):
-        '''...'''
-        return type(self)(torsion=self.torsion,
-                          convention=self.convention)
-
-    def create(self, other):
-        '''...'''
-        return type(self)(other, torsion=self.torsion,
-                          convention=self.convention)
-
     @property
     def arity(self):
-        '''...'''
+        """Returns the arity of self, defined as None if self is not
+        homogeneous.
+
+        The arity of a basis surjection agrees with the max value it attains.
+
+        Example
+        -------
+
+        >>> Surjection_element({(1,2,1,3,1): 1}).arity
+        3
+
+        """
         if not self:
             return None
         arities = set(max(surj) for surj in self.keys())
@@ -64,7 +64,19 @@ class Surjection_element(Module_element):
 
     @property
     def degree(self):
-        '''...'''
+        """Returns the degree of self, defined as None if self is not
+        homogeneous.
+
+        The degree of a basis surjection agrees with the cardinality of its
+        domain minus its arity.
+
+        Example
+        -------
+
+        >>> Surjection_element({(1,2,1,3,1): 1}).arity
+        3
+
+        """
         if not self:
             return None
         degs = set(len(surj) - max(surj) for surj in self.keys())
@@ -74,46 +86,39 @@ class Surjection_element(Module_element):
 
     @property
     def complexity(self):
-        '''returns the complexity of an element in the Surjection operad
+        """Returns the complexity of self, defined as None if self is
+        not homogeneous.
 
-        >>> Surjection_element({(1, 2, 1, 3, 1, 3, 2, 3): 1}).complexity
-        3
-        >>> Surjection_element({(1, 2, 1):1, (1, 2): 1}).complexity
-        2
+        For elements in arity 2, the complexity agrees with the degree. For higher
+        arity elements, it is the max of its arity 2 components.
 
-        '''
+        Example
+        -------
+
+        >>> Surjection_element({(1,2,1,3,1): 1}).complexity
+        1
+
+        """
         complexities = [0]
         for surjection in self.keys():
             for i, j in combinations(range(1, max(surjection) + 1), 2):
                 r = tuple(k for k in surjection if k == i or k == j)
-                cpxty = len([p for p, q in pairwise(r) if p != q])
+                cpxty = len([p for p, q in pairwise(r) if p != q]) - 1
                 complexities.append(cpxty)
 
         return max(complexities)
 
     def boundary(self):
-        '''boundary of self
+        """boundary of self, sign convention determined by attribute convention.
 
-        >>> s = Surjection_element({(1,2,1,3,1,3,2,3): 1}, torsion=2)
+        Example
+        -------
+
+        >>> s = Surjection_element({(1,2,1,3,1,3): 1})
         >>> print(s.boundary())
-        (2,1,3,1,3,2,3) + (1,2,3,1,3,2,3) + (1,2,1,3,1,2,3) + (1,2,1,3,1,3,2)
-        >>> print(s.boundary().boundary())
-        0
+        (2,1,3,1,3) - (1,2,3,1,3) - (1,2,1,3,1)
 
-        >>> s = Surjection_element({(1,2,1,3,1,3,2,3): 1})
-        >>> print(s.boundary())
-        (2,1,3,1,3,2,3) + (1,2,3,1,3,2,3) + (1,2,1,3,1,2,3) - (1,2,1,3,1,3,2)
-        >>> print(s.boundary().boundary())
-        0
-
-        >>> s = Surjection_element({(1,2,1,3,1,3,2,3): 1},
-        ...                        convention='McClure-Smith')
-        >>> print(s.boundary())
-        (2,1,3,1,3,2,3) - (1,2,3,1,3,2,3) + (1,2,1,3,1,2,3) - (1,2,1,3,1,3,2)
-        >>> print(s.boundary().boundary())
-        0
-
-        '''
+        """
         answer = self.zero()
 
         if self.torsion == 2:
@@ -159,25 +164,18 @@ class Surjection_element(Module_element):
         return answer
 
     def __rmul__(self, other):
-        '''Left action by the appropriate symmetric group ring.
+        """Left action by elements in the symmetric group ring of the same
+        arity and torsion.
 
-        # chain map checks:
+        Example
+        -------
 
-        >>> rho = SymmetricRing.rotation_element(3)
-        >>> surj = Surjection_element({(1, 2, 3, 1, 2): 1}, \
-                                       convention='Berger-Fresse')
-        >>> x, y = (rho * surj).boundary(), rho * surj.boundary()
-        >>> x == y
-        True
+        >>> rho = SymmetricRing_element({(2,3,1): 1})
+        >>> surj = Surjection_element({(1,2,3,1,2): 1})
+        >>> print(rho * surj)
+        (2,3,1,2,3)
 
-        >>> rho = SymmetricRing.rotation_element(3)
-        >>> surj = Surjection_element({(1, 2, 3, 1, 3): 1}, \
-                                       convention='McClure-Smith')
-        >>> x, y = (rho * surj).boundary(), rho * surj.boundary()
-        >>> x == y
-        True
-
-        '''
+        """
         def sign(perm, surj, convention):
             if convention == 'Berger-Fresse':
                 return 1
@@ -216,20 +214,21 @@ class Surjection_element(Module_element):
         return answer
 
     def orbit(self, representation='trivial'):
-        ''' Returns the preferred element in the symmetric orbit of an element
+        """ Returns the preferred element in the symmetric orbit of an element.
 
-        >>> s = Surjection_element({(1, 3, 2): 1})
+        The preferred representative of in a class containing a basis surjection,
+        is the surjection where the first occurence of each integer is increasing.
+
+        Example
+        -------
+
+        >>> s = Surjection_element({(1,3,2): 1})
         >>> print(s.orbit(representation='trivial'))
         (1,2,3)
         >>> print(s.orbit(representation='sign'))
         - (1,2,3)
 
-        >>> s = Surjection_element({(2, 1, 2, 1): 1}, \
-                                    convention='McClure-Smith')
-        >>> print(s.orbit())
-        - (1,2,1,2)
-
-        '''
+        """
         def sign(permutation, representation):
             if representation == 'trivial':
                 return 1
@@ -249,41 +248,35 @@ class Surjection_element(Module_element):
         return answer
 
     def __call__(self, other):
-        '''Action on an basis element in the normalized chains of a standard
+        """Action on an element in the normalized chains of a standard
         cube or simplex represented by an arity 1 element in the (cubical)
         Eilenberg-Zilber operad.
 
         Examples
         --------
 
-        # chain map check
+        >>> from clesto.eilenberg_zilber import EilenbergZilber
+        >>> s = Surjection_element({(1,2,1):1})
+        >>> x = EilenbergZilber.standard_element(2)
+        >>> print(s(x))
+        - ((0,1,2),(0,1)) + ((0,2),(0,1,2)) - ((0,1,2),(1,2))
 
-        >>> s = Surjection_element({(3, 2, 1, 3, 1, 2): 1},\
-                                       convention='McClure-Smith')
-        >>> x = EilenbergZilber.standard_element(3)
-        >>> ds_x = s.boundary()(x)
-        >>> d_sx = s(x).boundary()
-        >>> sdx = s(x.boundary())
-        >>> d_sx - ((-1)**(s.degree)) * sdx == ds_x
-        True
+        >>> from clesto.eilenberg_zilber import CubicalEilenbergZilber
+        >>> s = Surjection_element({(1,2,1):1})
+        >>> x = CubicalEilenbergZilber.standard_element(2)
+        >>> print(s(x))
+        - ((2,2),(1,2)) + ((2,1),(2,2)) + ((0,2),(2,2)) - ((2,2),(2,0))
 
-        >>> y = EilenbergZilber.standard_element(3)
-        >>> ds_y = s.boundary()(y)
-        >>> d_sy = s(y).boundary()
-        >>> sdy = s(y.boundary())
-        >>> d_sy - ((-1)**(s.degree)) * sdy == ds_y
-        True
-
-        '''
+        """
         def _sign(k1, k2):
-            '''...
-            '''
+            """...
+            """
             def ordering_sign(permu, weights):
-                '''Returns the exponent of the Koszul sign of the given
+                """Returns the exponent of the Koszul sign of the given
                 permutation acting on the elements of degrees given by the
                 list of weights
 
-                '''
+                """
                 sign_exp = 0
                 for idx, j in enumerate(permu):
                     to_add = [weights[permu.index(i)] for
@@ -292,12 +285,12 @@ class Surjection_element(Module_element):
                 return sign_exp % 2
 
             def action_sign(ordered_k1, ordered_weights):
-                '''Given a ordered tuple [1,..,1, 2,...,2, ..., r,...,r]
+                """Given a ordered tuple [1,..,1, 2,...,2, ..., r,...,r]
                 and weights [w_1, w_2, ..., w_{r+d}] of the same length, gives
                 the kozul sign obtained by inserting from the left a weight 1
                 operator between equal consecutive elements.
 
-                '''
+                """
                 sign_exp = 0
                 for idx, (i, j) in enumerate(pairwise(ordered_k1)):
                     if i == j:
@@ -317,7 +310,7 @@ class Surjection_element(Module_element):
             return (-1)**sign_exp
 
         def _simplicial(self, other):
-            '''...'''
+            """..."""
             answer = other.zero()
             pre_join = other.iterated_diagonal(self.arity + self.degree - 1)
             for (k1, v1), (k2, v2) in product(self.items(), pre_join.items()):
@@ -341,7 +334,7 @@ class Surjection_element(Module_element):
             return answer
 
         def _cubical(self, other):
-            '''...'''
+            """..."""
             answer = other.zero()
             pre_join = other.iterated_diagonal(self.arity + self.degree - 1)
             for (k1, v1), (k2, v2) in product(self.items(), pre_join.items()):
@@ -395,8 +388,10 @@ class Surjection_element(Module_element):
             raise NotImplementedError
 
     def _reduce_rep(self):
-        '''Sets to 0 all degenerate surjections.'''
-        # remove non-surjections
+        """Sets to 0 all degenerate surjections.
+
+        """
+        # removes non-surjections
         zeros = list()
         for k in self.keys():
             if set(k) != set(range(1, max(k) + 1)):
@@ -414,12 +409,12 @@ class Surjection_element(Module_element):
 
 
 class Surjection():
-    '''Class producing Surjection elements of special interest.'''
+    """Class producing Surjection elements of special interest."""
 
     @staticmethod
     def steenrod_product(arity, degree, torsion=None,
                          convention='Berger-Fresse'):
-        '''Returns a surjection element representing the Steenrod
+        """Returns a surjection element representing the Steenrod
         product in the given arity and degree.
 
         Constructed recursively by mapping the minimal resolution W(r)
@@ -461,12 +456,12 @@ class Surjection():
         True
 
 
-        '''
+        """
 
         def i(surj, iterate=1):
-            '''Inclusion of Surj(r) into Surj(r+1) by appending 1 at
+            """Inclusion of Surj(r) into Surj(r+1) by appending 1 at
             the start of basis elements and raising the value of all
-            other entries by 1.'''
+            other entries by 1."""
 
             if iterate == 1:
                 answer = surj.zero()
@@ -478,11 +473,11 @@ class Surjection():
                 return i(i(surj, iterate=iterate - 1))
 
         def p(surj, iterate=1):
-            '''Projection of Surj(r) to Surj(r-1) by removing 1
+            """Projection of Surj(r) to Surj(r-1) by removing 1
             from a basis element with only one occurence of value 1
             and substracting 1 from all other entries.
 
-            '''
+            """
             if iterate == 1:
                 answer = surj.zero()
                 for k, v in surj.items():
@@ -496,8 +491,8 @@ class Surjection():
                 return p(p(surj, iterate=iterate - 1))
 
         def s(surj):
-            '''Chain homotopy from the identity to the composition pi, i.e.
-            id - ip = ds + sd'''
+            """Chain homotopy from the identity to the composition pi, i.e.
+            id - ip = ds + sd"""
 
             answer = surj.zero()
             for k, v in surj.items():
@@ -505,10 +500,10 @@ class Surjection():
             return answer
 
         def h(surj):
-            '''Chain homotopy from the identiy to i...i p..p in Surj(r)
+            """Chain homotopy from the identiy to i...i p..p in Surj(r)
             realizing its contractibility to Surj(1).
 
-            '''
+            """
             answer = s(surj)
             for r in range(1, arity - 1):
                 answer += i(s(p(surj, r)), r)
@@ -520,7 +515,7 @@ class Surjection():
         }
 
         def psi(arity, degree, convention=convention):
-            '''Recursive definition of the steenrod product over the integers.'''
+            """Recursive definition of the steenrod product over the integers."""
 
             if degree == 0:
                 return Surjection_element({tuple(range(1, arity + 1)): 1},
@@ -537,8 +532,8 @@ class Surjection():
         return integral_answer
 
     def steenrod_operation(p, s, q, bockstein=False):
-        '''Models a chain level representative of P_s or bP_s over the prime p
-        acting on an element of degree n'''
+        """Models a chain level representative of P_s or bP_s over the prime p
+        acting on an element of degree n"""
 
         # input check
         if not all(isinstance(i, int) for i in {p, s, q}):
@@ -570,19 +565,11 @@ class Surjection():
 
     @staticmethod
     def basis(arity, degree, complexity=None):
-        ''' Returns the list of tuples forming the basis of the surjection
+        """ Returns the list of tuples forming the basis of the surjection
         operad in the given degree, arity and complexity
 
-        >>> basis = sorted(Surjection.basis(3, 5, 3))
-        >>> for s in basis:
-        ...     print(s)
-        (1, 2, 1, 3, 1, 3, 2, 3)
-        (1, 3, 1, 2, 1, 2, 3, 2)
-        (2, 1, 2, 3, 2, 3, 1, 3)
-        (2, 3, 2, 1, 2, 1, 3, 1)
-        (3, 1, 3, 2, 3, 2, 1, 2)
-        (3, 2, 3, 1, 3, 1, 2, 1)
-        '''
+
+        """
 
         if complexity is None:
             complexity = degree + 1

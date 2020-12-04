@@ -1,5 +1,5 @@
 from ..basics import Module_element, TorsionError
-from ..basics import SymmetricModule_element, ArityError
+from ..basics import SymmetricRing_element, ArityError
 from ..utils import pairwise
 from itertools import chain, product, combinations_with_replacement
 
@@ -144,7 +144,7 @@ class EilenbergZilber_element(Module_element):
 
         # chain map checks:
 
-        >>> rho = SymmetricModule_element({(2, 3, 1): 1})
+        >>> rho = SymmetricRing_element({(2, 3, 1): 1})
         >>> elmt = EilenbergZilber_element({((0, 1), (0,), (0, 1, 2, 3)): 1})
         >>> x, y = (rho * elmt).boundary(), rho * elmt.boundary()
         >>> x == y
@@ -164,9 +164,9 @@ class EilenbergZilber_element(Module_element):
         if isinstance(other, int):
             return super().__rmul__(other)
 
-        if not isinstance(other, SymmetricModule_element):
+        if not isinstance(other, SymmetricRing_element):
             raise TypeError(f'right mult. by type int or \
-                SymmetricModule_element not {type(other)}')
+                SymmetricRing_element not {type(other)}')
 
         if self.torsion != other.torsion:
             raise TorsionError

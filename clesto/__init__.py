@@ -1,7 +1,7 @@
 from .basics import Module_element
 from .basics import SymmetricGroup_element
-from .basics import SymmetricModule
-from .basics import SymmetricModule_element
+from .basics import SymmetricRing
+from .basics import SymmetricRing_element
 
 from .barratt_eccles import BarrattEccles
 from .barratt_eccles import BarrattEccles_element
@@ -20,8 +20,8 @@ from .eilenberg_zilber import CubicalEilenbergZilber_element
 __all__ = [
     'Module_element',
     'SymmetricGroup_element',
-    'SymmetricModule_element',
-    'SymmetricModule',
+    'SymmetricRing_element',
+    'SymmetricRing',
     'BarrattEccles_element',
     'BarrattEccles',
     'Surjection_element',

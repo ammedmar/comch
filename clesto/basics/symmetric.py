@@ -97,7 +97,7 @@ class SymmetricGroup_element(tuple):
 
         '''
         if not isinstance(other, SymmetricGroup_element):
-            self = SymmetricModule_element({self: 1}, torsion=other.torsion)
+            self = SymmetricRing_element({self: 1}, torsion=other.torsion)
             return other.__rmul__(self)
 
         if self.arity != other.arity:
@@ -151,7 +151,39 @@ class SymmetricGroup_element(tuple):
             return answer
 
 
-class SymmetricModule_element(Module_element):
+class SymmetricRing():
+    '''Class to produce special elements in the group ring of finite
+    symmetric groups
+
+    '''
+
+    @staticmethod
+    def identity_element(arity, torsion=None):
+        identity = tuple(range(1, arity + 1))
+        return SymmetricRing_element({identity: 1}, torsion=torsion)
+
+    @staticmethod
+    def rotation_element(arity, torsion=None):
+        rho = tuple(range(2, arity + 1)) + (1,)
+        return SymmetricRing_element({rho: 1}, torsion=torsion)
+
+    @staticmethod
+    def transposition_element(arity, torsion=None):
+        rho = tuple(range(2, arity + 1)) + (1,)
+        identity = tuple(range(1, arity + 1))
+        return SymmetricRing_element({rho: 1, identity: -1},
+                                     torsion=torsion)
+
+    @staticmethod
+    def norm_element(arity, torsion=None):
+        rho = SymmetricRing.rotation_element(arity, torsion=torsion)
+        answer = SymmetricRing_element(torsion=torsion)
+        for i in range(arity):
+            answer += rho**i
+        return answer
+
+
+class SymmetricRing_element(Module_element):
     '''Module_element modeling elements in the integral group ring of finite
     symmetric groups.
 
@@ -170,8 +202,8 @@ class SymmetricModule_element(Module_element):
 
             data = {SymmetricGroup_element(k): v for k, v in data.items()}
 
-        super(SymmetricModule_element, self).__init__(data=data,
-                                                      torsion=torsion)
+        super(SymmetricRing_element, self).__init__(data=data,
+                                                    torsion=torsion)
 
     def __str__(self):
         s = super().__str__()
@@ -181,9 +213,9 @@ class SymmetricModule_element(Module_element):
     def arity(self):
         ''' Returns the cardinality of the domain of the involved permutations
 
-        >>> SymmetricModule_element({(5, 2, 4, 3, 1): 1}).arity
+        >>> SymmetricRing_element({(5, 2, 4, 3, 1): 1}).arity
         5
-        >>> SymmetricModule_element({(2, 3, 1): 1, (1, 2): 1}).arity
+        >>> SymmetricRing_element({(2, 3, 1): 1, (1, 2): 1}).arity
 
         '''
         if not self:
@@ -198,10 +230,10 @@ class SymmetricModule_element(Module_element):
     def __mul__(self, other):
         ''' left multiplication by symmetric ring element
 
-        >>> p = SymmetricModule_element({(4, 3, 2, 1): 1, (1, 2, 3, 4): 2})
+        >>> p = SymmetricRing_element({(4, 3, 2, 1): 1, (1, 2, 3, 4): 2})
         >>> print(3 * p)
         3(4,3,2,1) + 6(1,2,3,4)
-        >>> q = SymmetricModule_element({(4, 1, 2, 3): 1})
+        >>> q = SymmetricRing_element({(4, 1, 2, 3): 1})
         >>> print(p * q)
         (1,4,3,2) + 2(4,1,2,3)
 
@@ -210,7 +242,7 @@ class SymmetricModule_element(Module_element):
         if isinstance(other, int):
             return super().__rmul__(other)
 
-        if not isinstance(other, SymmetricModule_element):
+        if not isinstance(other, SymmetricRing_element):
             return other.__rmul__(self)
 
         if self.torsion != other.torsion:
@@ -227,7 +259,7 @@ class SymmetricModule_element(Module_element):
         '''...'''
 
         if times == 0:
-            return SymmetricModule.identity_element(self.arity, self.torsion)
+            return SymmetricRing.identity_element(self.arity, self.torsion)
         answer = self.zero()
         for k, v in self.items():
             answer += self.create({k**times: v})
@@ -237,8 +269,8 @@ class SymmetricModule_element(Module_element):
         '''Operadic composition, read as composition of functions
         x o (y_1, ..., y_r) from right to left.
 
-        >>> x = SymmetricModule_element({(2, 3, 1): 1, (1, 2, 3): -1})
-        >>> y = SymmetricModule_element({(2, 1): 1, (1, 2): 1})
+        >>> x = SymmetricRing_element({(2, 3, 1): 1, (1, 2, 3): -1})
+        >>> y = SymmetricRing_element({(2, 1): 1, (1, 2): 1})
         >>> print(x.compose(y, 2))
         (3,2,4,1) + (2,3,4,1) - (1,3,2,4) - (1,2,3,4)
 
@@ -270,35 +302,3 @@ class SymmetricModule_element(Module_element):
             for idx, other in reversed(list(enumerate(others))):
                 answer = answer.compose(other, idx + 1)
             return answer
-
-
-class SymmetricModule():
-    '''Class to produce special elements in the group ring of finite
-    symmetric groups
-
-    '''
-
-    @staticmethod
-    def identity_element(arity, torsion=None):
-        identity = tuple(range(1, arity + 1))
-        return SymmetricModule_element({identity: 1}, torsion=torsion)
-
-    @staticmethod
-    def rotation_element(arity, torsion=None):
-        rho = tuple(range(2, arity + 1)) + (1,)
-        return SymmetricModule_element({rho: 1}, torsion=torsion)
-
-    @staticmethod
-    def transposition_element(arity, torsion=None):
-        rho = tuple(range(2, arity + 1)) + (1,)
-        identity = tuple(range(1, arity + 1))
-        return SymmetricModule_element({rho: 1, identity: -1},
-                                       torsion=torsion)
-
-    @staticmethod
-    def norm_element(arity, torsion=None):
-        rho = SymmetricModule.rotation_element(arity, torsion=torsion)
-        answer = SymmetricModule_element(torsion=torsion)
-        for i in range(arity):
-            answer += rho**i
-        return answer

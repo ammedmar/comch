@@ -1,6 +1,6 @@
 from ..basics import Module_element, TorsionError
 from ..basics import SymmetricGroup_element, ArityError
-from ..basics import SymmetricModule_element, SymmetricModule
+from ..basics import SymmetricRing_element, SymmetricRing
 
 from ..surjection import Surjection_element
 from ..utils import partitions
@@ -116,7 +116,7 @@ class BarrattEccles_element(Module_element):
         if isinstance(other, int):
             return super().__rmul__(other)
 
-        if not isinstance(other, SymmetricModule_element):
+        if not isinstance(other, SymmetricRing_element):
             raise NotImplementedError
 
         if self.torsion != other.torsion:
@@ -190,9 +190,9 @@ class BarrattEccles_element(Module_element):
                     for path in _paths(p, q):
                         new_perm_vect = ()
                         for i, j in path:
-                            perm1 = SymmetricModule_element(
+                            perm1 = SymmetricRing_element(
                                 {perm_vect1[i]: 1}, torsion=self.torsion)
-                            perm2 = SymmetricModule_element(
+                            perm2 = SymmetricRing_element(
                                 {perm_vect2[j]: 1}, torsion=self.torsion)
                             partial_comp = perm1.compose(perm2, k)
                             new_perm_vect += (tuple(partial_comp.keys())[0],)
@@ -268,7 +268,7 @@ class BarrattEccles_element(Module_element):
         answer = BarrattEccles_element(torsion=self.torsion)
         for k, v in self.items():
             inverse = tuple(k[0].index(i + 1) + 1 for i in range(len(k[0])))
-            permutation = SymmetricModule_element({inverse: 1}, torsion=self.torsion)
+            permutation = SymmetricRing_element({inverse: 1}, torsion=self.torsion)
             if representation == 'sign':
                 permutation = sign(k[0]) * permutation
             answer += permutation * BarrattEccles_element({k: v}, torsion=self.torsion)
@@ -303,13 +303,13 @@ class BarrattEccles():
 
         # chain map checks:
 
-        >>> t = SymmetricModule.transposition_element(6)
+        >>> t = SymmetricRing.transposition_element(6)
         >>> x = BarrattEccles.steenrod_product(6, 3).boundary()
         >>> y = t * BarrattEccles.steenrod_product(6, 2)
         >>> print(x == y)
         True
 
-        >>> n = SymmetricModule.norm_element(5, torsion=7)
+        >>> n = SymmetricRing.norm_element(5, torsion=7)
         >>> x = BarrattEccles.steenrod_product(5, 6, torsion=7).boundary()
         >>> y = n * BarrattEccles.steenrod_product(5, 5, torsion=7)
         >>> print(x == y)
@@ -318,8 +318,8 @@ class BarrattEccles():
         '''
 
         operators = {
-            0: SymmetricModule.norm_element(arity),
-            1: SymmetricModule.transposition_element(arity)
+            0: SymmetricRing.norm_element(arity),
+            1: SymmetricRing.transposition_element(arity)
         }
 
         def _psi(arity, degree):

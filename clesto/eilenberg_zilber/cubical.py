@@ -59,7 +59,7 @@ class CubicalEilenbergZilber_element(Module_element):
 
         >>> x = CubicalEilenbergZilber_element({((2,), (1,)): 1, ((0,), (2,)): 1})
         >>> print(x._latex_())
-        [01] \otimes 1 + 0 \otimes [01]
+        [01] \otimes [1] + [0] \otimes [01]
 
         '''
         string = str(self)

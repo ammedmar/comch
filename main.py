@@ -1,18 +1,15 @@
 # Run tests
 # ---------
 
-# import doctest
-# import clesto
-# doctest.testmod(clesto.module)
-# doctest.testmod(clesto.symmetric)
-# doctest.testmod(clesto.barratt_eccles)
-# doctest.testmod(clesto.surjection)
-# doctest.testmod(clesto.simplicial)
-# doctest.testmod(clesto.cubical)
-# print('tests passed')
+import doctest
+import clesto
+doctest.testmod(clesto.basics.module)
+doctest.testmod(clesto.basics.symmetric)
+doctest.testmod(clesto.barratt_eccles)
+doctest.testmod(clesto.surjection)
+doctest.testmod(clesto.eilenberg_zilber.simplicial)
+doctest.testmod(clesto.eilenberg_zilber.cubical)
+print('tests passed')
 
 # ------------------------------------------------------------------------------
 from clesto import *
-
-x = CubicalEilenbergZilber_element({((2,), (1,)): 1, ((0,), (2,)): 1})
-print(x._latex_())

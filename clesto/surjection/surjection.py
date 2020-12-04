@@ -1,6 +1,6 @@
 from ..basics import Module_element, TorsionError
 from ..basics import SymmetricGroup_element, ArityError
-from ..basics import SymmetricModule_element, SymmetricModule
+from ..basics import SymmetricRing_element, SymmetricRing
 
 from ..eilenberg_zilber import Simplex, EilenbergZilber_element, EilenbergZilber
 from ..eilenberg_zilber import CubicalEilenbergZilber_element, CubicalEilenbergZilber
@@ -163,14 +163,14 @@ class Surjection_element(Module_element):
 
         # chain map checks:
 
-        >>> rho = SymmetricModule.rotation_element(3)
+        >>> rho = SymmetricRing.rotation_element(3)
         >>> surj = Surjection_element({(1, 2, 3, 1, 2): 1}, \
                                        convention='Berger-Fresse')
         >>> x, y = (rho * surj).boundary(), rho * surj.boundary()
         >>> x == y
         True
 
-        >>> rho = SymmetricModule.rotation_element(3)
+        >>> rho = SymmetricRing.rotation_element(3)
         >>> surj = Surjection_element({(1, 2, 3, 1, 3): 1}, \
                                        convention='McClure-Smith')
         >>> x, y = (rho * surj).boundary(), rho * surj.boundary()
@@ -196,11 +196,11 @@ class Surjection_element(Module_element):
             return super().__rmul__(other)
 
         if isinstance(other, SymmetricGroup_element):
-            return SymmetricModule_element({other: 1}, torsion=self.torsion)
+            return SymmetricRing_element({other: 1}, torsion=self.torsion)
 
-        if not isinstance(other, SymmetricModule_element):
+        if not isinstance(other, SymmetricRing_element):
             raise TypeError(f'right mult. by type int or \
-                SymmetricModule_element not {type(other)}')
+                SymmetricRing_element not {type(other)}')
 
         if self.torsion != other.torsion:
             raise TorsionError
@@ -440,19 +440,19 @@ class Surjection():
 
         # chain map checks:
 
-        >>> t = SymmetricModule.transposition_element(6)
+        >>> t = SymmetricRing.transposition_element(6)
         >>> x = Surjection.steenrod_product(6, 3).boundary()
         >>> y = t * Surjection.steenrod_product(6, 2)
         >>> print(x == y)
         True
 
-        >>> n = SymmetricModule.norm_element(5, torsion=7)
+        >>> n = SymmetricRing.norm_element(5, torsion=7)
         >>> x = Surjection.steenrod_product(5, 6, torsion=7).boundary()
         >>> y = n * Surjection.steenrod_product(5, 5, torsion=7)
         >>> print(x == y)
         True
 
-        >>> t = SymmetricModule.transposition_element(5)
+        >>> t = SymmetricRing.transposition_element(5)
         >>> x = Surjection.steenrod_product(5, 3, \
             convention='McClure-Smith').boundary()
         >>> y = t * Surjection.steenrod_product(5, 2, \
@@ -515,8 +515,8 @@ class Surjection():
             return answer
 
         operators = {
-            0: SymmetricModule.norm_element(arity),
-            1: SymmetricModule.transposition_element(arity)
+            0: SymmetricRing.norm_element(arity),
+            1: SymmetricRing.transposition_element(arity)
         }
 
         def psi(arity, degree, convention=convention):

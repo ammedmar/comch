@@ -21,7 +21,6 @@ class SymmetricGroup_element(tuple):
     '''
 
     def __init__(self, perm):
-        '''...'''
         if set(perm) != set(range(1, len(perm) + 1)):
             raise TypeError('must be a permutations of (1,2,...,r)')
 

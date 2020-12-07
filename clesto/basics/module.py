@@ -14,8 +14,7 @@ class TorsionError(Exception):
 
 
 class Module_element(Counter):
-    '''
-    Counter with arithmetic improvements to handle (modular) integer values.
+    """Counter with arithmetic improvements to handle (modular) integer values.
 
     Class constructed to model free module elements over the ring Z or Z/nZ.
 
@@ -27,13 +26,11 @@ class Module_element(Counter):
     ----------
     torsion : non-negative int or string 'free'.
 
-    '''
+    """
 
     default_torsion = 'free'
 
     def __init__(self, data=None, torsion=None):
-        '''...'''
-
         if torsion is None:
             torsion = type(self).default_torsion
         self.torsion = torsion
@@ -43,7 +40,6 @@ class Module_element(Counter):
         self._reduce_rep()
 
     def __str__(self):
-        '''...'''
         if not self:
             return '0'
         else:
@@ -63,36 +59,40 @@ class Module_element(Counter):
             return answer[:-1]
 
     def __add__(self, other):
-        '''The sum of two free module elements.
+        """The sum of two free module elements.
 
         >>> Module_element({'a': 1, 'b': 2}) + Module_element({'a': 1})
         Module_element({'a': 2, 'b': 2})
 
-        '''
+        """
         if self.torsion != other.torsion:
             raise TorsionError
-        self.update(other)
-        return type(self)(self, torsion=self.torsion)
+        answer = self.create(self)
+        answer.update(other)
+        answer._reduce_rep()
+        return answer
 
     def __sub__(self, other):
-        '''The substraction of two free module elements.
+        """The substraction of two free module elements.
 
         >>> Module_element({'a': 1, 'b': 2}) - Module_element({'a': 1})
         Module_element({'b': 2})
 
-        '''
+        """
         if self.torsion != other.torsion:
             raise TorsionError
-        self.subtract(other)
-        return type(self)(self, torsion=self.torsion)
+        answer = self.create(self)
+        answer.subtract(other)
+        answer._reduce_rep()
+        return answer
 
     def __rmul__(self, c):
-        '''The scaling by c of a free module element.
+        """The scaling by c of a free module element.
 
         >>> 3*Module_element({'a':1, 'b':2})
         Module_element({'b': 6, 'a': 3})
 
-        '''
+        """
         if not isinstance(c, int):
             raise TypeError(f'can not act by non-int of type {type(c)}')
 
@@ -100,23 +100,23 @@ class Module_element(Counter):
         return self.create(scaled)
 
     def __neg__(self):
-        '''The additive inverse of a free module element.
+        """The additive inverse of a free module element.
 
         >>> -Module_element({'a': 1, 'b': 2})
         Module_element({'a': -1, 'b': -2})
 
-        '''
+        """
         return self.__rmul__(-1)
 
     def __iadd__(self, other):
-        '''The in place addition of two free module elements.
+        """The in place addition of two free module elements.
 
         >>> x = Module_element({'a': 1, 'b': 2})
         >>> x += Module_element({'a': 3, 'b': 6})
         >>> x
         Module_element({'b': 8, 'a': 4})
 
-        '''
+        """
         if self.torsion != other.torsion:
             raise TorsionError
         self.update(other)
@@ -124,14 +124,14 @@ class Module_element(Counter):
         return self
 
     def __isub__(self, other):
-        '''The in place addition of two free module elements.
+        """The in place addition of two free module elements.
 
         >>> x = Module_element({'a': 1, 'b': 2})
         >>> x -= Module_element({'a': 3, 'b': 6})
         >>> x
         Module_element({'a': -2, 'b': -4})
 
-        '''
+        """
         if self.torsion != other.torsion:
             raise TorsionError
         self.subtract(other)
@@ -139,7 +139,7 @@ class Module_element(Counter):
         return self
 
     def _reduce_rep(self):
-        '''The preferred representative of the free module element.
+        """The preferred representative of the free module element.
 
         It reduces all values mod n if torsion is n and removes
         key:value pairs with value = 0.
@@ -147,7 +147,7 @@ class Module_element(Counter):
         >>> Module_element({'a': 1, 'b': 2, 'c': 0})
         Module_element({'b': 2, 'a': 1})
 
-        '''
+        """
         # reducing coefficients mod torsion
         if self.torsion != 'free':
             for key, value in self.items():
@@ -159,22 +159,22 @@ class Module_element(Counter):
             del self[key]
 
     def set_torsion(self, torsion):
-        '''...'''
+        """..."""
         setattr(self, 'torsion', torsion)
         self._reduce_rep()
         return self
 
     def create(self, other=None):
-        '''...'''
+        """..."""
         answer = type(self)(other)
         answer.__dict__ = self.__dict__
         return answer
 
     def zero(self):
-        '''...'''
+        """..."""
         return self.create()
 
     def summands(self):
-        '''...'''
+        """..."""
         for k, v in self.items():
             yield self.create({k: v})

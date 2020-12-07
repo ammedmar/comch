@@ -5,7 +5,6 @@ from ..basics import SymmetricRing_element, SymmetricRing
 from ..surjection import Surjection_element
 from ..utils import partitions
 from itertools import chain, product
-from math import factorial
 
 
 class BarrattEccles_element(Module_element):
@@ -95,7 +94,7 @@ class BarrattEccles_element(Module_element):
         return answer
 
     def _reduce_rep(self):
-        '''deletes degenerate keys.
+        '''Returns representative with only non-zero terms.
 
         '''
         for simplex, v in self.items():

@@ -44,7 +44,6 @@ class TestSurjection_element(unittest.TestCase):
         self.assertEqual(b, Surjection_element({(1, 2, 1, 3, 1): -1}))
 
     def test_call(self):
-
         s = self.x
         x = EilenbergZilber.standard_element(3)
         ds_x = s.boundary()(x)
@@ -57,6 +56,18 @@ class TestSurjection_element(unittest.TestCase):
         d_sy = s(y).boundary()
         sdy = s(y.boundary())
         self.assertEqual(d_sy - ((-1)**(s.degree)) * sdy, ds_y)
+
+    def test_compose_bf(self):
+        i = 3
+        x = Surjection_element({(3, 2, 1, 2, 1, 3): 1}, convention='Berger-Fresse')
+        y = Surjection_element({(3, 1, 2, 1, 4, 3): 1}, convention='Berger-Fresse')
+        dx = x.boundary()
+        dy = y.boundary()
+        xy = x.compose(y, i)
+        d_xy = xy.boundary()
+        dx_y = dx.compose(y, i)
+        x_dy = x.compose(dy, i)
+        self.assertEqual(d_xy - dx_y - (-1)**(x.degree) * x_dy, x.zero())
 
 
 if __name__ == '__main__':

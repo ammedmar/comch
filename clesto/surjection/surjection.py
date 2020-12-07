@@ -2,11 +2,13 @@ from ..basics import Module_element, TorsionError
 from ..basics import SymmetricGroup_element, ArityError
 from ..basics import SymmetricRing_element, SymmetricRing
 
-from ..eilenberg_zilber import Simplex, EilenbergZilber_element, EilenbergZilber
-from ..eilenberg_zilber import CubicalEilenbergZilber_element, CubicalEilenbergZilber
+from ..eilenberg_zilber import Simplex, EilenbergZilber_element
+from ..eilenberg_zilber import EilenbergZilber
+from ..eilenberg_zilber import CubicalEilenbergZilber_element
+from ..eilenberg_zilber import CubicalEilenbergZilber
 from ..utils import pairwise
 
-from itertools import chain, combinations, product
+from itertools import chain, combinations, product, combinations_with_replacement
 from operator import itemgetter
 from functools import reduce
 from math import floor, factorial
@@ -216,8 +218,9 @@ class Surjection_element(Module_element):
     def orbit(self, representation='trivial'):
         """ Returns the preferred element in the symmetric orbit of an element.
 
-        The preferred representative of in a class containing a basis surjection,
-        is the surjection where the first occurence of each integer is increasing.
+        The preferred representative in the orbit of basis surjections is the
+        one satisfying that the first occurence of each integer appear in
+        increasing order.
 
         Example
         -------
@@ -387,6 +390,85 @@ class Surjection_element(Module_element):
         else:
             raise NotImplementedError
 
+    def compose(self, other, position):
+        """Returns the partial composition of self and other in position i.
+
+        We think of other being inserted into self and for Berger-Fresse this
+        pair is ordered self tensor other.
+
+        Examples:
+        ---------
+        From [BF] 1.6.2.
+        i = 3
+        >>> x = Surjection_element({(1,2,1,3): 1}, convention='Berger-Fresse')
+        >>> y = Surjection_element({(1,2,1): 1}, convention='Berger-Fresse')
+        >>> print(x.compose(y, 1))
+        (1,3,1,2,1,4) - (1,2,3,2,1,4) - (1,2,1,3,1,4)
+
+        """
+        def bf_sign(p1, k1, p2, k2):
+            """Sign associated to the Berger-Fresse composition."""
+
+            def caesuras(k):
+                """Returns the caesuras of a basis element."""
+                caesuras = []
+                for idx, i in enumerate(k):
+                    if i in k[idx + 1:]:
+                        caesuras.append(idx)
+                return caesuras
+
+            def weights(cae, p):
+                """Returns the weights of the splitting knowing the caesuras."""
+                weights = []
+                for i, j in pairwise(p):
+                    closed_open = len([e for e in cae if i <= e < j])
+                    weights.append(closed_open)
+                return [value % 2 for value in weights]
+
+            p1 = [0] + p1 + [len(k1) - 1]
+            cae1 = caesuras(k1)
+            w1 = weights(cae1, p1)
+            cae2 = caesuras(k2)
+            w2 = weights(cae2, p2)
+            sign_exp = 0
+            for idx, w in enumerate(w2):
+                if w:
+                    sign_exp += sum(w1[idx + 1:]) % 2
+            return (-1) ** sign_exp
+
+        def ms_sign(positions, k1, p, k2):
+            raise NotImplementedError
+
+        answer = self.zero()
+        for (k1, v1), (k2, v2) in product(self.items(), other.items()):
+            positions = [idx for idx, j in enumerate(k1) if j == position]
+            for p in combinations_with_replacement(
+                    range(len(k2)), len(positions) - 1):
+                p = (0,) + p + (len(k2) - 1,)
+                split = []
+                for a, b in pairwise(p):
+                    split.append(tuple(k2[a:b + 1]))
+                to_insert = (tuple(j + position - 1 for j in part) for part in split)
+                new_k = list()
+                for j in k1:
+                    if j < position:
+                        new_k.append(j)
+                    elif j == position:
+                        new_k += next(to_insert)
+                    else:
+                        new_k.append(j + other.arity - 1)
+
+                if self.torsion == 2:
+                    sign = 1
+                elif self.convention == 'Berger-Fresse':
+                    sign = bf_sign(positions, k1, p, k2)
+                else:
+                    sign = ms_sign()
+
+                answer += answer.create({tuple(new_k): v1 * v2 * sign})
+
+        return answer
+
     def _reduce_rep(self):
         """Sets to 0 all degenerate surjections.
 
@@ -413,7 +495,7 @@ class Surjection():
 
     @staticmethod
     def steenrod_product(arity, degree, torsion=None,
-                         convention='Berger-Fresse'):
+                         convention='McClure-Smith'):
         """Returns a surjection element representing the Steenrod
         product in the given arity and degree.
 
@@ -570,7 +652,6 @@ class Surjection():
 
 
         """
-
         if complexity is None:
             complexity = degree + 1
         a, d, c = arity, degree, complexity

@@ -43,7 +43,7 @@ class TestSurjection_element(unittest.TestCase):
         b = self.x.orbit(representation='sign')
         self.assertEqual(b, Surjection_element({(1, 2, 1, 3, 1): -1}))
 
-    def test_call(self):
+    def test_call_simplicial(self):
         s = self.x
         x = EilenbergZilber.standard_element(3)
         ds_x = s.boundary()(x)
@@ -51,6 +51,8 @@ class TestSurjection_element(unittest.TestCase):
         sdx = s(x.boundary())
         self.assertEqual(d_sx - ((-1)**(s.degree)) * sdx, ds_x)
 
+    def test_call_cubical(self):
+        s = self.x
         y = CubicalEilenbergZilber.standard_element(3)
         ds_y = s.boundary()(y)
         d_sy = s(y).boundary()
@@ -59,8 +61,10 @@ class TestSurjection_element(unittest.TestCase):
 
     def test_compose_bf(self):
         i = 3
-        x = Surjection_element({(3, 2, 1, 2, 1, 3): 1}, convention='Berger-Fresse')
-        y = Surjection_element({(3, 1, 2, 1, 4, 3): 1}, convention='Berger-Fresse')
+        x = Surjection_element({(3, 2, 1, 2, 1, 3): 1},
+                               convention='Berger-Fresse')
+        y = Surjection_element({(3, 1, 2, 1, 4, 3): 1},
+                               convention='Berger-Fresse')
         dx = x.boundary()
         dy = y.boundary()
         xy = x.compose(y, i)
@@ -68,6 +72,22 @@ class TestSurjection_element(unittest.TestCase):
         dx_y = dx.compose(y, i)
         x_dy = x.compose(dy, i)
         self.assertEqual(d_xy - dx_y - (-1)**(x.degree) * x_dy, x.zero())
+
+    def test_suspension(self):
+        x = Surjection_element({(1, 3, 2, 1, 2, 3, 4): 1},
+                               convention='Berger-Fresse')
+        y = Surjection_element({(1, 2, 3, 1, 2, 3): 1},
+                               convention='Berger-Fresse')
+        sx = x.suspension()
+        sy = y.suspension()
+        xy = x.compose(y, 1)
+        self.assertEqual(xy.suspension(), sx.compose(sy, 1))
+
+        z = Surjection_element({(1, 2, 1, 3, 1, 2, 3): 1},
+                               convention='Berger-Fresse')
+        sz = z.suspension()
+        xz = x.compose(z, 2)
+        self.assertEqual(xz.suspension(), sx.compose(sz, 1))
 
 
 if __name__ == '__main__':

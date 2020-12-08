@@ -469,6 +469,45 @@ class Surjection_element(Module_element):
 
         return answer
 
+    def suspension(self):
+        """Returns the suspension of a surjection element.
+
+        Given a basis element u in arity r and degree d the suspension is
+        in degree d-r+1 and is 0 if (u(1),...,u(r)) is not a permutation
+        and sgn(u(1),...,u(r)) (u(r),...,u(r+d)) otherwise.
+
+        Example
+        -------
+
+        >>> x = Surjection_element({(1,3,2,1,2):1}, convention='Berger-Fresse')
+        >>> print(x.suspension())
+        - (2,1,2)
+
+
+        """
+        if not self:
+            return self
+
+        if self.arity is None or self.degree is None:
+            raise TypeError('defined for homogeneous elements only')
+
+        if self.convention != 'Berger-Fresse':
+            raise NotImplementedError
+
+        answer = self.zero()
+        for k, v in self.items():
+            nonzero = False
+            try:
+                p = SymmetricGroup_element(k[:self.arity])
+                sign = p.sign
+                nonzero = True
+            except TypeError:
+                pass
+            if nonzero:
+                answer += self.create({k[self.arity - 1:]: v * sign})
+
+        return answer
+
     def _reduce_rep(self):
         """Sets to 0 all degenerate surjections.
 

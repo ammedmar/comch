@@ -3,9 +3,7 @@ from ..basics import SymmetricGroup_element, ArityError
 from ..basics import SymmetricRing_element, SymmetricRing
 
 from ..eilenberg_zilber import Simplex, EilenbergZilber_element
-from ..eilenberg_zilber import EilenbergZilber
 from ..eilenberg_zilber import CubicalEilenbergZilber_element
-from ..eilenberg_zilber import CubicalEilenbergZilber
 from ..utils import pairwise
 
 from itertools import chain, combinations, product, combinations_with_replacement
@@ -36,7 +34,6 @@ class Surjection_element(Module_element):
 
         # initialize element
         self.convention = convention
-
         super(Surjection_element, self).__init__(data=data, torsion=torsion)
 
     def __str__(self):
@@ -272,8 +269,7 @@ class Surjection_element(Module_element):
 
         """
         def _sign(k1, k2):
-            """...
-            """
+            """Returns the sign associated to a pair."""
             def ordering_sign(permu, weights):
                 """Returns the exponent of the Koszul sign of the given
                 permutation acting on the elements of degrees given by the
@@ -313,7 +309,7 @@ class Surjection_element(Module_element):
             return (-1)**sign_exp
 
         def _simplicial(self, other):
-            """..."""
+            """Action on Eilenberg-Zilber elements."""
             answer = other.zero()
             pre_join = other.iterated_diagonal(self.arity + self.degree - 1)
             for (k1, v1), (k2, v2) in product(self.items(), pre_join.items()):
@@ -337,7 +333,7 @@ class Surjection_element(Module_element):
             return answer
 
         def _cubical(self, other):
-            """..."""
+            """Action on cubical Eilenberg-Zilber elements."""
             answer = other.zero()
             pre_join = other.iterated_diagonal(self.arity + self.degree - 1)
             for (k1, v1), (k2, v2) in product(self.items(), pre_join.items()):

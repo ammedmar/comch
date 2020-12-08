@@ -58,6 +58,9 @@ class Module_element(Counter):
 
             return answer[:-1]
 
+    def __hash__(self):
+        return hash(frozenset(self))
+
     def __add__(self, other):
         """The sum of two free module elements.
 

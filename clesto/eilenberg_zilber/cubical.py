@@ -4,7 +4,7 @@ from itertools import combinations, product
 
 
 class Cube(tuple):
-    '''...'''
+    """..."""
     intervals: tuple
 
     def __init__(self, data):
@@ -18,19 +18,19 @@ class Cube(tuple):
         return self.count(2)
 
     def face(self, i, epsilon):
-        '''...'''
+        """..."""
         idx = self.intervals[i]
         answer = self[:idx] + ((epsilon + 1) % 2, ) + self[idx + 1:]
         return Cube(answer)
 
 
 class CubicalEilenbergZilber_element(Module_element):
-    '''...'''
+    """..."""
 
     dimenion: int = None
 
     def __init__(self, data=None, torsion=None):
-        '''...'''
+        """..."""
 
         if data:
             new_data = {}
@@ -52,7 +52,7 @@ class CubicalEilenbergZilber_element(Module_element):
         return string.replace(', ', ',')
 
     def _latex_(self):
-        '''Representation in Latex.
+        """Representation in Latex.
 
         Example
         -------
@@ -61,7 +61,7 @@ class CubicalEilenbergZilber_element(Module_element):
         >>> print(x._latex_())
         [01] \otimes [1] + [0] \otimes [01]
 
-        '''
+        """
         string = str(self)
         string = string.replace('1', '[1]').replace('0', '[0]')
         string = string.replace(',2', '[01]').replace('2,', '[01]')
@@ -75,7 +75,7 @@ class CubicalEilenbergZilber_element(Module_element):
 
     @property
     def arity(self):
-        '''...'''
+        """..."""
         arities = set(len(multicube) for multicube in self.keys())
         if len(arities) != 1:
             return None
@@ -83,14 +83,14 @@ class CubicalEilenbergZilber_element(Module_element):
 
     @property
     def degree(self):
-        '''...'''
+        """..."""
         degs = {sum(cube.dimension for cube in k) for k in self.keys()}
         if len(degs) != 1:
             return None
         return degs.pop()
 
     def boundary(self):
-        '''Boundary of an element in a tensor product of the standard
+        """Boundary of an element in a tensor product of the standard
         chains.
 
         # squares to zero
@@ -99,7 +99,7 @@ class CubicalEilenbergZilber_element(Module_element):
         >>> print(elmt.boundary().boundary())
         0
 
-        '''
+        """
         answer = self.zero()
         for k, v in self.items():
             for idx, cube in enumerate(k):
@@ -113,7 +113,7 @@ class CubicalEilenbergZilber_element(Module_element):
         return answer
 
     def iterated_diagonal(self, n=1):
-        '''Serre chain approximation to the diagonal applied n-times.
+        """Serre chain approximation to the diagonal applied n-times.
 
         Examples
         --------
@@ -126,20 +126,20 @@ class CubicalEilenbergZilber_element(Module_element):
         >>> d_delta_x == delta_d_x
         True
 
-        '''
+        """
         def sign(p):
-            '''Counts the number of pairs appearing in reversed order.
+            """Counts the number of pairs appearing in reversed order.
 
-            '''
+            """
             to_count = filter(lambda x: x[0] > x[1], combinations(p, 2))
             sign_exp = sum(1 for _ in to_count) % 2
             return (-1)**sign_exp
 
         def elementary_summand(fixed, i):
-            '''Models as a function the element 0,...,0,2,1,...,1 appearing
+            """Models as a function the element 0,...,0,2,1,...,1 appearing
             as one of the summands of the iterated diagonal of an interval.
 
-            '''
+            """
             if i < fixed:
                 return 0
             elif i == fixed:
@@ -170,7 +170,7 @@ class CubicalEilenbergZilber_element(Module_element):
         return answer
 
     def join(self):
-        '''Join of an element in the cubical EZ operad thought of
+        """Join of an element in the cubical EZ operad thought of
         as an element in the tensor product, computed using the left
         comb. (I suspect it is associative product though.)
 
@@ -184,15 +184,15 @@ class CubicalEilenbergZilber_element(Module_element):
         >>> print(x.join().boundary() + x.boundary().join())
         ((1,0,0),) - ((0,0,1),)
 
-        '''
+        """
         def is_zero(left, right):
-            '''Two conditions need to be satisfied for a triple
+            """Two conditions need to be satisfied for a triple
             (cube1, cube2, i) give a nonzero i-join: no intervals
             in cube1 can have indices greater or equal to i, and
             no intervals in cube2 can have indices less than or
             equal to i.
 
-            '''
+            """
             if left == tuple() or right == tuple():
                 return False
             if isinstance(right, int):
@@ -201,9 +201,9 @@ class CubicalEilenbergZilber_element(Module_element):
                 return left >= min(right)
 
         def _join(i, cube1, cube2, sign_exp):
-            '''the i-th elementary join keeping track of signs.
+            """the i-th elementary join keeping track of signs.
 
-            '''
+            """
             cube = Cube(cube1[:i] + (2,) + cube2[i + 1:])
             p, q = cube1[i], cube2[i]
             if (p, q) == (0, 1):
@@ -244,8 +244,8 @@ class CubicalEilenbergZilber_element(Module_element):
 
 
 class CubicalEilenbergZilber:
-    '''..'''
+    """.."""
 
     def standard_element(n, torsion=None):
-        '''...'''
+        """..."""
         return CubicalEilenbergZilber_element({((2,) * n, ): 1}, torsion=torsion)

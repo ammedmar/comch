@@ -1,4 +1,4 @@
-from module import Module_element, TorsionError
+from module import Module_element
 from symmetric import SymmetricGroup_element, \
     SymmetricModule_element, SymmetricModule, ArityError
 from _utils import pairwise, decompositions, distinct_permutations

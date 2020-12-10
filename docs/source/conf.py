@@ -30,17 +30,10 @@ release = '0.0.3'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-<<<<<<< HEAD
-    # 'sphinx.ext.napoleon',
+    'sphinx.ext.napoleon',
     'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
     'sphinx.ext.doctest'
-=======
-    'sphinx.ext.autodoc',
-    'sphinx.ext.viewcode',
-    'sphinx.ext.doctest',
-    'sphinx.ext.napoleon'
->>>>>>> master
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -63,14 +56,12 @@ html_theme = 'default'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
-<<<<<<< HEAD
 
+# autodoc options
 autodoc_default_options = {
     'members': True,
     'member-order': 'bysource',
     'special-members': True,
     'undoc-members': True,
-    'exclude-members': '__weakref__, __dict__, __module__, __hash__'
+    'exclude-members': '__weakref__, __dict__, __module__, __hash__, __str__'
 }
-=======
->>>>>>> master

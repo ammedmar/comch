@@ -3,12 +3,12 @@ from operator import add
 
 
 def partitions(n, k, smallest_value=1, largest_value=None, ordered=False):
-    '''n is the integer to partition and k is the length of partitions.
+    """n is the integer to partition and k is the length of partitions.
     It returns all k tuples of integers greater or equal to smallest_value
     and less than or equal to largest_value that add up to n.
     If ordered == True it returns all tuples if False it returns those
     in non-decreassing order
-    '''
+    """
 
     if largest_value is None:
         largest_value = n
@@ -30,14 +30,14 @@ def partitions(n, k, smallest_value=1, largest_value=None, ordered=False):
 
 
 def decompositions(x, k):
-    '''Returns a set with all tuples
+    """Returns a set with all tuples
     (x[:i_1+1], x[i_1: i_2+1], ..., x[i_{k-1}: i_k+1], x[i_k:])
     with i_1 <= i_2 <= ... <= i_k
 
     >>> sorted(decompositions((0, 1), 2))
     [((0,), (0,), (0, 1)), ((0,), (0, 1), (1,)), ((0, 1), (1,), (1,))]
 
-    '''
+    """
     if isinstance(x, int):
         for part in partitions(x + k, k + 1, ordered=True):
             augmented_desuspension = (0,) + tuple(i - 1 for i in part)
@@ -149,7 +149,7 @@ def distinct_permutations(iterable, r=None):
 
 
 def pairwise(iterable):
-    '''s -> (s0,s1), (s1,s2), (s2, s3), ...'''
+    """s -> (s0,s1), (s1,s2), (s2, s3), ..."""
     a, b = tee(iterable)
     next(b, None)
     return zip(a, b)

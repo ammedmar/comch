@@ -1,5 +1,5 @@
-from ..basics import Module_element, TorsionError
-from ..basics import SymmetricGroup_element, ArityError
+from ..basics import Module_element
+from ..basics import SymmetricGroup_element
 from ..basics import SymmetricRing_element, SymmetricRing
 
 from ..eilenberg_zilber import Simplex, EilenbergZilber_element
@@ -200,10 +200,10 @@ class Surjection_element(Module_element):
                 SymmetricRing_element not {type(other)}')
 
         if self.torsion != other.torsion:
-            raise TorsionError
+            raise TypeError('Unequal torsion attribute')
 
         if self.arity != other.arity:
-            raise ArityError
+            raise TypeError('Unequal arity attribute')
 
         answer = self.zero()
         for (k1, v1), (k2, v2) in product(self.items(), other.items()):
@@ -373,7 +373,7 @@ class Surjection_element(Module_element):
             raise TypeError('defined for homogeneous surjections')
 
         if self.torsion != other.torsion:
-            raise TorsionError
+            raise TypeError('Unequal torsion attribute')
 
         if isinstance(other, EilenbergZilber_element):
             if self.convention != 'McClure-Smith':

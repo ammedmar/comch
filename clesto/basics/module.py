@@ -1,16 +1,6 @@
 from collections import Counter
 
 
-class TorsionError(Exception):
-    """Exception raised for unequal torsion atribute.
-
-    """
-
-    def __init__(self, message='unequal torsion attribute'):
-        self.message = message
-        super(TorsionError, self).__init__(message)
-
-
 class Module_element(Counter):
     """Counter with arithmetic improvements to handle (modular) integer values.
 
@@ -34,7 +24,7 @@ class Module_element(Counter):
 
         >>> print(Module_element())
         0
-        >>> print(Module_element({'a': 1, 'b': -1}))
+        >>> print(Module_element({'a': 1, 'b': -1, 'c': 0}))
         a - b
 
         """
@@ -82,7 +72,7 @@ class Module_element(Counter):
 
         """
         if self.torsion != other.torsion:
-            raise TorsionError
+            raise TypeError('Unequal torsion attribute')
         answer = self.create(self)
         answer.update(other)
         answer._reduce_rep()
@@ -96,7 +86,7 @@ class Module_element(Counter):
 
         """
         if self.torsion != other.torsion:
-            raise TorsionError
+            raise TypeError('Unequal torsion attribute')
         answer = self.create(self)
         answer.subtract(other)
         answer._reduce_rep()
@@ -134,7 +124,7 @@ class Module_element(Counter):
 
         """
         if self.torsion != other.torsion:
-            raise TorsionError
+            raise TypeError('Unequal torsion attribute')
         self.update(other)
         self._reduce_rep()
         return self
@@ -149,7 +139,7 @@ class Module_element(Counter):
 
         """
         if self.torsion != other.torsion:
-            raise TorsionError
+            raise TypeError('Unequal torsion attribute')
         self.subtract(other)
         self._reduce_rep()
         return self
@@ -186,8 +176,8 @@ class Module_element(Counter):
         return self
 
     def create(self, other=None):
-        """Returns an instance of the same type and attribute values
-        of self with the given data.
+        """Instantiates the given data with the same type and attribute values
+        as self.
 
         >>> x =  Module_element({'a': 1})
         >>> x + x.create({'b': 1})

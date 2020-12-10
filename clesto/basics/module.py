@@ -2,13 +2,11 @@ from collections import Counter
 
 
 class TorsionError(Exception):
-    """Exception raised for unequal torsion.
+    """Exception raised for unequal torsion atribute.
 
-    Attributes:
-        message : explanation of the error
     """
 
-    def __init__(self, message='attribute torsion must be the same'):
+    def __init__(self, message='unequal torsion attribute'):
         self.message = message
         super(TorsionError, self).__init__(message)
 
@@ -31,6 +29,15 @@ class Module_element(Counter):
     default_torsion = 'free'
 
     def __init__(self, data=None, torsion=None):
+        """Create a new, empty Module_element object representing 0, and, if given,
+        initialize a Module_element from a dict with integer values.
+
+        >>> print(Module_element())
+        0
+        >>> print(Module_element({'a': 1, 'b': -1}))
+        a - b
+
+        """
         if torsion is None:
             torsion = type(self).default_torsion
         self.torsion = torsion
@@ -40,6 +47,12 @@ class Module_element(Counter):
         self._reduce_rep()
 
     def __str__(self):
+        """Usual representation of elements in a free module over a ring.
+
+        >>> str(Module_element({'a': 1, 'b': -1}))
+        'a - b'
+
+        """
         if not self:
             return '0'
         else:
@@ -62,7 +75,7 @@ class Module_element(Counter):
         return hash(frozenset(self))
 
     def __add__(self, other):
-        """The sum of two free module elements.
+        """The sum of two elements in a free module.
 
         >>> Module_element({'a': 1, 'b': 2}) + Module_element({'a': 1})
         Module_element({'a': 2, 'b': 2})
@@ -76,7 +89,7 @@ class Module_element(Counter):
         return answer
 
     def __sub__(self, other):
-        """The substraction of two free module elements.
+        """The diference of two elements in a free module.
 
         >>> Module_element({'a': 1, 'b': 2}) - Module_element({'a': 1})
         Module_element({'b': 2})
@@ -92,7 +105,7 @@ class Module_element(Counter):
     def __rmul__(self, c):
         """The scaling by c of a free module element.
 
-        >>> 3*Module_element({'a':1, 'b':2})
+        >>> 3 * Module_element({'a':1, 'b':2})
         Module_element({'b': 6, 'a': 3})
 
         """
@@ -105,7 +118,7 @@ class Module_element(Counter):
     def __neg__(self):
         """The additive inverse of a free module element.
 
-        >>> -Module_element({'a': 1, 'b': 2})
+        >>> - Module_element({'a': 1, 'b': 2})
         Module_element({'a': -1, 'b': -2})
 
         """
@@ -162,22 +175,36 @@ class Module_element(Counter):
             del self[key]
 
     def set_torsion(self, torsion):
-        """..."""
+        """Sets the torsion of an element.
+
+        >>> Module_element({'a': 1, 'b': 2}).set_torsion(2)
+        Module_element({'a': 1})
+
+        """
         setattr(self, 'torsion', torsion)
         self._reduce_rep()
         return self
 
     def create(self, other=None):
-        """..."""
+        """Returns an instance of the same type and attribute values
+        of self with the given data.
+
+        >>> x =  Module_element({'a': 1})
+        >>> x + x.create({'b': 1})
+        Module_element({'a': 1, 'b': 1})
+
+        """
         answer = type(self)(other)
         answer.__dict__ = self.__dict__
         return answer
 
     def zero(self):
-        """..."""
-        return self.create()
+        """Returns an instance of the same type and attribute values
+        of self representing 0.
 
-    def summands(self):
-        """..."""
-        for k, v in self.items():
-            yield self.create({k: v})
+        >>> x = Module_element({'a': 1})
+        >>> x + x.zero() == x
+        True
+
+        """
+        return self.create()

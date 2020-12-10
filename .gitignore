@@ -4,10 +4,17 @@
 # Compiled python modules.
 *.pyc
 
+# Built docs
+docs/build
+
 # cache
 __pycache__/
 
+# External
 .DS_Store
+
+# Pickle
 *.pkl
 
+# Development
 dev.py

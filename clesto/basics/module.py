@@ -2,13 +2,11 @@ from collections import Counter
 
 
 class TorsionError(Exception):
-    """Exception raised for unequal torsion.
+    """Exception raised for unequal torsion atribute.
 
-    Attributes:
-        message : explanation of the error
     """
 
-    def __init__(self, message='attribute torsion must be the same'):
+    def __init__(self, message='unequal torsion attribute'):
         self.message = message
         super(TorsionError, self).__init__(message)
 
@@ -162,22 +160,19 @@ class Module_element(Counter):
             del self[key]
 
     def set_torsion(self, torsion):
-        """..."""
+        """Sets the torsion of an element."""
         setattr(self, 'torsion', torsion)
         self._reduce_rep()
         return self
 
     def create(self, other=None):
-        """..."""
+        """Returns an instance of the same type and attribute values
+        of self with the given data."""
         answer = type(self)(other)
         answer.__dict__ = self.__dict__
         return answer
 
     def zero(self):
-        """..."""
+        """Returns an instance of the same type and attribute values
+        of self representing 0."""
         return self.create()
-
-    def summands(self):
-        """..."""
-        for k, v in self.items():
-            yield self.create({k: v})

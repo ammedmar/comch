@@ -3,10 +3,7 @@ from itertools import chain, product
 
 
 class SymmetricGroup_element(tuple):
-    """Tuple modeling bijections of {1,...,r} thought of as elements in
-    the symmetric group with r-elements.
-
-    """
+    """Elements in the symmetric group of r elements."""
 
     def __init__(self, perm):
         """Initializes a SymmetricGroup_element

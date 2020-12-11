@@ -9,10 +9,11 @@ class SymmetricGroup_element(tuple):
     """
 
     def __init__(self, perm):
-        """Initializes as a tuple
+        """Initializes a SymmetricGroup_element
 
-        It demans the result is a permutation of (1,2,...,r) which is
-        thought of as a self-bijection of the set {1,...,r}.
+        Create a SymmetricGroup_element from an iterable representing a
+        permutation of (1,2,...,r) which is thought of as a self-bijection
+        of the set {1,...,r}.
 
         >>> print(SymmetricGroup_element((1,3,2)))
         (1,3,2)
@@ -66,7 +67,7 @@ class SymmetricGroup_element(tuple):
 
     @property
     def arity(self):
-        """Returns the arity of the given symmetric group element
+        """Arity of self
 
         The arity of a symmetric group element is defined as the
         cardinality of its domain.
@@ -78,7 +79,7 @@ class SymmetricGroup_element(tuple):
         return max(self)
 
     def inverse(self):
-        """Inverse of the given symmetric group element.
+        """Multiplicative inverse: self^{-1}.
 
         >>> pi = SymmetricGroup_element((2,3,1))
         >>> print(pi.inverse())
@@ -89,7 +90,7 @@ class SymmetricGroup_element(tuple):
         return SymmetricGroup_element(inverse)
 
     def __mul__(self, other):
-        """Product in the symmetric group: self * other
+        """Product: self * other
 
         This product agrees with the composition of bijections: self o other.
 
@@ -126,8 +127,7 @@ class SymmetricGroup_element(tuple):
         return answer
 
     def compose(self, *others):
-        """Partial and total operadic compositions: self o_i other and
-        self o others.
+        """Operadic compositions: self o_i other or self o others.
 
         >>> x = SymmetricGroup_element((1,3,2))
         >>> y = SymmetricGroup_element((2,1))
@@ -156,16 +156,18 @@ class SymmetricGroup_element(tuple):
 
 
 class SymmetricRing_element(Module_element):
-    """Model elements in the (modular) integral group ring of finite symmetric
-    groups.
+    """Elements in the (modular) integral group ring of finite symmetric groups.
 
     """
 
     def __init__(self, data=None, torsion=None):
-        """Create a new, empty SymmetricRing_element object representing 0, and,
-        if given, initialize a SymmetricRing_element from a dict with integer
-        values and SymmetricGroup_element keys or tuples representing them."""
+        """Initialize a Symmetric ring element
 
+        Create an element representing 0, and, if given, initialize a
+        SymmetricRing_element from a dict with integer values and
+        SymmetricGroup_element keys or tuples representing them.
+
+        """
         if data:
             if not (isinstance(data, dict)
                     and all(isinstance(perm, tuple) for perm in data.keys())
@@ -186,7 +188,7 @@ class SymmetricRing_element(Module_element):
 
     @property
     def arity(self):
-        """Return the arity of self if it is homogeneous and None otherwise.
+        """Return the arity of self if it is homogeneous and None otherwise
 
         self is said to be homogeneous if all basis elements are of the same
         arity.
@@ -206,7 +208,7 @@ class SymmetricRing_element(Module_element):
         return arities.pop()
 
     def __mul__(self, other):
-        """Linear Product in the symmetric group ring: self * other.
+        """Linear product in the symmetric group ring: self * other.
 
         >>> p = SymmetricRing_element({(4,3,2,1): 1, (1,2,3,4): 2})
         >>> print(3 * p)
@@ -236,7 +238,6 @@ class SymmetricRing_element(Module_element):
     def __pow__(self, times):
         """Iterated product of self: self * ... * self.
 
-
         >>> p = SymmetricRing_element({(4,3,2,1): 1, (1,2,3,4): 2})
         >>> p ** 2
         SymmetricRing_element({(1, 2, 3, 4): 3})
@@ -250,8 +251,7 @@ class SymmetricRing_element(Module_element):
         return answer
 
     def compose(self, *others):
-        """Partial and total operadic compositions: self o_i other and
-        self o others extended linearly.
+        """Linear operadic compositions: self o_i other or self o others.
 
         >>> x = SymmetricRing_element({(2,3,1): 1, (1,2,3): -1})
         >>> y = SymmetricRing_element({(2,1): 1, (1,2): 1})
@@ -288,7 +288,7 @@ class SymmetricRing_element(Module_element):
 
 
 class SymmetricRing():
-    """Produce special elements in the group ring of finite symmetric groups
+    """Produce special elements in the group ring of finite symmetric groups.
 
     """
     @staticmethod

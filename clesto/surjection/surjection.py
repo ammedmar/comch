@@ -13,11 +13,18 @@ from math import floor, factorial
 
 
 class Surjection_element(Module_element):
-    """...
+    """Elements in the surjection operad
 
     """
 
     def __init__(self, data=None, torsion=None, convention='McClure-Smith'):
+        """Initialize an instance of Surjection_element
+
+        Create a new, empty Surjection_element object representing 0, and, if given,
+        initialize a Module_element from a dict with tuple of int keys and int values.
+
+
+        """
         # check input data: dict with tuple of int keys
         if data:
             if not (isinstance(data, dict)
@@ -42,13 +49,11 @@ class Surjection_element(Module_element):
 
     @property
     def arity(self):
-        """Returns the arity of self, defined as None if self is not
-        homogeneous.
+        """Arity of self
 
-        The arity of a basis surjection agrees with the max value it attains.
+        Defined as None if self is not homogeneous. The arity of a basis
+        surjection agrees with the max value it attains.
 
-        Example
-        -------
 
         >>> Surjection_element({(1,2,1,3,1): 1}).arity
         3
@@ -63,14 +68,11 @@ class Surjection_element(Module_element):
 
     @property
     def degree(self):
-        """Returns the degree of self, defined as None if self is not
-        homogeneous.
+        """Degree of self
 
-        The degree of a basis surjection agrees with the cardinality of its
-        domain minus its arity.
+        Defined as None if self is not homogeneous. The degree of a basis
+        surjection agrees with the cardinality of its domain minus its arity.
 
-        Example
-        -------
 
         >>> Surjection_element({(1,2,1,3,1): 1}).arity
         3
@@ -91,8 +93,6 @@ class Surjection_element(Module_element):
         For elements in arity 2, the complexity agrees with the degree. For higher
         arity elements, it is the max of its arity 2 components.
 
-        Example
-        -------
 
         >>> Surjection_element({(1,2,1,3,1): 1}).complexity
         1
@@ -109,9 +109,6 @@ class Surjection_element(Module_element):
 
     def boundary(self):
         """boundary of self, sign convention determined by attribute convention.
-
-        Example
-        -------
 
         >>> s = Surjection_element({(1,2,1,3,1,3): 1})
         >>> print(s.boundary())
@@ -166,9 +163,6 @@ class Surjection_element(Module_element):
         """Left action by elements in the symmetric group ring of the same
         arity and torsion.
 
-        Example
-        -------
-
         >>> rho = SymmetricRing_element({(2,3,1): 1})
         >>> surj = Surjection_element({(1,2,3,1,2): 1})
         >>> print(rho * surj)
@@ -219,9 +213,6 @@ class Surjection_element(Module_element):
         one satisfying that the first occurence of each integer appear in
         increasing order.
 
-        Example
-        -------
-
         >>> s = Surjection_element({(1,3,2): 1})
         >>> print(s.orbit(representation='trivial'))
         (1,2,3)
@@ -251,9 +242,6 @@ class Surjection_element(Module_element):
         """Action on an element in the normalized chains of a standard
         cube or simplex represented by an arity 1 element in the (cubical)
         Eilenberg-Zilber operad.
-
-        Examples
-        --------
 
         >>> from clesto.eilenberg_zilber import EilenbergZilber
         >>> s = Surjection_element({(1,2,1):1})
@@ -387,15 +375,13 @@ class Surjection_element(Module_element):
             raise NotImplementedError
 
     def compose(self, other, position):
-        """Returns the partial composition of self and other in position i.
+        """Returns the partial composition of self and other in position i
 
         We think of other being inserted into self and for Berger-Fresse this
         pair is ordered self tensor other.
 
-        Examples:
-        ---------
-        From [BF] 1.6.2.
-        i = 3
+        From [BF] 1.6.2:
+
         >>> x = Surjection_element({(1,2,1,3): 1}, convention='Berger-Fresse')
         >>> y = Surjection_element({(1,2,1): 1}, convention='Berger-Fresse')
         >>> print(x.compose(y, 1))
@@ -466,19 +452,15 @@ class Surjection_element(Module_element):
         return answer
 
     def suspension(self):
-        """Returns the suspension of a surjection element.
+        """Returns the image in the suspension of the surjection operad
 
         Given a basis element u in arity r and degree d the suspension is
         in degree d-r+1 and is 0 if (u(1),...,u(r)) is not a permutation
         and sgn(u(1),...,u(r)) (u(r),...,u(r+d)) otherwise.
 
-        Example
-        -------
-
         >>> x = Surjection_element({(1,3,2,1,2):1}, convention='Berger-Fresse')
         >>> print(x.suspension())
         - (2,1,2)
-
 
         """
         if not self:
@@ -505,9 +487,7 @@ class Surjection_element(Module_element):
         return answer
 
     def _reduce_rep(self):
-        """Sets to 0 all degenerate surjections.
-
-        """
+        """Sets to 0 all degenerate surjections."""
         # removes non-surjections
         zeros = list()
         for k in self.keys():
@@ -526,13 +506,12 @@ class Surjection_element(Module_element):
 
 
 class Surjection():
-    """Class producing Surjection elements of special interest."""
+    """Class producing instances of Surjection_elements of interest."""
 
     @staticmethod
     def steenrod_product(arity, degree, torsion=None,
                          convention='McClure-Smith'):
-        """Returns a surjection element representing the Steenrod
-        product in the given arity and degree.
+        """Returns a representative of the requesed Steenrod product
 
         Constructed recursively by mapping the minimal resolution W(r)
         of Z[S_r] to Surj(r). We use the chain homotopy equivalence
@@ -547,38 +526,12 @@ class Surjection():
         degree : int
         degree of the element considered Surj(arity)_degree.
 
-        Examples
-        --------
-
-        # chain map checks:
-
-        >>> t = SymmetricRing.transposition_element(6)
-        >>> x = Surjection.steenrod_product(6, 3).boundary()
-        >>> y = t * Surjection.steenrod_product(6, 2)
-        >>> print(x == y)
-        True
-
-        >>> n = SymmetricRing.norm_element(5, torsion=7)
-        >>> x = Surjection.steenrod_product(5, 6, torsion=7).boundary()
-        >>> y = n * Surjection.steenrod_product(5, 5, torsion=7)
-        >>> print(x == y)
-        True
-
-        >>> t = SymmetricRing.transposition_element(5)
-        >>> x = Surjection.steenrod_product(5, 3, \
-            convention='McClure-Smith').boundary()
-        >>> y = t * Surjection.steenrod_product(5, 2, \
-            convention='McClure-Smith')
-        >>> print(x == y)
-        True
-
-
         """
-
         def i(surj, iterate=1):
-            """Inclusion of Surj(r) into Surj(r+1) by appending 1 at
-            the start of basis elements and raising the value of all
-            other entries by 1."""
+            """Inclusion of Surj(r) into Surj(r+1)
+
+            Defined by appending 1 at the start of basis elements and
+            raising the value of all other entries by 1."""
 
             if iterate == 1:
                 answer = surj.zero()
@@ -590,9 +543,10 @@ class Surjection():
                 return i(i(surj, iterate=iterate - 1))
 
         def p(surj, iterate=1):
-            """Projection of Surj(r) to Surj(r-1) by removing 1
-            from a basis element with only one occurence of value 1
-            and substracting 1 from all other entries.
+            """Projection of Surj(r) to Surj(r-1)
+
+            Defined by removing 1 from a basis element with only one
+            occurence of value 1 and substracting 1 from all other entries.
 
             """
             if iterate == 1:
@@ -608,8 +562,9 @@ class Surjection():
                 return p(p(surj, iterate=iterate - 1))
 
         def s(surj):
-            """Chain homotopy from the identity to the composition pi, i.e.
-            id - ip = ds + sd"""
+            """Chain homotopy from the identity to the composition pi
+
+            Explicitly, id - ip = ds + sd."""
 
             answer = surj.zero()
             for k, v in surj.items():
@@ -617,8 +572,9 @@ class Surjection():
             return answer
 
         def h(surj):
-            """Chain homotopy from the identiy to i...i p..p in Surj(r)
-            realizing its contractibility to Surj(1).
+            """Chain homotopy from the identiy to i...i p..p 
+
+            In Surj(r) realizing its contractibility to Surj(1).
 
             """
             answer = s(surj)
@@ -632,7 +588,7 @@ class Surjection():
         }
 
         def psi(arity, degree, convention=convention):
-            """Recursive definition of the steenrod product over the integers."""
+            """Recursive definition of steenrod product over the integers."""
 
             if degree == 0:
                 return Surjection_element({tuple(range(1, arity + 1)): 1},
@@ -649,8 +605,9 @@ class Surjection():
         return integral_answer
 
     def steenrod_operation(p, s, q, bockstein=False):
-        """Models a chain level representative of P_s or bP_s over the prime p
-        acting on an element of degree n"""
+        """Chain level representative of P_s or bP_s 
+
+        Over the prime p acting on an element of degree q."""
 
         # input check
         if not all(isinstance(i, int) for i in {p, s, q}):

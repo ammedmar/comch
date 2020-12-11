@@ -19,7 +19,9 @@ class Module_element(Counter):
     default_torsion = 'free'
 
     def __init__(self, data=None, torsion=None):
-        """Create a new, empty Module_element object representing 0, and, if given,
+        """Initialize an instance of Module_element
+
+        Create a new, empty Module_element object representing 0, and, if given,
         initialize a Module_element from a dict with integer values.
 
         >>> print(Module_element())
@@ -37,7 +39,7 @@ class Module_element(Counter):
         self._reduce_rep()
 
     def __str__(self):
-        """Usual representation of elements in a free module over a ring.
+        """Coefficient first representation.
 
         >>> str(Module_element({'a': 1, 'b': -1}))
         'a - b'
@@ -65,7 +67,7 @@ class Module_element(Counter):
         return hash(frozenset(self))
 
     def __add__(self, other):
-        """The sum of two elements in a free module.
+        """Addition: self + other
 
         >>> Module_element({'a': 1, 'b': 2}) + Module_element({'a': 1})
         Module_element({'a': 2, 'b': 2})
@@ -79,7 +81,7 @@ class Module_element(Counter):
         return answer
 
     def __sub__(self, other):
-        """The diference of two elements in a free module.
+        """Diference: self - other
 
         >>> Module_element({'a': 1, 'b': 2}) - Module_element({'a': 1})
         Module_element({'b': 2})
@@ -93,7 +95,7 @@ class Module_element(Counter):
         return answer
 
     def __rmul__(self, c):
-        """The scaling by c of a free module element.
+        """Integral scaling: c * self
 
         >>> 3 * Module_element({'a':1, 'b':2})
         Module_element({'b': 6, 'a': 3})
@@ -106,7 +108,7 @@ class Module_element(Counter):
         return self.create(scaled)
 
     def __neg__(self):
-        """The additive inverse of a free module element.
+        """Additive inverse: - self
 
         >>> - Module_element({'a': 1, 'b': 2})
         Module_element({'a': -1, 'b': -2})
@@ -115,7 +117,7 @@ class Module_element(Counter):
         return self.__rmul__(-1)
 
     def __iadd__(self, other):
-        """The in place addition of two free module elements.
+        """In place addition: self + other
 
         >>> x = Module_element({'a': 1, 'b': 2})
         >>> x += Module_element({'a': 3, 'b': 6})
@@ -130,7 +132,7 @@ class Module_element(Counter):
         return self
 
     def __isub__(self, other):
-        """The in place addition of two free module elements.
+        """In place difference: self - other
 
         >>> x = Module_element({'a': 1, 'b': 2})
         >>> x -= Module_element({'a': 3, 'b': 6})
@@ -145,7 +147,7 @@ class Module_element(Counter):
         return self
 
     def _reduce_rep(self):
-        """The preferred representative of the free module element.
+        """The preferred representative of the free module element
 
         It reduces all values mod n if torsion is n and removes
         key:value pairs with value = 0.
@@ -176,8 +178,7 @@ class Module_element(Counter):
         return self
 
     def create(self, other=None):
-        """Instantiates the given data with the same type and attribute values
-        as self.
+        """Instantiates data with the same type and attribute values as self.
 
         >>> x =  Module_element({'a': 1})
         >>> x + x.create({'b': 1})
@@ -189,8 +190,7 @@ class Module_element(Counter):
         return answer
 
     def zero(self):
-        """Returns an instance of the same type and attribute values
-        of self representing 0.
+        """Instantiates 0 with same type and attribute values as self.
 
         >>> x = Module_element({'a': 1})
         >>> x + x.zero() == x

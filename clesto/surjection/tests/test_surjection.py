@@ -1,5 +1,5 @@
 import unittest
-from clesto.surjection import Surjection_element
+from clesto.surjection import Surjection_element, Surjection
 from clesto.basics import SymmetricRing
 from clesto.eilenberg_zilber import EilenbergZilber, CubicalEilenbergZilber
 
@@ -88,6 +88,29 @@ class TestSurjection_element(unittest.TestCase):
         sz = z.suspension()
         xz = x.compose(z, 2)
         self.assertEqual(xz.suspension(), sx.compose(sz, 1))
+
+
+class TestSurjection(unittest.TestCase):
+
+    def test_steenrod_product(self):
+        arity = 6
+        t = SymmetricRing.transposition_element(arity)
+        x = Surjection.steenrod_product(arity, 3).boundary()
+        y = t * Surjection.steenrod_product(arity, 2)
+        self.assertEqual(x, y)
+
+        arity = 5
+        n = SymmetricRing.norm_element(arity, torsion=7)
+        x = Surjection.steenrod_product(arity, 4, torsion=7).boundary()
+        y = n * Surjection.steenrod_product(arity, 3, torsion=7)
+        self.assertEqual(x, y)
+
+        t = SymmetricRing.transposition_element(arity)
+        x = Surjection.steenrod_product(arity, 3,
+                                        convention='McClure-Smith').boundary()
+        y = t * Surjection.steenrod_product(arity, 2,
+                                            convention='McClure-Smith')
+        self.assertEqual(x, y)
 
 
 if __name__ == '__main__':

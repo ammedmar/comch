@@ -2,17 +2,7 @@ from collections import Counter
 
 
 class Module_element(Counter):
-    """Counter with arithmetic improvements to handle (modular) integer values.
-
-    Class constructed to model free module elements over the ring Z or Z/nZ.
-
-    Parameters
-    ----------
-    data : dict
-
-    Attributes
-    ----------
-    torsion : non-negative int or string 'free'.
+    """Elements in a free module over the (modular) integers.
 
     """
 

@@ -8,12 +8,19 @@ from itertools import chain, product
 
 
 class BarrattEccles_element(Module_element):
-    """..."""
+    """Elements in the Barratt-Eccles operad.
+
+    """
 
     def __init__(self, data=None, torsion=None):
+        """Initialize an instance of BarrattEccles_element
 
-        # check input data: dict with tuple of tuple of int keys
-        if data:
+        Create a new, empty BarrattEccles_element object representing 0, and,
+        if given, initialize a BarrattEccles_element from a dict with tuple of
+        tuple of int keys and int values.
+
+        """
+        def check_input_data(data):
             if not (isinstance(data, dict)
                     and all(isinstance(x, tuple) for x in data.keys())
                     and all(isinstance(perm, tuple) for perm in
@@ -28,17 +35,22 @@ class BarrattEccles_element(Module_element):
                     chain.from_iterable(data.keys()))):
                 raise TypeError('keys must tuples of '
                                 + 'permutations of (1,2,...,r)')
+            return
 
-            # transform tuples to symmetric group elements
+        def prepare_data(data):
+            """transform tuples to symmetric group elements."""
             new_data = {}
             for k, v in data.items():
                 new_key = tuple(SymmetricGroup_element(pi) for pi in k)
                 new_data[new_key] = v
-        else:
-            new_data = data
+            return new_data
+
+        if data:
+            check_input_data(data)
+            data = prepare_data(data)
 
         # initializing element
-        super(BarrattEccles_element, self).__init__(data=new_data,
+        super(BarrattEccles_element, self).__init__(data=data,
                                                     torsion=torsion)
 
     def __str__(self):
@@ -47,11 +59,13 @@ class BarrattEccles_element(Module_element):
 
     @property
     def arity(self):
-        """Arity of the Barratt-Eccles element, set to None if non-homogeneous
-        or zero
+        """Arity of self
 
-        >>> b = BarrattEccles_element({((1, 3, 2), (2, 3, 1)): 1})
-        >>> print(b.arity)
+        Defined as None if self is not homogeneous. The arity of a basis
+        element agrees with arity of any of the symmetric group elements
+
+        >>> x = BarrattEccles_element({((1,3,2), (2,3,1)): 1})
+        >>> x.arity
         3
 
         """
@@ -67,21 +81,37 @@ class BarrattEccles_element(Module_element):
 
     @property
     def degree(self):
-        pass
+        """Degree of self
+
+        Defined as None if self is not homogeneous. The degree of a basis
+        surjection agrees with the cardinality of the tuple minus one.
+
+        >>> x = BarrattEccles_element({((1,3,2), (2,3,1)): 1})
+        >>> x.degree
+        1
+
+        """
+        if not self:
+            return None
+        degrees = []
+        for k in self.keys():
+            degrees.append(len(k) - 1)
+        if len(set(degrees)) > 1:
+            return None
+        return degrees.pop()
 
     @property
     def complexity(self):
-        pass
+        raise NotImplementedError
 
     def boundary(self):
-        """Boundary as normalized chains of a simplicial set.
+        """Boundary of self.
 
-        >>> b = BarrattEccles_element({((1, 3, 2), (2, 3, 1)): 1})
-        >>> print(b.boundary().boundary())
+        >>> x = BarrattEccles_element({((1,3,2), (2,3,1)): 1})
+        >>> print(x.boundary().boundary())
         0
 
         """
-
         sign = {0: 1, 1: -1}
         answer = self.zero()
         for spx, coeff in self.items():
@@ -93,25 +123,20 @@ class BarrattEccles_element(Module_element):
 
         return answer
 
-    def _reduce_rep(self):
-        """Returns representative with only non-zero terms.
-
-        """
-        for simplex, v in self.items():
-            for i in range(len(simplex) - 1):
-                if simplex[i] == simplex[i + 1]:
-                    self[simplex] = 0
-
-        super()._reduce_rep()
-
     def __rmul__(self, other):
-        """Left action by the appropriate symmetric group ring.
+        """Left action: other * self
 
-        # >>> surj = Surjection_element({(1, 2, 3, 1, 2): 1})
-        # >>> print(-1 * surj)
-        # - (1,2,3,1,2)
+        Left multiplication by a symmetric group element or an integer.
+
+        >>> x = BarrattEccles_element({((1,3,2), (2,3,1)): 1})
+        >>> print(-x)
+        - ((1,3,2),(2,3,1))
+        >>> rho = SymmetricRing_element({(2,3,1): 1})
+        >>> print(rho * x)
+        ((2,1,3),(3,1,2))
+
+
         """
-
         if isinstance(other, int):
             return super().__rmul__(other)
 
@@ -128,6 +153,34 @@ class BarrattEccles_element(Module_element):
         for (k1, v1), (k2, v2) in product(self.items(), other.items()):
             new_k = tuple(k2 * pi for pi in k1)
             answer += self.create({new_k: v1 * v2})
+        return answer
+
+    def orbit(self, representation='trivial'):
+        """Returns the preferred representative in the orbit of self
+
+        The preferred representative in the orbit of basis element is one whose first
+        symmetric group element if the identity.
+
+        The representation used can be either 'trivial' or 'sign'.
+
+        >>> x = BarrattEccles_element({((1,3,2), (1,2,3)): 1})
+        >>> print(x.orbit())
+        ((1,2,3),(1,3,2))
+        >>> print(x.orbit('sign'))
+        - ((1,2,3),(1,3,2))
+
+        """
+        if not self:
+            return self
+
+        answer = BarrattEccles_element(torsion=self.torsion)
+        for k, v in self.items():
+            inverse = tuple(k[0].index(i + 1) + 1 for i in range(len(k[0])))
+            permutation = SymmetricRing_element({inverse: 1}, torsion=self.torsion)
+            if representation == 'sign':
+                permutation = k[0].sign * permutation
+            answer += permutation * BarrattEccles_element({k: v}, torsion=self.torsion)
+
         return answer
 
     def compose(self, *others):
@@ -212,25 +265,15 @@ class BarrattEccles_element(Module_element):
             return answer
 
     def table_reduction(self):
-        """Returns the image of the table refuction morphism applied to self.
+        """Table reduction of self
 
-        # Berger-Fresse Example before Theorem 1.3.2:
+        As defined by Berger-Fresse.
 
         >>> b = BarrattEccles_element({((1,2,3,4), (1,4,3,2), (1,2,4,3)): 1})
         >>> print(b.table_reduction())
         (1,2,4,2,4,3) + (1,2,4,3,2,3)
 
-        # Chain map check:
-
-        >>> b = BarrattEccles_element({((1,2,3,4), (1,4,3,2)): 1, \
-                                       ((1,2,4,3), (3,4,2,1)): 2})
-        >>> dTR_b = b.table_reduction().boundary()
-        >>> TRd_b = b.boundary().table_reduction()
-        >>> dTR_b == TRd_b
-        True
-
         """
-
         answer = Surjection_element(torsion=self.torsion,
                                     convention='Berger-Fresse')
         for k1, v in self.items():
@@ -255,25 +298,6 @@ class BarrattEccles_element(Module_element):
 
         return answer
 
-    def orbit(self, representation='trivial'):
-        """Orbit under the symmetric group action
-
-        SIGN PERMUTATIONS FAILING
-
-        """
-        if not self:
-            return self
-
-        answer = BarrattEccles_element(torsion=self.torsion)
-        for k, v in self.items():
-            inverse = tuple(k[0].index(i + 1) + 1 for i in range(len(k[0])))
-            permutation = SymmetricRing_element({inverse: 1}, torsion=self.torsion)
-            if representation == 'sign':
-                permutation = sign(k[0]) * permutation
-            answer += permutation * BarrattEccles_element({k: v}, torsion=self.torsion)
-
-        return answer
-
     def alexander_whitney(self, r=1):
         """..."""
 
@@ -291,38 +315,38 @@ class BarrattEccles_element(Module_element):
 
         return answer
 
+    def _reduce_rep(self):
+        """Returns representative with only non-zero terms.
+
+        """
+        for simplex, v in self.items():
+            for i in range(len(simplex) - 1):
+                if simplex[i] == simplex[i + 1]:
+                    self[simplex] = 0
+
+        super()._reduce_rep()
+
 
 class BarrattEccles():
     """Class producing Barratt-Eccles elements of special interest."""
 
     @staticmethod
     def steenrod_product(arity, degree, torsion=None):
-        """Returns a Barratt-Eccles element representing the Steenrod
-        product in the given arity and degree.
+        """Returns a representative of the requesed Steenrod product
 
-        # chain map checks:
-
-        >>> t = SymmetricRing.transposition_element(6)
-        >>> x = BarrattEccles.steenrod_product(6, 3).boundary()
-        >>> y = t * BarrattEccles.steenrod_product(6, 2)
-        >>> print(x == y)
-        True
-
-        >>> n = SymmetricRing.norm_element(5, torsion=7)
-        >>> x = BarrattEccles.steenrod_product(5, 6, torsion=7).boundary()
-        >>> y = n * BarrattEccles.steenrod_product(5, 5, torsion=7)
-        >>> print(x == y)
-        True
+        Constructed recursively by mapping the minimal resolution W(r)
+        of Z[S_r] to E(r). We use the chain homotopy equivalence
+        of Surj(r) and Z defined using the chain contraction (i, p, s)
+        relating Surj(r-1) and Surj(r).
 
         """
-
         operators = {
             0: SymmetricRing.norm_element(arity),
             1: SymmetricRing.transposition_element(arity)
         }
 
         def _psi(arity, degree):
-            """Recursive definition over the integers."""
+            """Recursive definition of W --> E over the integers."""
 
             if degree == 0:
                 return BarrattEccles_element(

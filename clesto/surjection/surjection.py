@@ -13,20 +13,19 @@ from math import floor, factorial
 
 
 class Surjection_element(Module_element):
-    """Elements in the surjection operad
+    """Elements in the surjection operad.
 
     """
 
     def __init__(self, data=None, torsion=None, convention='McClure-Smith'):
         """Initialize an instance of Surjection_element
 
-        Create a new, empty Surjection_element object representing 0, and, if given,
-        initialize a Module_element from a dict with tuple of int keys and int values.
-
+        Create a new, empty Surjection_element object representing 0, and, if
+        given, initialize a Surjection_element from a dict with tuple of int keys
+        and int values.
 
         """
-        # check input data: dict with tuple of int keys
-        if data:
+        def check_input_data(data):
             if not (isinstance(data, dict)
                     and all(isinstance(surj, tuple) for surj in data.keys())
                     and all(isinstance(i, int) for i in
@@ -35,11 +34,14 @@ class Surjection_element(Module_element):
                 raise TypeError(
                     'data type must be dict with tuple of int keys')
 
-        if convention not in {'Berger-Fresse', 'McClure-Smith'}:
-            raise TypeError(
-                'convention must be either Berger-Fresse or McClure-Smith')
+            if convention not in {'Berger-Fresse', 'McClure-Smith'}:
+                raise TypeError(
+                    'convention must be either Berger-Fresse or McClure-Smith')
+            return
 
-        # initialize element
+        if data:
+            check_input_data(data)
+
         self.convention = convention
         super(Surjection_element, self).__init__(data=data, torsion=torsion)
 
@@ -108,7 +110,10 @@ class Surjection_element(Module_element):
         return max(complexities)
 
     def boundary(self):
-        """boundary of self, sign convention determined by attribute convention.
+        """boundary of self
+
+        Sign convention determined by attribute convention, either
+        'McClure-Smith' or 'Berger-Fresse'.
 
         >>> s = Surjection_element({(1,2,1,3,1,3): 1})
         >>> print(s.boundary())
@@ -160,11 +165,14 @@ class Surjection_element(Module_element):
         return answer
 
     def __rmul__(self, other):
-        """Left action by elements in the symmetric group ring of the same
-        arity and torsion.
+        """Left action: other * self
 
-        >>> rho = SymmetricRing_element({(2,3,1): 1})
+        Left multiplication by a symmetric group element or an integer.
+
         >>> surj = Surjection_element({(1,2,3,1,2): 1})
+        >>> print(- surj)
+        - (1,2,3,1,2)
+        >>> rho = SymmetricRing_element({(2,3,1): 1})
         >>> print(rho * surj)
         (2,3,1,2,3)
 
@@ -207,11 +215,13 @@ class Surjection_element(Module_element):
         return answer
 
     def orbit(self, representation='trivial'):
-        """ Returns the preferred element in the symmetric orbit of an element.
+        """Returns the preferred element in the symmetric orbit of an element.
 
         The preferred representative in the orbit of basis surjections is the
         one satisfying that the first occurence of each integer appear in
         increasing order.
+
+        The representation used can be either 'trivial' or 'sign'.
 
         >>> s = Surjection_element({(1,3,2): 1})
         >>> print(s.orbit(representation='trivial'))
@@ -572,9 +582,9 @@ class Surjection():
             return answer
 
         def h(surj):
-            """Chain homotopy from the identiy to i...i p..p 
+            """Chain homotopy from the identiy to i...i p..p
 
-            In Surj(r) realizing its contractibility to Surj(1).
+            In Surj(r), realizing its contractibility to Surj(1).
 
             """
             answer = s(surj)
@@ -605,7 +615,7 @@ class Surjection():
         return integral_answer
 
     def steenrod_operation(p, s, q, bockstein=False):
-        """Chain level representative of P_s or bP_s 
+        """Chain level representative of P_s or bP_s
 
         Over the prime p acting on an element of degree q."""
 

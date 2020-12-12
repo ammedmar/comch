@@ -3,13 +3,15 @@ from itertools import chain, product
 
 
 class SymmetricGroup_element(tuple):
-    """Elements in the symmetric group of r elements."""
+    """Elements in the symmetric group of r elements.
+
+    """
 
     def __init__(self, perm):
         """Initializes a SymmetricGroup_element
 
         Create a SymmetricGroup_element from an iterable representing a
-        permutation of (1,2,...,r) which is thought of as a self-bijection
+        permutation of (1,2,...,r) which is thought of as an automorphism
         of the set {1,...,r}.
 
         >>> print(SymmetricGroup_element((1,3,2)))

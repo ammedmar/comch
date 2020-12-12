@@ -36,6 +36,8 @@ class TestSurjection_element(unittest.TestCase):
         a, b = (rho * self.x).boundary(), rho * self.x.boundary()
         self.assertEqual(a, b)
 
+        self.assertEqual(3 * self.x, Surjection_element({(1, 3, 1, 2, 1): 3}))
+
     def test_orbit(self):
         a = self.x.orbit(representation='trivial')
         self.assertEqual(a, Surjection_element({(1, 2, 1, 3, 1): 1}))

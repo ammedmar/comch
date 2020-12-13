@@ -31,7 +31,13 @@ class TestBarrattEccles_element(unittest.TestCase):
         self.assertEqual(y, z.orbit('sign'))
 
     def test_compose(self):
-        pass
+        i = 2
+        x = BarrattEccles_element({((1, 2, 3), (3, 2, 1), (1, 3, 2)): 1})
+        y = BarrattEccles_element({((1, 2, 3, 4), (4, 3, 2, 1), (4, 1, 3, 2)): 1})
+        d_xy = x.compose(y, i).boundary()
+        dx_y = x.boundary().compose(y, i)
+        x_dy = x.compose(y.boundary(), i)
+        self.assertEqual(d_xy, dx_y + (-1)**(x.degree) * x_dy)
 
     def test_table_reduction(self):
         b = BarrattEccles_element({((1, 2, 3, 4), (1, 4, 3, 2)): 1,

@@ -3,12 +3,18 @@ from ..basics import SymmetricGroup_element
 from ..basics import SymmetricRing_element, SymmetricRing
 
 from ..surjection import Surjection_element
-from ..utils import partitions
+from ..utils import partitions, pairwise
 from itertools import chain, product
 
 
 class BarrattEccles_element(Module_element):
-    """Elements in the Barratt-Eccles operad.
+    """Elements in the Barratt-Eccles operad
+
+    As defined in:
+
+    [BF]: C. Berger, and B. Fresse. "Combinatorial operad actions on cochains."
+    Mathematical Proceedings of the Cambridge Philosophical Society. Vol. 137.
+    No. 1. Cambridge University Press, 2004.
 
     """
 
@@ -107,9 +113,9 @@ class BarrattEccles_element(Module_element):
     def boundary(self):
         """Boundary of self.
 
-        >>> x = BarrattEccles_element({((1,3,2), (2,3,1)): 1})
-        >>> print(x.boundary().boundary())
-        0
+        >>> x = BarrattEccles_element({((1,3,2), (2,3,1), (1,2,3)): 1})
+        >>> print(x.boundary())
+        ((2,3,1),(1,2,3)) - ((1,3,2),(1,2,3)) + ((1,3,2),(2,3,1))
 
         """
         sign = {0: 1, 1: -1}
@@ -135,7 +141,6 @@ class BarrattEccles_element(Module_element):
         >>> print(rho * x)
         ((2,1,3),(3,1,2))
 
-
         """
         if isinstance(other, int):
             return super().__rmul__(other)
@@ -158,8 +163,8 @@ class BarrattEccles_element(Module_element):
     def orbit(self, representation='trivial'):
         """Returns the preferred representative in the orbit of self
 
-        The preferred representative in the orbit of basis element is one whose first
-        symmetric group element if the identity.
+        The preferred representative in the orbit of a basis element is one
+        whose first symmetric group element if the identity.
 
         The representation used can be either 'trivial' or 'sign'.
 
@@ -183,86 +188,65 @@ class BarrattEccles_element(Module_element):
 
         return answer
 
-    def compose(self, *others):
-        """WRONG, NOT DONE BY ME. NOT A CHAIN MAP"""
+    def compose(self, other, position):
+        """Operadic compositions: self o_position other
 
-        def _paths(p, q):
-            """returns as a list all increasing paths from (0,0) to (p,q)."""
+        We think of other being inserted into self and in the Berger-Fresse
+        convention this pair is ordered: self tensor other.
 
+        >>> x = BarrattEccles_element({((1, 2), (2, 1)): 1})
+        >>> print(x.compose(x, 1))
+        - ((1,2,3),(2,1,3),(3,2,1)) + ((1,2,3),(3,1,2),(3,2,1))
+
+        """
+
+        def check_input(self, other, position):
+            """Homogeneous, equal torsion, and position less than arity."""
+            if self.torsion != other.torsion:
+                raise TypeError('Unequal torsion attribute')
+            if not self or not other:
+                return self.zero()
+            if None in [self.arity, other.arity, self.degree, other.degree]:
+                raise TypeError('Defined for homogeneous elements only')
+            if self.arity < position:
+                raise TypeError(f'Arity {self.arity} < position = {position}')
+
+        def paths(p, q):
+            """All increasing paths from (0,0) to (p,q)."""
             if (p, q) == (0, 0):
                 return [((0, 0),)]
             answer = list()
             if p > 0:
-                west = _paths(p - 1, q)
+                west = paths(p - 1, q)
                 for path in west:
                     answer.append(path + ((p, q),))
             if q > 0:
-                south = _paths(p, q - 1)
+                south = paths(p, q - 1)
                 for path in south:
                     answer.append(path + ((p, q),))
             return answer
 
-        def _sgn_of_path(path):
-            """..."""
-            segments = range(1, len(path))
-            horizontal_segments, vertical_segments = [], []
-            for i in segments:
-                vertex1, vertex2 = path[i - 1], path[i]
-                if vertex2[0] > vertex1[0]:
-                    horizontal_segments.append(i)
-                else:
-                    vertical_segments.append(i)
-            ordered_segments = horizontal_segments + vertical_segments
-            # find the permutation that transforms segments to orderedSegments
-            permutation = {}
-            for seg in segments:
-                for j in range(1, len(ordered_segments) + 1):
-                    if seg == ordered_segments[j - 1]:
-                        permutation[seg] = j
-            # compute the sign of the permutation
-            sgn = 1
-            for i in range(1, len(segments) + 1):
-                for j in range(i + 1, len(segments) + 1):
-                    diff = permutation[j] - permutation[i]
-                    sgn *= diff // abs(diff)
-            return sgn
+        def sign_of_path(path):
+            """Sign of shuffle placing horizontal before vertical lines."""
+            vectors = [(a[0] - b[0], a[1] - b[1]) for b, a in pairwise(path)]
+            sign_exp = 0
+            for idx, vector in enumerate(vectors):
+                if vector == (0, 1):
+                    sign_exp += len([v for v in vectors[idx + 1:] if v == (1, 0)])
+            return (-1) ** (sign_exp)
 
-        # partial composition
-        if len(others) == 2 and isinstance(others[1], int):
-            other, k = others
-            if self.torsion != other.torsion:
-                raise TypeError('not the same torsion')
-
-            answer = self.zero()
-            for perm_vect1, coeff1 in self.items():
-                for perm_vect2, coeff2 in other.items():
-                    comp = BarrattEccles_element().copy_attrs_from(answer)
-                    p, q = len(perm_vect1) - 1, len(perm_vect2) - 1
-                    # summands parametrized by paths from (0,0) to (p,q)
-                    for path in _paths(p, q):
-                        new_perm_vect = ()
-                        for i, j in path:
-                            perm1 = SymmetricRing_element(
-                                {perm_vect1[i]: 1}, torsion=self.torsion)
-                            perm2 = SymmetricRing_element(
-                                {perm_vect2[j]: 1}, torsion=self.torsion)
-                            partial_comp = perm1.compose(perm2, k)
-                            new_perm_vect += (tuple(partial_comp.keys())[0],)
-                        sgn = _sgn_of_path(path)
-                        comp += BarrattEccles_element(
-                            {new_perm_vect: sgn}, torsion=self.torsion)
-                    answer += coeff1 * coeff2 * comp
-            return answer
-
-        # total composition
-        else:
-            if not len(others) == self.arity:
-                raise TypeError('the number of arguments must be equal to '
-                                + 'the arity of self')
-            answer = self
-            for idx, other in reversed(list(enumerate(others))):
-                answer = answer.compose(other, idx + 1)
-            return answer
+        check_input(self, other, position)
+        answer = self.zero()
+        p, q = self.degree, other.degree
+        all_paths = paths(p, q)
+        for (k1, v1), (k2, v2) in product(self.items(), other.items()):
+            for path in all_paths:
+                new_k = []
+                for i, j in path:
+                    new_k.append(k1[i].compose(k2[j], position))
+                sign = 1 if self.torsion == 2 else sign_of_path(path)
+                answer += self.create({tuple(new_k): sign * v1 * v2})
+        return answer
 
     def table_reduction(self):
         """Table reduction of self
@@ -316,14 +300,18 @@ class BarrattEccles_element(Module_element):
         return answer
 
     def _reduce_rep(self):
-        """Returns representative with only non-zero terms.
+        """Removes degenerate elements
+
+        Those with consecutive equal permutations or equal to an empty
+        permutation.
 
         """
-        for simplex, v in self.items():
-            for i in range(len(simplex) - 1):
-                if simplex[i] == simplex[i + 1]:
-                    self[simplex] = 0
-
+        for k, v in self.items():
+            if not k:
+                self[k] = 0
+            for per1, per2 in pairwise(k):
+                if per1 == per2:
+                    self[k] = 0
         super()._reduce_rep()
 
 

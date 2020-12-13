@@ -3,7 +3,7 @@ Surjection operad
 
 Surjection elements
 -------------------
-.. automodule:: clesto.surjection
+.. automodule:: clesto.surjection.surjection
    :members:
 
    

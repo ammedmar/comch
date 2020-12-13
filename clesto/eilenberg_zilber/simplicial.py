@@ -216,7 +216,7 @@ class EilenbergZilber_element(Module_element):
 
         super()._reduce_rep()
 
-    def iterated_diagonal(self, n=1):
+    def iterated_diagonal(self, times=1, coord=1):
         """Alexander-Whitney chain approximation to the diagonal applied
         n-times.
 
@@ -235,18 +235,18 @@ class EilenbergZilber_element(Module_element):
         if self.degree is None:
             raise TypeError(f'only for homogeneous elements')
 
-        if self.arity != 1:
-            raise TypeError(f'only for arity 1 elements')
+        if self.arity < coord:
+            raise TypeError(f'arity = {self.arity} < coord = {coord}')
 
         answer = self.zero()
         for k, v in self.items():
-            spx = k[0]
-            for p in combinations_with_replacement(range(self.degree + 1), n):
+            left, spx, right = k[:coord - 1], k[coord - 1], k[coord:]
+            for p in combinations_with_replacement(range(self.degree + 1), times):
                 p = (0,) + p + (self.degree,)
                 new_k = []
                 for i, j in pairwise(p):
                     new_k.append(Simplex(spx[i:j + 1]))
-                answer += self.create({tuple(new_k): v})
+                answer += self.create({left + tuple(new_k) + right: v})
         return answer
 
 

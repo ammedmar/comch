@@ -13,11 +13,22 @@ from math import floor, factorial
 
 
 class Surjection_element(Module_element):
-    """Elements in the surjection operad.
+    """Elements in the surjection operad
+
+    As defined in:
+
+    [McS]: J. McClure, and J. Smith. "Multivariable cochain operations and little
+    n-cubes." Journal of the American Mathematical Society 16.3 (2003): 681-704.
+
+    [BF]: C. Berger, and B. Fresse. "Combinatorial operad actions on cochains."
+    Mathematical Proceedings of the Cambridge Philosophical Society. Vol. 137.
+    No. 1. Cambridge University Press, 2004.
 
     """
 
-    def __init__(self, data=None, torsion=None, convention='McClure-Smith'):
+    default_convention = 'McClure-Smith'
+
+    def __init__(self, data=None, torsion=None, convention=None):
         """Initialize an instance of Surjection_element
 
         Create a new, empty Surjection_element object representing 0, and, if
@@ -34,14 +45,15 @@ class Surjection_element(Module_element):
                 raise TypeError(
                     'data type must be dict with tuple of int keys')
 
-            if convention not in {'Berger-Fresse', 'McClure-Smith'}:
-                raise TypeError(
-                    'convention must be either Berger-Fresse or McClure-Smith')
+            if convention not in {None, 'Berger-Fresse', 'McClure-Smith'}:
+                raise TypeError('convention must be Berger-Fresse or' +
+                                'McClure-Smith')
             return
 
         if data:
             check_input_data(data)
-
+        if convention is None:
+            convention = Surjection_element.default_convention
         self.convention = convention
         super(Surjection_element, self).__init__(data=data, torsion=torsion)
 
@@ -248,7 +260,7 @@ class Surjection_element(Module_element):
 
         return answer
 
-    def __call__(self, other):
+    def __call__(self, other, coord=1):
         """Action on an element in the normalized chains of a standard
         cube or simplex represented by an arity 1 element in the (cubical)
         Eilenberg-Zilber operad.
@@ -309,7 +321,8 @@ class Surjection_element(Module_element):
         def _simplicial(self, other):
             """Action on Eilenberg-Zilber elements."""
             answer = other.zero()
-            pre_join = other.iterated_diagonal(self.arity + self.degree - 1)
+            pre_join = other.iterated_diagonal(self.arity + self.degree - 1,
+                                               coord=coord)
             for (k1, v1), (k2, v2) in product(self.items(), pre_join.items()):
                 new_k = []
                 zero_summand = False
@@ -358,37 +371,30 @@ class Surjection_element(Module_element):
                         new_v = reduce(lambda x, y: x * y, (pair[1] for pair in pairs))
                         to_add = answer.create({tuple(new_k): sign * new_v * v1 * v2})
                         answer += to_add
-
             return answer
 
         if not self or not other:
             return other.zero()
-
-        if other.arity != 1:
-            raise TypeError(f'action only on arity 1, not {other.arity}')
-
+        if other.arity < coord:
+            raise TypeError(f'arity = {other.arity} < coord = {coord}')
         if self.degree is None or self.arity is None:
             raise TypeError('defined for homogeneous surjections')
-
         if self.torsion != other.torsion:
             raise TypeError('Unequal torsion attribute')
-
         if isinstance(other, EilenbergZilber_element):
             if self.convention != 'McClure-Smith':
                 raise NotImplementedError
             return _simplicial(self, other)
-
         elif isinstance(other, CubicalEilenbergZilber_element):
             return _cubical(self, other)
-
         else:
             raise NotImplementedError
 
     def compose(self, other, position):
-        """Returns the partial composition of self and other in position i
+        """Operadic compositions: self o_position other
 
-        We think of other being inserted into self and for Berger-Fresse this
-        pair is ordered self tensor other.
+        We think of other being inserted into self and in the Berger-Fresse
+        convention this pair is ordered: self tensor other.
 
         From [BF] 1.6.2:
 
@@ -454,7 +460,7 @@ class Surjection_element(Module_element):
                     sign = 1
                 elif self.convention == 'Berger-Fresse':
                     sign = bf_sign(positions, k1, p, k2)
-                else:
+                elif self.convention == 'McClure-Smith':
                     sign = ms_sign()
 
                 answer += answer.create({tuple(new_k): v1 * v2 * sign})
@@ -520,21 +526,13 @@ class Surjection():
 
     @staticmethod
     def steenrod_product(arity, degree, torsion=None,
-                         convention='McClure-Smith'):
+                         convention=Surjection_element.default_convention):
         """Returns a representative of the requesed Steenrod product
 
         Constructed recursively by mapping the minimal resolution W(r)
         of Z[S_r] to Surj(r). We use the chain homotopy equivalence
         of Surj(r) and Z defined using the chain contraction (i, p, s)
         relating Surj(r-1) and Surj(r).
-
-        Parameters
-        ----------
-        arity : int
-        Arity of the complex considered, Surj(arity).
-
-        degree : int
-        degree of the element considered Surj(arity)_degree.
 
         """
         def i(surj, iterate=1):
@@ -614,6 +612,7 @@ class Surjection():
             integral_answer.set_torsion(torsion)
         return integral_answer
 
+    @staticmethod
     def steenrod_operation(p, s, q, bockstein=False):
         """Chain level representative of P_s or bP_s
 
@@ -632,7 +631,6 @@ class Surjection():
             d = s - q
             if d < 0:
                 return Surjection_element(torsion=p)
-
         else:
             b = int(bockstein)
             # Serre convention: v(2j)=(-1)^j & v(2j+1)=v(2j)*m! w/ m=(p-1)/2
@@ -649,9 +647,9 @@ class Surjection():
 
     @staticmethod
     def basis(arity, degree, complexity=None):
-        """ Returns the list of tuples forming the basis of the surjection
-        operad in the given degree, arity and complexity
+        """Basis of the chain complex
 
+        In the given arity, degree and complexity.
 
         """
         if complexity is None:

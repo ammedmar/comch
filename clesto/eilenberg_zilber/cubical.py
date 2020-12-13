@@ -4,10 +4,11 @@ from itertools import combinations, product
 
 
 class Cube(tuple):
-    """..."""
+    """Models an elementary cube"""
     intervals: tuple
 
     def __init__(self, data):
+        """Initialize"""
 
         self.intervals = tuple(idx for idx, x in enumerate(data) if x == 2)
 

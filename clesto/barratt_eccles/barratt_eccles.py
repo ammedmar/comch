@@ -191,8 +191,8 @@ class BarrattEccles_element(Module_element):
     def compose(self, other, position):
         """Operadic compositions: self o_position other
 
-        We think of other being inserted into self and in the Berger-Fresse
-        convention this pair is ordered: self tensor other.
+        We think of other being inserted into self the pair is ordered:
+        self tensor other.
 
         >>> x = BarrattEccles_element({((1, 2), (2, 1)): 1})
         >>> print(x.compose(x, 1))
@@ -282,8 +282,13 @@ class BarrattEccles_element(Module_element):
 
         return answer
 
-    def alexander_whitney(self, r=1):
-        """..."""
+    def diagonal(self, r=1):
+        """Alexander Whitney diagonal
+
+        Defined on basis elements by
+        sum_i [pi_0,...pi_i] tensor [pi_i,...,pi_d]
+
+        """
 
         def split(multispx):
             a, b = multispx[0], multispx[1:]
@@ -320,7 +325,7 @@ class BarrattEccles():
 
     @staticmethod
     def steenrod_product(arity, degree, torsion=None):
-        """Returns a representative of the requesed Steenrod product
+        """Returns a representative of the requested Steenrod product
 
         Constructed recursively by mapping the minimal resolution W(r)
         of Z[S_r] to E(r). We use the chain homotopy equivalence
@@ -333,20 +338,20 @@ class BarrattEccles():
             1: SymmetricRing.transposition_element(arity)
         }
 
-        def _psi(arity, degree):
+        def psi(arity, degree):
             """Recursive definition of W --> E over the integers."""
 
             if degree == 0:
                 return BarrattEccles_element(
                     {(tuple(range(1, arity + 1)),): 1})
             else:
-                previous = _psi(arity, degree - 1)
+                previous = psi(arity, degree - 1)
                 acted_on = operators[degree % 2] * previous
                 identity = tuple(range(1, arity + 1))
                 new_data = {(identity,) + k: v for k, v in acted_on.items()}
                 return BarrattEccles_element(new_data)
 
-        integral_answer = _psi(arity, degree)
+        integral_answer = psi(arity, degree)
         if torsion:
             integral_answer.set_torsion(torsion)
         return integral_answer

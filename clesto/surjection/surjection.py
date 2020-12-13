@@ -26,7 +26,7 @@ class Surjection_element(Module_element):
 
     """
 
-    default_convention = 'McClure-Smith'
+    default_convention = 'Berger-Fresse'
 
     def __init__(self, data=None, torsion=None, convention=None):
         """Initialize an instance of Surjection_element
@@ -67,7 +67,6 @@ class Surjection_element(Module_element):
 
         Defined as None if self is not homogeneous. The arity of a basis
         surjection agrees with the max value it attains.
-
 
         >>> Surjection_element({(1,2,1,3,1): 1}).arity
         3
@@ -113,9 +112,9 @@ class Surjection_element(Module_element):
 
         """
         complexities = [0]
-        for surjection in self.keys():
-            for i, j in combinations(range(1, max(surjection) + 1), 2):
-                r = tuple(k for k in surjection if k == i or k == j)
+        for key in self.keys():
+            for i, j in combinations(range(1, max(key) + 1), 2):
+                r = tuple(k for k in key if k == i or k == j)
                 cpxty = len([p for p, q in pairwise(r) if p != q]) - 1
                 complexities.append(cpxty)
 
@@ -124,8 +123,11 @@ class Surjection_element(Module_element):
     def boundary(self):
         """boundary of self
 
-        Sign convention determined by attribute convention, either
-        'McClure-Smith' or 'Berger-Fresse'.
+        Up to signs, it is defined by taking the sum of all elements
+        obtained by removing one entry at the time.
+        The sign of each summand depends on the convention, either
+        'McClure-Smith' or 'Berger-Fresse'. See [McCS] and [BF] for
+        details.
 
         >>> s = Surjection_element({(1,2,1,3,1,3): 1})
         >>> print(s.boundary())
@@ -266,7 +268,7 @@ class Surjection_element(Module_element):
         Eilenberg-Zilber operad.
 
         >>> from clesto.eilenberg_zilber import EilenbergZilber
-        >>> s = Surjection_element({(1,2,1):1})
+        >>> s = Surjection_element({(1,2,1):1}, convention='McClure-Smith')
         >>> x = EilenbergZilber.standard_element(2)
         >>> print(s(x))
         - ((0,1,2),(0,1)) + ((0,2),(0,1,2)) - ((0,1,2),(1,2))
@@ -527,7 +529,7 @@ class Surjection():
     @staticmethod
     def steenrod_product(arity, degree, torsion=None,
                          convention=Surjection_element.default_convention):
-        """Returns a representative of the requesed Steenrod product
+        """Returns a representative of the requested Steenrod product
 
         Constructed recursively by mapping the minimal resolution W(r)
         of Z[S_r] to Surj(r). We use the chain homotopy equivalence
@@ -653,7 +655,7 @@ class Surjection():
 
         """
         if complexity is None:
-            complexity = degree + 1
+            complexity = degree
         a, d, c = arity, degree, complexity
         basis = []
         for s in product(range(1, a + 1), repeat=a + d):

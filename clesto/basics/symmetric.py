@@ -3,9 +3,7 @@ from itertools import chain, product
 
 
 class SymmetricGroup_element(tuple):
-    """Elements in the symmetric group of r elements.
-
-    """
+    """Element in a finite symmetric group."""
 
     def __init__(self, perm):
         """Initializes a SymmetricGroup_element

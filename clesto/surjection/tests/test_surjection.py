@@ -1,7 +1,8 @@
 import unittest
 from clesto.surjection import Surjection_element, Surjection
 from clesto.basics import SymmetricRing
-from clesto.eilenberg_zilber import EilenbergZilber, CubicalEilenbergZilber
+from clesto.eilenberg_zilber import EilenbergZilber, EilenbergZilber_element
+from clesto.eilenberg_zilber import CubicalEilenbergZilber, CubicalEilenbergZilber_element
 
 
 class TestSurjection_element(unittest.TestCase):
@@ -47,11 +48,18 @@ class TestSurjection_element(unittest.TestCase):
 
     def test_call_simplicial(self):
         s = self.x
+        s.convention = 'McClure-Smith'
         x = EilenbergZilber.standard_element(3)
         ds_x = s.boundary()(x)
         d_sx = s(x).boundary()
-        sdx = s(x.boundary())
-        self.assertEqual(d_sx - ((-1)**(s.degree)) * sdx, ds_x)
+        s_dx = s(x.boundary())
+        self.assertEqual(d_sx - ((-1)**(s.degree)) * s_dx, ds_x)
+
+        x = EilenbergZilber_element({((0, 1, 2), (3, 4), (5, 6)): 1})
+        ds_x = s.boundary()(x, 2)
+        d_sx = s(x, 2).boundary()
+        s_dx = s(x.boundary(), 2)
+        self.assertEqual(d_sx - ((-1)**(s.degree)) * s_dx, ds_x)
 
     def test_call_cubical(self):
         s = self.x
@@ -67,12 +75,10 @@ class TestSurjection_element(unittest.TestCase):
                                convention='Berger-Fresse')
         y = Surjection_element({(3, 1, 2, 1, 4, 3): 1},
                                convention='Berger-Fresse')
-        dx = x.boundary()
-        dy = y.boundary()
+        dx, dy = x.boundary(), y.boundary()
+        dx_y, x_dy = dx.compose(y, i), x.compose(dy, i)
         xy = x.compose(y, i)
         d_xy = xy.boundary()
-        dx_y = dx.compose(y, i)
-        x_dy = x.compose(dy, i)
         self.assertEqual(d_xy - dx_y - (-1)**(x.degree) * x_dy, x.zero())
 
     def test_suspension(self):

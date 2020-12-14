@@ -48,8 +48,6 @@ class Surjection_element(Module_element):
             if convention not in {None, 'Berger-Fresse', 'McClure-Smith'}:
                 raise TypeError('convention must be Berger-Fresse or' +
                                 'McClure-Smith')
-            return
-
         if data:
             check_input_data(data)
         if convention is None:
@@ -105,7 +103,6 @@ class Surjection_element(Module_element):
 
         For elements in arity 2, the complexity agrees with the degree. For higher
         arity elements, it is the max of its arity 2 components.
-
 
         >>> Surjection_element({(1,2,1,3,1): 1}).complexity
         1
@@ -191,35 +188,33 @@ class Surjection_element(Module_element):
         (2,3,1,2,3)
 
         """
+
+        def check_input(self, other):
+            if not isinstance(other, SymmetricRing_element):
+                raise TypeError(
+                    f'Type int or SymmetricRing_element not {type(other)}')
+            if self.torsion != other.torsion:
+                raise TypeError('Unequal torsion attribute')
+            if self.arity != other.arity:
+                raise TypeError('Unequal arity attribute')
+
         def sign(perm, surj, convention):
             if convention == 'Berger-Fresse':
                 return 1
             assert convention == 'McClure-Smith'
-            signs = {0: 1, 1: -1}
             weights = [surj.count(i) - 1 for
                        i in range(1, max(surj) + 1)]
-            answer = 0
+            sign_exp = 0
             for idx, i in enumerate(perm):
                 right = [weights[perm.index(j)] for
                          j in perm[idx + 1:] if i > j]
-                answer += sum(right) * weights[idx]
-            return signs[answer % 2]
+                sign_exp += sum(right) * weights[idx]
+            return (-1)**(sign_exp % 2)
 
         if isinstance(other, int):
             return super().__rmul__(other)
 
-        if isinstance(other, SymmetricGroup_element):
-            return SymmetricRing_element({other: 1}, torsion=self.torsion)
-
-        if not isinstance(other, SymmetricRing_element):
-            raise TypeError(f'right mult. by type int or \
-                SymmetricRing_element not {type(other)}')
-
-        if self.torsion != other.torsion:
-            raise TypeError('Unequal torsion attribute')
-
-        if self.arity != other.arity:
-            raise TypeError('Unequal arity attribute')
+        check_input(self, other)
 
         answer = self.zero()
         for (k1, v1), (k2, v2) in product(self.items(), other.items()):
@@ -280,7 +275,16 @@ class Surjection_element(Module_element):
         - ((2,2),(1,2)) + ((2,1),(2,2)) + ((0,2),(2,2)) - ((2,2),(2,0))
 
         """
-        def _sign(k1, k2):
+
+        def check_input(self, other, coord=1):
+            if self.degree is None or self.arity is None:
+                raise TypeError('defined for homogeneous surjections')
+            if other.arity < coord:
+                raise TypeError(f'arity = {other.arity} < coord = {coord}')
+            if self.torsion != other.torsion:
+                raise TypeError('Unequal torsion attribute')
+
+        def compute_sign(k1, k2):
             """Returns the sign associated to a pair."""
             def ordering_sign(permu, weights):
                 """Returns the exponent of the Koszul sign of the given
@@ -320,12 +324,14 @@ class Surjection_element(Module_element):
             sign_exp += action_sign(ordered_k1, ordered_weights)
             return (-1)**sign_exp
 
-        def _simplicial(self, other):
+        def simplicial(self, other, coord):
             """Action on Eilenberg-Zilber elements."""
             answer = other.zero()
-            pre_join = other.iterated_diagonal(self.arity + self.degree - 1,
-                                               coord=coord)
+            times = self.arity + self.degree - 1
+            pre_join = other.iterated_diagonal(times, coord)
             for (k1, v1), (k2, v2) in product(self.items(), pre_join.items()):
+                i, j = coord - 1, coord + len(k1) - 1
+                left, k2, right = k2[:i], k2[i:j], k2[j:]
                 new_k = []
                 zero_summand = False
                 for i in range(1, max(k1) + 1):
@@ -341,11 +347,15 @@ class Surjection_element(Module_element):
                     if self.torsion == 2:
                         sign = 1
                     else:
-                        sign = _sign(k1, k2)
-                    answer += answer.create({tuple(new_k): sign * v1 * v2})
+                        sign = compute_sign(k1, k2)
+                        deg_left = sum(len(spx) - 1 for spx in left) % 2
+                        sign *= (-1)**(deg_left * self.degree)
+
+                    answer += answer.create({left + tuple(new_k) + right:
+                                             sign * v1 * v2})
             return answer
 
-        def _cubical(self, other):
+        def cubical(self, other):
             """Action on cubical Eilenberg-Zilber elements."""
             answer = other.zero()
             pre_join = other.iterated_diagonal(self.arity + self.degree - 1)
@@ -365,7 +375,7 @@ class Surjection_element(Module_element):
                     if self.torsion == 2:
                         sign = 1
                     else:
-                        sign = _sign(k1, k2)
+                        sign = compute_sign(k1, k2)
 
                     items_to_dist = [summand.items() for summand in to_dist]
                     for pairs in product(*items_to_dist):
@@ -377,18 +387,15 @@ class Surjection_element(Module_element):
 
         if not self or not other:
             return other.zero()
-        if other.arity < coord:
-            raise TypeError(f'arity = {other.arity} < coord = {coord}')
-        if self.degree is None or self.arity is None:
-            raise TypeError('defined for homogeneous surjections')
-        if self.torsion != other.torsion:
-            raise TypeError('Unequal torsion attribute')
+
+        check_input(self, other, coord=1)
+
         if isinstance(other, EilenbergZilber_element):
             if self.convention != 'McClure-Smith':
                 raise NotImplementedError
-            return _simplicial(self, other)
+            return simplicial(self, other, coord)
         elif isinstance(other, CubicalEilenbergZilber_element):
-            return _cubical(self, other)
+            return cubical(self, other)
         else:
             raise NotImplementedError
 

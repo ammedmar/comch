@@ -41,7 +41,6 @@ class BarrattEccles_element(Module_element):
                     chain.from_iterable(data.keys()))):
                 raise TypeError('keys must tuples of '
                                 + 'permutations of (1,2,...,r)')
-            return
 
         def prepare_data(data):
             """transform tuples to symmetric group elements."""

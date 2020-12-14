@@ -9,6 +9,5 @@ Module
 Symmetric
 ---------
 .. automodule:: clesto.basics.symmetric
-   :members:
-   
+   :members:   
 

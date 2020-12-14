@@ -9,10 +9,11 @@ class Module_element(Counter):
     default_torsion = 'free'
 
     def __init__(self, data=None, torsion=None):
-        """Initialize an instance of Module_element
+        """Initialize an instance of ``Module_element``
 
-        Create a new, empty Module_element object representing 0, and, if given,
-        initialize a Module_element from a dict with integer values.
+        Create a new, empty ``Module_element`` object representing 0, and,
+        if given, initialize a ``Module_element`` from a dict with integer
+        values.
 
         >>> print(Module_element())
         0
@@ -57,7 +58,7 @@ class Module_element(Counter):
         return hash(frozenset(self))
 
     def __add__(self, other):
-        """Addition: self + other
+        """Addition: *self* + *other*.
 
         >>> Module_element({'a': 1, 'b': 2}) + Module_element({'a': 1})
         Module_element({'a': 2, 'b': 2})
@@ -71,7 +72,7 @@ class Module_element(Counter):
         return answer
 
     def __sub__(self, other):
-        """Diference: self - other
+        """Diference: *self* - *other*.
 
         >>> Module_element({'a': 1, 'b': 2}) - Module_element({'a': 1})
         Module_element({'b': 2})
@@ -85,7 +86,7 @@ class Module_element(Counter):
         return answer
 
     def __rmul__(self, c):
-        """Integral scaling: c * self
+        """Integral scaling: *c* * *self*.
 
         >>> 3 * Module_element({'a':1, 'b':2})
         Module_element({'b': 6, 'a': 3})
@@ -98,7 +99,7 @@ class Module_element(Counter):
         return self.create(scaled)
 
     def __neg__(self):
-        """Additive inverse: - self
+        """Additive inverse: - *self*.
 
         >>> - Module_element({'a': 1, 'b': 2})
         Module_element({'a': -1, 'b': -2})
@@ -107,7 +108,7 @@ class Module_element(Counter):
         return self.__rmul__(-1)
 
     def __iadd__(self, other):
-        """In place addition: self + other
+        """In place addition: *self* += *other*.
 
         >>> x = Module_element({'a': 1, 'b': 2})
         >>> x += Module_element({'a': 3, 'b': 6})
@@ -122,7 +123,7 @@ class Module_element(Counter):
         return self
 
     def __isub__(self, other):
-        """In place difference: self - other
+        """In place difference: *self* -= *other*.
 
         >>> x = Module_element({'a': 1, 'b': 2})
         >>> x -= Module_element({'a': 3, 'b': 6})
@@ -137,10 +138,11 @@ class Module_element(Counter):
         return self
 
     def _reduce_rep(self):
-        """The preferred representative of the free module element
+        """The preferred representative of *self*.
 
-        It reduces all values mod n if torsion is n and removes
-        key:value pairs with value = 0.
+        The preferred representative has coefficient in {0,...,torsion-1}
+        if attribute torsion is not 'free', and no pairs key:value with
+        value = 0.
 
         >>> Module_element({'a': 1, 'b': 2, 'c': 0})
         Module_element({'b': 2, 'a': 1})
@@ -157,7 +159,7 @@ class Module_element(Counter):
             del self[key]
 
     def set_torsion(self, torsion):
-        """Sets the torsion of an element.
+        """Sets the torsion of *self*.
 
         >>> Module_element({'a': 1, 'b': 2}).set_torsion(2)
         Module_element({'a': 1})
@@ -168,7 +170,7 @@ class Module_element(Counter):
         return self
 
     def create(self, other=None):
-        """Instantiates data with the same type and attribute values as self.
+        """Instantiates data with same type and attribute values as *self*.
 
         >>> x =  Module_element({'a': 1})
         >>> x + x.create({'b': 1})
@@ -180,7 +182,7 @@ class Module_element(Counter):
         return answer
 
     def zero(self):
-        """Instantiates 0 with same type and attribute values as self.
+        """Instantiates 0 with same type and attribute values as *self*.
 
         >>> x = Module_element({'a': 1})
         >>> x + x.zero() == x

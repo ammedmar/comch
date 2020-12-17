@@ -2,7 +2,7 @@ import unittest
 from clesto.surjection import Surjection_element, Surjection
 from clesto.basics import SymmetricRing
 from clesto.eilenberg_zilber import EilenbergZilber, EilenbergZilber_element
-from clesto.eilenberg_zilber import CubicalEilenbergZilber, CubicalEilenbergZilber_element
+from clesto.eilenberg_zilber import CubicalEilenbergZilber
 
 
 class TestSurjection_element(unittest.TestCase):

@@ -65,7 +65,7 @@ class CubicalEilenbergZilber_element(Module_element):
         """
         string = str(self)
         string = string.replace('1', '[1]').replace('0', '[0]')
-        string = string.replace(',2', '[01]').replace('2,', '[01]')
+        string = string.replace('2,', '[01]').replace(',2', '[01]')
         string = string.replace(',),(', ' \otimes ')
         string = string.replace('),(', ' \otimes ')
         string = string.replace(')', '').replace('((', '')

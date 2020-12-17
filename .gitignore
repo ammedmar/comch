@@ -18,3 +18,6 @@ __pycache__/
 
 # Development
 dev.py
+
+# egg
+clesto.egg-info/

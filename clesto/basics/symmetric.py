@@ -6,11 +6,10 @@ class SymmetricGroup_element(tuple):
     """Element in a finite symmetric group."""
 
     def __init__(self, perm):
-        """Initializes a SymmetricGroup_element
+        """Initializes a ``SymmetricGroup_element``.
 
-        Create a SymmetricGroup_element from an iterable representing a
-        permutation of (1,2,...,r) which is thought of as an automorphism
-        of the set {1,...,r}.
+        Create a ``SymmetricGroup_element`` from an iterable representing a
+        permutation of (1,2,...,r) thought of as an automorphism of {1,...,r}.
 
         >>> print(SymmetricGroup_element((1,3,2)))
         (1,3,2)
@@ -25,9 +24,9 @@ class SymmetricGroup_element(tuple):
 
     @property
     def sign(self):
-        """Returns the sign of the symmetric group element
+        """Returns the sign of *self*.
 
-        The sign is defined as the  mod 2 number of transpositions
+        The sign is defined as the mod 2 number of transpositions
         required to express the element.
 
         >>> SymmetricGroup_element((5,2,4,3,1)).sign
@@ -64,7 +63,7 @@ class SymmetricGroup_element(tuple):
 
     @property
     def arity(self):
-        """Arity of self
+        """Arity of *self*
 
         The arity of a symmetric group element is defined as the
         cardinality of its domain.
@@ -87,9 +86,10 @@ class SymmetricGroup_element(tuple):
         return SymmetricGroup_element(inverse)
 
     def __mul__(self, other):
-        """Product: self * other
+        """Product: ``self`` * ``other``.
 
-        This product agrees with the composition of bijections: self o other.
+        This product agrees with the composition of bijections:
+        ``self`` o ``other``.
 
         >>> x = SymmetricGroup_element((1,3,2))
         >>> y = SymmetricGroup_element((2,3,1))
@@ -108,7 +108,7 @@ class SymmetricGroup_element(tuple):
         return SymmetricGroup_element(tuple(self[i - 1] for i in other))
 
     def __pow__(self, times):
-        """Iterated product of self: self * ... * self.
+        """Iterated product of ``self``: ``self`` * ... * ``self``.
 
         >>> x = SymmetricGroup_element((2,3,4,5,1))
         >>> print(x**5)
@@ -123,8 +123,8 @@ class SymmetricGroup_element(tuple):
 
         return answer
 
-    def compose(self, *others):
-        """Operadic compositions: self o_i other or self o others.
+    def compose(self, other, position):
+        """Operadic compositions: *self* o_*position* *other*.
 
         >>> x = SymmetricGroup_element((1,3,2))
         >>> y = SymmetricGroup_element((2,1))
@@ -132,24 +132,12 @@ class SymmetricGroup_element(tuple):
         (2,1,4,3)
 
         """
-        # partial composition
-        if len(others) == 2 and isinstance(others[1], int):
-            other, j = others
-            s = len(other) - 1
-            to_insert = tuple(i + j - 1 for i in other)
-            at = self.index(j)
-            shift = tuple(map(lambda i: i + s if i > j else i, self))
-            answer = shift[:at] + to_insert + shift[at + 1:]
-            return SymmetricGroup_element(answer)
-
-        # total composition
-        else:
-            if len(others) != self.arity:
-                raise TypeError('argument number must equal the arity of self')
-            answer = self
-            for idx, other in reversed(list(enumerate(others))):
-                answer = answer.compose(other, idx + 1)
-            return answer
+        s = len(other) - 1
+        to_insert = tuple(i + position - 1 for i in other)
+        at = self.index(position)
+        shift = tuple(map(lambda i: i + s if i > position else i, self))
+        answer = shift[:at] + to_insert + shift[at + 1:]
+        return SymmetricGroup_element(answer)
 
 
 class SymmetricRing_element(Module_element):
@@ -158,11 +146,11 @@ class SymmetricRing_element(Module_element):
     """
 
     def __init__(self, data=None, torsion=None):
-        """Initialize a Symmetric ring element
+        """Initialize a ``SymmetricRing_element``
 
-        Create an element representing 0, and, if given, initialize a
-        SymmetricRing_element from a dict with integer values and
-        SymmetricGroup_element keys or tuples representing them.
+        Create a ``SymmetricRing_element`` representing 0, and, if given,
+        initialize a ``SymmetricRing_element`` from a dict with integer values
+        and ``SymmetricGroup_element`` keys or tuples representing them.
 
         """
         if data:
@@ -185,10 +173,10 @@ class SymmetricRing_element(Module_element):
 
     @property
     def arity(self):
-        """Return the arity of self if it is homogeneous and None otherwise
+        """Return the arity of *self* if homogeneous and ``None`` otherwise.
 
-        self is said to be homogeneous if all basis elements are of the same
-        arity.
+        *self* is said to be homogeneous if all basis elements belong to the
+        same arity.
 
         >>> SymmetricRing_element({(5,2,4,3,1): 1}).arity
         5
@@ -205,7 +193,7 @@ class SymmetricRing_element(Module_element):
         return arities.pop()
 
     def __mul__(self, other):
-        """Linear product in the symmetric group ring: self * other.
+        """Linear product in the symmetric group ring: *self* * *other*.
 
         >>> p = SymmetricRing_element({(4,3,2,1): 1, (1,2,3,4): 2})
         >>> print(3 * p)
@@ -233,7 +221,7 @@ class SymmetricRing_element(Module_element):
         return answer
 
     def __pow__(self, times):
-        """Iterated product of self: self * ... * self.
+        """Iterated product of *self*: *self* * ... * *self*.
 
         >>> p = SymmetricRing_element({(4,3,2,1): 1, (1,2,3,4): 2})
         >>> p ** 2
@@ -247,8 +235,8 @@ class SymmetricRing_element(Module_element):
             answer += self.create({k**times: v})
         return answer
 
-    def compose(self, *others):
-        """Linear operadic compositions: self o_i other or self o others.
+    def compose(self, other, position):
+        """Linear operadic compositions: *self* o_position *other*.
 
         >>> x = SymmetricRing_element({(2,3,1): 1, (1,2,3): -1})
         >>> y = SymmetricRing_element({(2,1): 1, (1,2): 1})
@@ -259,29 +247,16 @@ class SymmetricRing_element(Module_element):
         if not self:
             return self.zero()
 
-        # partial composition
-        if len(others) == 2 and isinstance(others[1], int):
+        if self.torsion != other.torsion:
+            raise TypeError('Unequal attribute torsion')
 
-            other, j = others
-            if self.torsion != other.torsion:
-                raise TypeError('elements must have equal torsion')
-
-            answer = self.zero()
-            for (k1, v1), (k2, v2) in product(self.items(), other.items()):
-                new_k = k1.compose(k2, j)
-                new_v = v1 * v2
-                to_add = self.create({new_k: new_v})
-                answer += to_add
-            return answer
-
-        # total composition
-        else:
-            if len(others) != self.arity:
-                raise TypeError('argument number must equal arity of self')
-            answer = self
-            for idx, other in reversed(list(enumerate(others))):
-                answer = answer.compose(other, idx + 1)
-            return answer
+        answer = self.zero()
+        for (k1, v1), (k2, v2) in product(self.items(), other.items()):
+            new_k = k1.compose(k2, position)
+            new_v = v1 * v2
+            to_add = self.create({new_k: new_v})
+            answer += to_add
+        return answer
 
 
 class SymmetricRing():

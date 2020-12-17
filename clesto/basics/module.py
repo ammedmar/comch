@@ -131,7 +131,7 @@ class Module_element(Counter):
         ----------
 
         other : int
-            The element to scale current (*self*) by. 
+            The element to scale current (*self*) by.
 
         Returns
         -------
@@ -224,7 +224,7 @@ class Module_element(Counter):
         The preferred representative has coefficient in {0,...,torsion-1}
         if attribute torsion is not 'free', and no pairs key:value with
         value = 0.
-        
+
         Example
         -------
 
@@ -287,7 +287,7 @@ class Module_element(Counter):
         """
         answer = type(self)(other)
         answer.__dict__ = self.__dict__
-        return
+        return answer
 
     def zero(self):
         """Instantiates 0 with same type and attribute values as *self*.

@@ -250,8 +250,6 @@ class BarrattEccles_element(Module_element):
     def table_reduction(self):
         """Table reduction of self
 
-        As defined by Berger-Fresse.
-
         >>> b = BarrattEccles_element({((1,2,3,4), (1,4,3,2), (1,2,4,3)): 1})
         >>> print(b.table_reduction())
         (1,2,4,2,4,3) + (1,2,4,3,2,3)

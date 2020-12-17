@@ -55,8 +55,7 @@ class CubicalEilenbergZilber_element(Module_element):
     def _latex_(self):
         """Representation in Latex.
 
-        Example
-        -------
+        ERROR: (2,2) --> [01]2 since no coma is left
 
         >>> x = CubicalEilenbergZilber_element({((2,), (1,)): 1, ((0,), (2,)): 1})
         >>> print(x._latex_())

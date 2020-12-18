@@ -11,11 +11,11 @@ from .surjection import Surjection_element
 
 from .simplicial import Simplex
 from .simplicial import SimplicialEZ_element
-from .simplicial import SimplicialEZ_element_element
+from .simplicial import SimplicialEZ
 
 from .cubical import Cube
 from .cubical import CubicalEZ_element
-from .cubical import CubicalEZ_element_element
+from .cubical import CubicalEZ
 
 __all__ = [
     'Module_element',
@@ -28,8 +28,8 @@ __all__ = [
     'Surjection',
     'Simplex',
     'SimplicialEZ_element',
-    'SimplicialEZ_element_element',
+    'SimplicialEZ',
     'Cube',
-    'CubicalEZ_element_element',
-    'CubicalEZ_element'
+    'CubicalEZ_element',
+    'CubicalEZ'
 ]

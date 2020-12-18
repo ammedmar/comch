@@ -25,3 +25,9 @@ clesto.egg-info/
 # sublime text
 *.sublime-project
 *.sublime-workspace
+
+# development
+necklace.py
+
+# temp
+temp/

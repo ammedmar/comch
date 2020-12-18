@@ -2,8 +2,8 @@ from ..module import Module_element
 from ..symmetric import SymmetricGroup_element
 from ..symmetric import SymmetricRing_element, SymmetricRing
 
-from ..simplicial import Simplex, SimplicialEZ_element_element
-from ..cubical import CubicalEZ_element_element
+from ..simplicial import Simplex, SimplicialEZ_element
+from ..cubical import CubicalEZ_element
 from ..utils import pairwise
 
 from itertools import chain, combinations, product, combinations_with_replacement
@@ -15,7 +15,19 @@ from math import floor, factorial
 class Surjection_element(Module_element):
     """Elements in the surjection operad
 
-    As defined in:
+    Examples
+    --------
+
+    >>> s = Surjection_element()
+    >>> print(s)
+    0
+    >>> s = Surjection_element({(1,2,1,3,1,3): 1})
+    >>> print(s)
+    (1,2,1,3,1,3)
+
+
+    References
+    ----------
 
     [McS]: J. McClure, and J. Smith. "Multivariable cochain operations and little
     n-cubes." Journal of the American Mathematical Society 16.3 (2003): 681-704.
@@ -29,27 +41,6 @@ class Surjection_element(Module_element):
     default_convention = 'Berger-Fresse'
 
     def __init__(self, data=None, torsion=None, convention=None):
-        """Initialize an instance of Surjection_element
-
-        Create a new, empty Surjection_element object representing 0, and, if
-        given, initialize a Surjection_element from a dict with tuple of int keys
-        and int values.
-
-        """
-        def check_input_data(data):
-            if not (isinstance(data, dict)
-                    and all(isinstance(surj, tuple) for surj in data.keys())
-                    and all(isinstance(i, int) for i in
-                            chain.from_iterable(data.keys()))
-                    ):
-                raise TypeError(
-                    'data type must be dict with tuple of int keys')
-
-            if convention not in {None, 'Berger-Fresse', 'McClure-Smith'}:
-                raise TypeError('convention must be Berger-Fresse or' +
-                                'McClure-Smith')
-        if data:
-            check_input_data(data)
         if convention is None:
             convention = Surjection_element.default_convention
         self.convention = convention
@@ -194,7 +185,7 @@ class Surjection_element(Module_element):
                 raise TypeError(
                     f'Type int or SymmetricRing_element not {type(other)}')
             if self.torsion != other.torsion:
-                raise TypeError('Unequal torsion attribute')
+                raise TypeError('only defined for equal attribute torsion')
             if self.arity != other.arity:
                 raise TypeError('Unequal arity attribute')
 
@@ -262,14 +253,14 @@ class Surjection_element(Module_element):
         cube or simplex represented by an arity 1 element in the (cubical)
         Eilenberg-Zilber operad.
 
-        >>> from clesto.simplicial import SimplicialEZ_element
+        >>> from clesto.simplicial import SimplicialEZ
         >>> s = Surjection_element({(1,2,1):1}, convention='McClure-Smith')
-        >>> x = SimplicialEZ_element.standard_element(2)
+        >>> x = SimplicialEZ.standard_element(2)
         >>> print(s(x))
         - ((0,1,2),(0,1)) + ((0,2),(0,1,2)) - ((0,1,2),(1,2))
 
-        >>> from clesto.cubical import CubicalEZ_element
-        >>> x = CubicalEZ_element.standard_element(2)
+        >>> from clesto.cubical import CubicalEZ
+        >>> x = CubicalEZ.standard_element(2)
         >>> print(s(x))
         - ((2,2),(1,2)) + ((2,1),(2,2)) + ((0,2),(2,2)) - ((2,2),(2,0))
 
@@ -281,7 +272,7 @@ class Surjection_element(Module_element):
             if other.arity < coord:
                 raise TypeError(f'arity = {other.arity} < coord = {coord}')
             if self.torsion != other.torsion:
-                raise TypeError('Unequal torsion attribute')
+                raise TypeError('only defined for equal attribute torsion')
 
         def compute_sign(k1, k2):
             """Returns the sign associated to a pair."""
@@ -389,11 +380,11 @@ class Surjection_element(Module_element):
 
         check_input(self, other, coord=1)
 
-        if isinstance(other, SimplicialEZ_element_element):
+        if isinstance(other, SimplicialEZ_element):
             if self.convention != 'McClure-Smith':
                 raise NotImplementedError
             return simplicial(self, other, coord)
-        elif isinstance(other, CubicalEZ_element_element):
+        elif isinstance(other, CubicalEZ_element):
             return cubical(self, other)
         else:
             raise NotImplementedError
@@ -489,13 +480,10 @@ class Surjection_element(Module_element):
         """
         if not self:
             return self
-
         if self.arity is None or self.degree is None:
             raise TypeError('defined for homogeneous elements only')
-
         if self.convention != 'Berger-Fresse':
             raise NotImplementedError
-
         answer = self.zero()
         for k, v in self.items():
             nonzero = False
@@ -507,7 +495,6 @@ class Surjection_element(Module_element):
                 pass
             if nonzero:
                 answer += self.create({k[self.arity - 1:]: v * sign})
-
         return answer
 
     def _reduce_rep(self):

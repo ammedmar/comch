@@ -25,27 +25,18 @@ class Cube(tuple):
         return Cube(answer)
 
 
-class CubicalEZ_element_element(Module_element):
+class CubicalEZ_element(Module_element):
     """..."""
 
-    dimenion: int = None
-
     def __init__(self, data=None, torsion=None):
-        """..."""
-
         if data:
             new_data = {}
             for k, v in data.items():
-                dim_k = set(len(cube) for cube in k)
-                if len(dim_k) != 1:
-                    raise TypeError('some faces have different length')
                 new_k = tuple(Cube(cube) for cube in k)
                 new_data[new_k] = v
             data = new_data
-            dimension = dim_k.pop()  # they are all equal, using last.
-            self.dimension = dimension
 
-        super(CubicalEZ_element_element, self).__init__(
+        super(CubicalEZ_element, self).__init__(
             data=data, torsion=torsion)
 
     def __str__(self):
@@ -53,11 +44,11 @@ class CubicalEZ_element_element(Module_element):
         return string.replace(', ', ',')
 
     def _latex_(self):
-        """Representation in Latex.
+        r"""Representation in Latex.
 
         ERROR: (2,2) --> [01]2 since no coma is left
 
-        >>> x = CubicalEZ_element_element({((2,), (1,)): 1, ((0,), (2,)): 1})
+        >>> x = CubicalEZ_element({((2,), (1,)): 1, ((0,), (2,)): 1})
         >>> print(x._latex_())
         [01] \otimes [1] + [0] \otimes [01]
 
@@ -65,8 +56,8 @@ class CubicalEZ_element_element(Module_element):
         string = str(self)
         string = string.replace('1', '[1]').replace('0', '[0]')
         string = string.replace('2,', '[01]').replace(',2', '[01]')
-        string = string.replace(',),(', ' \otimes ')
-        string = string.replace('),(', ' \otimes ')
+        string = string.replace(',),(', r' \otimes ')
+        string = string.replace('),(', r' \otimes ')
         string = string.replace(')', '').replace('((', '')
         string = string.replace(')', '').replace('))', '')
         string = string.replace(',', '')
@@ -95,7 +86,7 @@ class CubicalEZ_element_element(Module_element):
 
         # squares to zero
 
-        >>> elmt = CubicalEZ_element_element({((0, 2), (2, 1), (2, 0)): 1})
+        >>> elmt = CubicalEZ_element({((0, 2), (2, 1), (2, 0)): 1})
         >>> print(elmt.boundary().boundary())
         0
 
@@ -120,7 +111,7 @@ class CubicalEZ_element_element(Module_element):
 
         # chain map check:
 
-        >>> x = CubicalEZ_element_element({((0, 2, 2, 1, 2),): 1})
+        >>> x = CubicalEZ_element({((0, 2, 2, 1, 2),): 1})
         >>> d_delta_x = x.iterated_diagonal(2).boundary()
         >>> delta_d_x = x.boundary().iterated_diagonal(2)
         >>> d_delta_x == delta_d_x
@@ -179,7 +170,7 @@ class CubicalEZ_element_element(Module_element):
 
         # boundary of the join
 
-        >>> x = CubicalEZ_element_element({((0, 0, 1), \
+        >>> x = CubicalEZ_element({((0, 0, 1), \
                                                  (1, 0, 0)): 1})
         >>> print(x.join().boundary() + x.boundary().join())
         ((1,0,0),) - ((0,0,1),)
@@ -221,7 +212,7 @@ class CubicalEZ_element_element(Module_element):
 
         answer = self.zero()
         for k, v in self.items():
-            for inds in combinations(range(self.dimension), self.arity - 1):
+            for inds in combinations(range(len(k[0])), self.arity - 1):
                 skip = False
                 for i, (cube1, cube2) in zip(inds, pairwise(k)):
                     if (is_zero(cube1.intervals, i) or
@@ -243,9 +234,9 @@ class CubicalEZ_element_element(Module_element):
         return answer
 
 
-class CubicalEZ_element:
+class CubicalEZ:
     """.."""
 
     def standard_element(n, torsion=None):
         """..."""
-        return CubicalEZ_element_element({((2,) * n, ): 1}, torsion=torsion)
+        return CubicalEZ_element({((2,) * n, ): 1}, torsion=torsion)

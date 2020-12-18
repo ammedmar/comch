@@ -1,22 +1,17 @@
 from clesto.module import Module_element
-from itertools import chain, product
+from itertools import product
 
 
 class SymmetricGroup_element(tuple):
-    """Element in a finite symmetric group."""
+    """Element in a finite symmetric group.
 
-    def __init__(self, perm):
-        """Initializes a ``SymmetricGroup_element``.
+    Create a ``SymmetricGroup_element`` from an iterable representing a
+    permutation of (1,2,...,r) thought of as an automorphism of {1,...,r}.
 
-        Create a ``SymmetricGroup_element`` from an iterable representing a
-        permutation of (1,2,...,r) thought of as an automorphism of {1,...,r}.
+    >>> print(SymmetricGroup_element((1,3,2)))
+    (1,3,2)
 
-        >>> print(SymmetricGroup_element((1,3,2)))
-        (1,3,2)
-
-        """
-        if set(perm) != set(range(1, len(perm) + 1)):
-            raise TypeError('must be a permutations of (1,2,...,r)')
+    """
 
     def __str__(self):
         s = super().__str__()
@@ -58,6 +53,9 @@ class SymmetricGroup_element(tuple):
 
             return cycles
 
+        if set(self) != set(range(1, len(self) + 1)):
+            raise TypeError(f'defined for permutations of (1,...,r) ' +
+                            f'only not {self}')
         cycles = to_cycles(self)
         return (-1)**sum(len(cycle) - 1 for cycle in cycles)
 
@@ -86,10 +84,10 @@ class SymmetricGroup_element(tuple):
         return SymmetricGroup_element(inverse)
 
     def __mul__(self, other):
-        """Product: ``self`` * ``other``.
+        """Product: *self* * *other*.
 
         This product agrees with the composition of bijections:
-        ``self`` o ``other``.
+        *self* o *other*.
 
         >>> x = SymmetricGroup_element((1,3,2))
         >>> y = SymmetricGroup_element((2,3,1))
@@ -108,7 +106,7 @@ class SymmetricGroup_element(tuple):
         return SymmetricGroup_element(tuple(self[i - 1] for i in other))
 
     def __pow__(self, times):
-        """Iterated product of ``self``: ``self`` * ... * ``self``.
+        """Iterated product of *self*: *self* * ... * *self*.
 
         >>> x = SymmetricGroup_element((2,3,4,5,1))
         >>> print(x**5)
@@ -146,22 +144,7 @@ class SymmetricRing_element(Module_element):
     """
 
     def __init__(self, data=None, torsion=None):
-        """Initialize a ``SymmetricRing_element``
-
-        Create a ``SymmetricRing_element`` representing 0, and, if given,
-        initialize a ``SymmetricRing_element`` from a dict with integer values
-        and ``SymmetricGroup_element`` keys or tuples representing them.
-
-        """
         if data:
-            if not (isinstance(data, dict)
-                    and all(isinstance(perm, tuple) for perm in data.keys())
-                    and all(isinstance(i, int) for i in
-                            chain.from_iterable(data.keys()))
-                    ):
-                raise TypeError(
-                    'data type must be dict with tuple of int keys')
-
             data = {SymmetricGroup_element(k): v for k, v in data.items()}
 
         super(SymmetricRing_element, self).__init__(data=data,
@@ -211,7 +194,7 @@ class SymmetricRing_element(Module_element):
             return other.__rmul__(self)
 
         if self.torsion != other.torsion:
-            raise TypeError('Unequal torsion attribute')
+            raise TypeError('only defined for equal attribute torsion')
 
         answer = self.zero()
         for (k1, v1), (k2, v2) in product(self.items(), other.items()):
@@ -248,7 +231,7 @@ class SymmetricRing_element(Module_element):
             return self.zero()
 
         if self.torsion != other.torsion:
-            raise TypeError('Unequal attribute torsion')
+            raise TypeError('only defined for equal attribute torsion')
 
         answer = self.zero()
         for (k1, v1), (k2, v2) in product(self.items(), other.items()):

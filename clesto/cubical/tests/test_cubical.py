@@ -1,13 +1,13 @@
 import unittest
-from clesto.simplicial import SimplicialEZ_element_element
+from clesto.simplicial import SimplicialEZ_element
 from clesto.symmetric import SymmetricRing
 
 
 class TestBarrattEccles_element(unittest.TestCase):
     def setUp(self):
-        self.x = SimplicialEZ_element_element({((0,), (0, 1, 2)): 1,
-                                               ((0, 1), (1, 2)): -1,
-                                               ((0, 1, 2), (2,)): 1})
+        self.x = SimplicialEZ_element({((0,), (0, 1, 2)): 1,
+                                       ((0, 1), (1, 2)): -1,
+                                       ((0, 1, 2), (2,)): 1})
 
     def test_arity(self):
         self.assertEqual(self.x.arity, 2)

@@ -5,7 +5,6 @@ class Module_element(Counter):
     """Elements in a free module over :math:`\\mathbb{Z}` or
     :math:`\\mathbb{Z}/n \\mathbb{Z}`.
 
-
     Parameters
     ----------
 
@@ -18,6 +17,7 @@ class Module_element(Counter):
 
     Attributes
     ----------
+
     torsion : int or 'free', default 'free'
         The torsion of the underlying ring :math:`\\mathbb{Z}` or
         :math:`\\mathbb{Z}/n \\mathbb{Z}`
@@ -35,8 +35,10 @@ class Module_element(Counter):
     default_torsion = 'free'
 
     def __init__(self, data=None, torsion=None):
+
         if torsion is None:
             torsion = type(self).default_torsion
+
         self.torsion = torsion
 
         super(Module_element, self).__init__(data)
@@ -73,12 +75,12 @@ class Module_element(Counter):
         ----------
 
         other : :class:`clesto.basics.module.Module_element` object
-            The element to add to current (*self*)
+            The element to add to *self*.
 
         Returns
         -------
 
-        answer : :class:`clesto.basics.module.Module_element` object
+        :class:`clesto.basics.module.Module_element` object
             The sum of *self* and *other*.
 
         Example
@@ -89,7 +91,7 @@ class Module_element(Counter):
 
         """
         if self.torsion != other.torsion:
-            raise TypeError('Unequal torsion attribute')
+            raise TypeError('only defined for equal attribute torsion')
         answer = self.create(self)
         answer.update(other)
         answer._reduce_rep()
@@ -102,12 +104,12 @@ class Module_element(Counter):
         ----------
 
         other : :class:`clesto.basics.module.Module_element` object
-            The element to substract from current (*self*)
+            The element to substract from *self*.
 
         Returns
         -------
 
-        answer : :class:`clesto.basics.module.Module_element` object
+        :class:`clesto.basics.module.Module_element` object
             The difference of *self* and *other*.
 
         Example
@@ -118,7 +120,7 @@ class Module_element(Counter):
 
         """
         if self.torsion != other.torsion:
-            raise TypeError('Unequal torsion attribute')
+            raise TypeError('only defined for equal attribute torsion')
         answer = self.create(self)
         answer.subtract(other)
         answer._reduce_rep()
@@ -131,12 +133,12 @@ class Module_element(Counter):
         ----------
 
         other : int
-            The element to scale current (*self*) by.
+            The element to scale *self*. by.
 
         Returns
         -------
 
-        answer : :class:`clesto.basics.module.Module_element` object
+        :class:`clesto.basics.module.Module_element` object
             The scaling of *self* by *other*.
 
         Example
@@ -147,7 +149,7 @@ class Module_element(Counter):
 
         """
         if not isinstance(c, int):
-            raise TypeError(f'can not act by non-int of type {type(c)}')
+            raise TypeError(f'Act only by int not by type {type(c)}')
 
         scaled = {k: c * v for k, v in self.items()}
         return self.create(scaled)
@@ -158,8 +160,8 @@ class Module_element(Counter):
         Returns
         -------
 
-        answer : :class:`clesto.basics.module.Module_element` object
-            the additive inverse of current (*self*)
+        :class:`clesto.basics.module.Module_element` object
+            the additive inverse of *self*.
 
         Example
         -------
@@ -177,7 +179,7 @@ class Module_element(Counter):
         ----------
 
         other : :class:`clesto.basics.module.Module_element` object
-            The element to add to current (*self*)
+            The element to add to *self*.
 
         Example
         -------
@@ -189,7 +191,7 @@ class Module_element(Counter):
 
         """
         if self.torsion != other.torsion:
-            raise TypeError('Unequal torsion attribute')
+            raise TypeError('only defined for equal attribute torsion')
         self.update(other)
         self._reduce_rep()
         return self
@@ -201,7 +203,7 @@ class Module_element(Counter):
         ----------
 
         other : :class:`clesto.basics.module.Module_element` object
-            The element to substract from current (*self*)
+            The element to substract from *self*.
 
         Example
         -------
@@ -213,7 +215,7 @@ class Module_element(Counter):
 
         """
         if self.torsion != other.torsion:
-            raise TypeError('Unequal torsion attribute')
+            raise TypeError('only defined for equal attribute torsion')
         self.subtract(other)
         self._reduce_rep()
         return self

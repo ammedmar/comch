@@ -3,11 +3,11 @@ Basics
 
 Module
 ------
-.. automodule:: clesto.basics.module
+.. automodule:: clesto.module.module
    :members:
 
 Symmetric
 ---------
-.. automodule:: clesto.basics.symmetric
+.. automodule:: clesto.symmetric.symmetric
    :members:   
 

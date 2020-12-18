@@ -5,13 +5,25 @@ from ..symmetric import SymmetricRing_element, SymmetricRing
 
 from ..surjection import Surjection_element
 from ..utils import partitions, pairwise
-from itertools import chain, product
+from itertools import product
 
 
 class BarrattEccles_element(Module_element):
     """Elements in the Barratt-Eccles operad
 
-    As defined in:
+    Examples
+    --------
+
+    >>> x = BarrattEccles_element()
+    >>> print(x)
+    0
+    >>> y = BarrattEccles_element({((1,3,2), (2,1,3)): -1})
+    >>> print(y)
+    - ((1,3,2),(2,1,3))
+
+
+    References
+    ----------
 
     [BF]: C. Berger, and B. Fresse. "Combinatorial operad actions on cochains."
     Mathematical Proceedings of the Cambridge Philosophical Society. Vol. 137.
@@ -20,44 +32,14 @@ class BarrattEccles_element(Module_element):
     """
 
     def __init__(self, data=None, torsion=None):
-        """Initialize an instance of BarrattEccles_element
-
-        Create a new, empty BarrattEccles_element object representing 0, and,
-        if given, initialize a BarrattEccles_element from a dict with tuple of
-        tuple of int keys and int values.
-
-        """
-        def check_input_data(data):
-            if not (isinstance(data, dict)
-                    and all(isinstance(x, tuple) for x in data.keys())
-                    and all(isinstance(perm, tuple) for perm in
-                            chain.from_iterable(data.keys()))
-                    and all(isinstance(i, int) for i in
-                            chain.from_iterable(chain.from_iterable(data.keys())))
-                    ):
-                raise TypeError('data type must be dict '
-                                + 'with tuple of tuple of int keys')
-
-            if any((set(perm) != set(range(1, len(perm) + 1)) for perm in
-                    chain.from_iterable(data.keys()))):
-                raise TypeError('keys must tuples of '
-                                + 'permutations of (1,2,...,r)')
-
-        def prepare_data(data):
-            """transform tuples to symmetric group elements."""
+        if data:
             new_data = {}
             for k, v in data.items():
                 new_key = tuple(SymmetricGroup_element(pi) for pi in k)
                 new_data[new_key] = v
-            return new_data
+            data = new_data
 
-        if data:
-            check_input_data(data)
-            data = prepare_data(data)
-
-        # initializing element
-        super(BarrattEccles_element, self).__init__(data=data,
-                                                    torsion=torsion)
+        super(BarrattEccles_element, self).__init__(data=data, torsion=torsion)
 
     def __str__(self):
         string = super().__str__()
@@ -149,7 +131,7 @@ class BarrattEccles_element(Module_element):
             raise NotImplementedError
 
         if self.torsion != other.torsion:
-            raise TypeError('Unequal torsion attribute')
+            raise TypeError('only defined for equal attribute torsion')
 
         if self.arity != other.arity:
             raise TypeError('Unequal arity attribute')
@@ -203,7 +185,7 @@ class BarrattEccles_element(Module_element):
         def check_input(self, other, position):
             """Homogeneous, equal torsion, and position less than arity."""
             if self.torsion != other.torsion:
-                raise TypeError('Unequal torsion attribute')
+                raise TypeError('only defined for equal attribute torsion')
             if not self or not other:
                 return self.zero()
             if None in [self.arity, other.arity, self.degree, other.degree]:

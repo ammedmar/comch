@@ -60,7 +60,7 @@ class Simplex(tuple):
         return empty_simplex or conseq_values
 
 
-class SimplicialEZ_element_element(Module_element):
+class SimplicialEZ_element(Module_element):
     """Element in the Eilenberg-Zilber operad
 
     This operad is the chain complex of natural transformations from
@@ -79,18 +79,18 @@ class SimplicialEZ_element_element(Module_element):
     """
 
     def __init__(self, data=None, dimension=None, torsion=None):
-        """Initialize an instance of SimplicialEZ_element_element
+        """Initialize an instance of SimplicialEZ_element
 
-        Create a new, empty SimplicialEZ_element_element object representing 0,
-        and, if given, initialize a SimplicialEZ_element_element from a dict with
-        tuple of tuple of int keys and int values.
+        Create a new, empty SimplicialEZ_element object representing
+        0, and, if given, initialize a SimplicialEZ_element from a
+        dict with tuple of tuple of int keys and int values.
 
         Note: this corresponds to the element in the sequence representing a
         natural transformation at the given dimension.
 
-        >>> x = SimplicialEZ_element_element({((0,), (0, 1, 2)): 1, \
-                                         ((0, 1), (1, 2)): -1, \
-                                         ((0, 1, 2), (2,)): 1})
+        >>> x = SimplicialEZ_element({((0,), (0, 1, 2)): 1,\
+                                              ((0, 1), (1, 2)): -1,\
+                                              ((0, 1, 2), (2,)): 1})
         """
 
         if data:
@@ -105,26 +105,24 @@ class SimplicialEZ_element_element(Module_element):
 
         self.dimension = dimension
 
-        super(SimplicialEZ_element_element, self).__init__(data=data,
-                                                           torsion=torsion)
+        super(SimplicialEZ_element, self).__init__(data=data,
+                                                   torsion=torsion)
 
     def __str__(self):
         string = super().__str__()
         return string.replace(', ', ',')
 
     def _latex_(self):
-        """Representation in LaTex.
+        r"""Representation in LaTex.
 
-        >>> x = SimplicialEZ_element_element({((0,), (0, 1, 2)): 1, \
-                                         ((0, 1), (1, 2)): -1, \
-                                         ((0, 1, 2), (2,)): 1})
+        >>> x = SimplicialEZ_element({((0,), (0, 1, 2)): 1})
         >>> print(x._latex_())
-        [0] \otimes [0,1,2] - [0,1] \otimes [1,2] + [0,1,2] \otimes [2]
+        [0] \otimes [0,1,2]
 
         """
         string = str(self)
-        string = string.replace(',),(', '] \otimes [')
-        string = string.replace('),(', '] \otimes [')
+        string = string.replace(',),(', r'] \otimes [')
+        string = string.replace('),(', r'] \otimes [')
         string = string.replace('((', '[')
         string = string.replace(',))', ']').replace('),)', ']')
         string = string.replace('))', ']')
@@ -138,7 +136,7 @@ class SimplicialEZ_element_element(Module_element):
         Defined as None if self is not homogeneous. The arity of a basis
         element corresponds to the number of simplices it contains.
 
-        >>> x = SimplicialEZ_element_element({((0,), (0, 1, 2)): 1})
+        >>> x = SimplicialEZ_element({((0,), (0, 1, 2)): 1})
         >>> x.arity
         2
 
@@ -156,7 +154,7 @@ class SimplicialEZ_element_element(Module_element):
         element agrees with the sum of the dimension of the simplices it
         contains.
 
-        >>> x = SimplicialEZ_element_element({((0,), (0, 1, 2)): 1})
+        >>> x = SimplicialEZ_element({((0,), (0, 1, 2)): 1})
         >>> x.degree
         2
 
@@ -171,7 +169,7 @@ class SimplicialEZ_element_element(Module_element):
 
         Defined as the boundary of a tensor product of chains complexes.
 
-        >>> x = SimplicialEZ_element_element({((0, 1), (1, 2)): 1})
+        >>> x = SimplicialEZ_element({((0, 1), (1, 2)): 1})
         >>> print(x.boundary())
         ((1,),(1,2)) - ((0,),(1,2)) - ((0,1),(2,)) + ((0,1),(1,))
 
@@ -192,7 +190,7 @@ class SimplicialEZ_element_element(Module_element):
 
         Left multiplication by a symmetric ring element or an integer.
 
-        >>> x = SimplicialEZ_element_element({((0, 1), (1, 2)): 1})
+        >>> x = SimplicialEZ_element({((0, 1), (1, 2)): 1})
         >>> t = SymmetricRing_element({(2, 1): 1})
         >>> print(t * x)
         - ((1,2),(0,1))
@@ -207,7 +205,7 @@ class SimplicialEZ_element_element(Module_element):
                 raise TypeError(f'right mult. by type int or \
                     SymmetricRing_element not {type(other)}')
             if self.torsion != other.torsion:
-                raise TypeError('Unequal torsion attribute')
+                raise TypeError('only defined for equal attribute torsion')
             if self.arity != other.arity:
                 raise TypeError('Unequal arity attribute')
 
@@ -276,7 +274,7 @@ class SimplicialEZ_element_element(Module_element):
 
         # chain map check:
 
-        >>> x = SimplicialEZ_element_element({((0, 1, 2), ): 1})
+        >>> x = SimplicialEZ_element({((0, 1, 2), ): 1})
         >>> dx = x.boundary()
         >>> dx.iterated_diagonal(3) == x.iterated_diagonal(3).boundary()
         True
@@ -301,18 +299,18 @@ class SimplicialEZ_element_element(Module_element):
         return answer
 
 
-class SimplicialEZ_element():
+class SimplicialEZ():
     """Class producing Eilenberg-Zilber elements of special interest."""
 
     def standard_element(n, torsion=None):
-        return SimplicialEZ_element_element({(tuple(range(n + 1)), ): 1},
-                                            torsion=torsion)
+        return SimplicialEZ_element({(tuple(range(n + 1)), ): 1},
+                                    torsion=torsion)
 
     def boundary_element(n, torsion=None):
         """..."""
 
         sign = {0: 1, 1: -1}
-        answer = SimplicialEZ_element_element(dimension=n, torsion=torsion)
+        answer = SimplicialEZ_element(dimension=n, torsion=torsion)
         spx = Simplex(range(n + 1))
         for i in range(n + 1):
             new_k = (spx[:i] + spx[i + 1:], )
@@ -322,7 +320,7 @@ class SimplicialEZ_element():
     def coproduct_element(n, torsion=None):
         """..."""
 
-        answer = SimplicialEZ_element_element(dimension=n, torsion=torsion)
+        answer = SimplicialEZ_element(dimension=n, torsion=torsion)
         spx = Simplex(range(n + 1))
         for i in range(1, n + 2):
             new_k = (spx[:i], spx[i - 1:])

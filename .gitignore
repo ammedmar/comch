@@ -5,7 +5,7 @@
 *.pyc
 
 # Built docs
-docs/build
+doc/build
 
 # cache
 __pycache__/

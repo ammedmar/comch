@@ -534,8 +534,7 @@ class Surjection():
     """Class producing instances of Surjection_elements of interest."""
 
     @staticmethod
-    def steenrod_product(arity, degree, torsion=None,
-                         convention=Surjection_element.default_convention):
+    def steenrod_product(arity, degree, torsion=None, convention=None):
         """Returns a representative of the requested Steenrod product
 
         Constructed recursively by mapping the minimal resolution W(r)
@@ -615,6 +614,9 @@ class Surjection():
                 acted_on = operators[degree % 2] * previous
                 answer = h(acted_on)
                 return answer
+
+        if convention is None:
+            convention = Surjection_element.default_convention
 
         integral_answer = psi(arity, degree, convention=convention)
         if torsion:

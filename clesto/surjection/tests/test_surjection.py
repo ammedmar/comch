@@ -40,11 +40,15 @@ class TestSurjection_element(unittest.TestCase):
         self.assertEqual(3 * self.x, Surjection_element({(1, 3, 1, 2, 1): 3}))
 
     def test_orbit(self):
-        a = self.x.orbit(representation='trivial')
-        self.assertEqual(a, Surjection_element({(1, 2, 1, 3, 1): 1}))
+        for conv in ['McClure-Smith', 'Berger-Fresse']:
+            x = Surjection_element({(1, 3, 1, 2, 1): 1}, convention=conv)
+            a = x.orbit(representation='trivial')
+            self.assertEqual(a, Surjection_element({(1, 2, 1, 3, 1): 1},
+                                                   convention=conv))
 
-        b = self.x.orbit(representation='sign')
-        self.assertEqual(b, Surjection_element({(1, 2, 1, 3, 1): -1}))
+            b = x.orbit(representation='sign')
+            self.assertEqual(b, Surjection_element({(1, 2, 1, 3, 1): -1},
+                                                   convention=conv))
 
     def test_call_simplicial(self):
         s = self.x

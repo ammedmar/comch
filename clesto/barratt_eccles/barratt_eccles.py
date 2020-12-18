@@ -1,6 +1,7 @@
-from ..basics import Module_element
-from ..basics import SymmetricGroup_element
-from ..basics import SymmetricRing_element, SymmetricRing
+from ..module import Module_element
+
+from ..symmetric import SymmetricGroup_element
+from ..symmetric import SymmetricRing_element, SymmetricRing
 
 from ..surjection import Surjection_element
 from ..utils import partitions, pairwise

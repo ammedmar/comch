@@ -1,5 +1,5 @@
-from ..basics import Module_element
-from ..basics import SymmetricRing_element
+from ..module import Module_element
+from ..symmetric import SymmetricRing_element
 from ..utils import pairwise
 from itertools import chain, product, combinations_with_replacement
 

@@ -11,7 +11,7 @@ class Module_element(Counter):
 
     data : dict or None, default: ``None``
         Dictionary representing a linear cobination of basis elements.
-        Items in the dict correspond with pairs (basis element: coefficient). 
+        Items in the dict correspond with pairs (basis element: coefficient).
     torsion : int or 'free', default 'free'
         The torsion of the underlying ring :math:`\\mathbb{Z}` or
         :math:`\\mathbb{Z}/n \\mathbb{Z}`

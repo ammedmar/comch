@@ -1,6 +1,6 @@
 import unittest
 from clesto.eilenberg_zilber import EilenbergZilber_element
-from clesto.basics import SymmetricRing
+from clesto.symmetric import SymmetricRing
 
 
 class TestBarrattEccles_element(unittest.TestCase):

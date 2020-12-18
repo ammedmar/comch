@@ -1,6 +1,6 @@
-from ..basics import Module_element
-from ..basics import SymmetricGroup_element
-from ..basics import SymmetricRing_element, SymmetricRing
+from ..module import Module_element
+from ..symmetric import SymmetricGroup_element
+from ..symmetric import SymmetricRing_element, SymmetricRing
 
 from ..eilenberg_zilber import Simplex, EilenbergZilber_element
 from ..eilenberg_zilber import CubicalEilenbergZilber_element

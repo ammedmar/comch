@@ -1,6 +1,6 @@
 import unittest
 from clesto.barratt_eccles import BarrattEccles_element, BarrattEccles
-from clesto.basics import SymmetricRing
+from clesto.symmetric import SymmetricRing
 
 
 class TestBarrattEccles_element(unittest.TestCase):

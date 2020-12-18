@@ -1,7 +1,7 @@
-from .basics import Module_element
-from .basics import SymmetricGroup_element
-from .basics import SymmetricRing
-from .basics import SymmetricRing_element
+from .module import Module_element
+from .symmetric import SymmetricGroup_element
+from .symmetric import SymmetricRing
+from .symmetric import SymmetricRing_element
 
 from .barratt_eccles import BarrattEccles
 from .barratt_eccles import BarrattEccles_element

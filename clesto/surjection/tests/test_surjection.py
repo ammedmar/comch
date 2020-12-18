@@ -1,6 +1,6 @@
 import unittest
 from clesto.surjection import Surjection_element, Surjection
-from clesto.basics import SymmetricRing
+from clesto.symmetric import SymmetricRing
 from clesto.eilenberg_zilber import EilenbergZilber, EilenbergZilber_element
 from clesto.eilenberg_zilber import CubicalEilenbergZilber
 

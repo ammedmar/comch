@@ -1,4 +1,4 @@
-from ..basics import Module_element
+from ..module import Module_element
 from ..utils import pairwise
 from itertools import combinations, product
 

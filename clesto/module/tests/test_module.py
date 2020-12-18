@@ -1,5 +1,5 @@
 import unittest
-from clesto.basics import Module_element
+from clesto.module import Module_element
 
 
 class TestModule(unittest.TestCase):

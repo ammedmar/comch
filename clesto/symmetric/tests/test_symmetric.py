@@ -1,5 +1,5 @@
 import unittest
-from clesto.basics import SymmetricGroup_element, SymmetricRing_element
+from clesto.symmetric import SymmetricGroup_element, SymmetricRing_element
 
 
 class TestSymmetricGroup(unittest.TestCase):

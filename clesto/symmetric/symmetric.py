@@ -1,4 +1,4 @@
-from .module import Module_element
+from clesto.module import Module_element
 from itertools import chain, product
 
 

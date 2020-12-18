@@ -1,8 +1,8 @@
 import unittest
 from clesto.surjection import Surjection_element, Surjection
 from clesto.symmetric import SymmetricRing
-from clesto.eilenberg_zilber import EilenbergZilber, EilenbergZilber_element
-from clesto.eilenberg_zilber import CubicalEilenbergZilber
+from clesto.simplicial import SimplicialEZ_element, SimplicialEZ_element_element
+from clesto.cubical import CubicalEZ_element
 
 
 class TestSurjection_element(unittest.TestCase):
@@ -53,13 +53,13 @@ class TestSurjection_element(unittest.TestCase):
     def test_call_simplicial(self):
         s = self.x
         s.convention = 'McClure-Smith'
-        x = EilenbergZilber.standard_element(3)
+        x = SimplicialEZ_element.standard_element(3)
         ds_x = s.boundary()(x)
         d_sx = s(x).boundary()
         s_dx = s(x.boundary())
         self.assertEqual(d_sx - ((-1)**(s.degree)) * s_dx, ds_x)
 
-        x = EilenbergZilber_element({((0, 1, 2), (3, 4), (5, 6)): 1})
+        x = SimplicialEZ_element_element({((0, 1, 2), (3, 4), (5, 6)): 1})
         ds_x = s.boundary()(x, 2)
         d_sx = s(x, 2).boundary()
         s_dx = s(x.boundary(), 2)
@@ -67,7 +67,7 @@ class TestSurjection_element(unittest.TestCase):
 
     def test_call_cubical(self):
         s = self.x
-        y = CubicalEilenbergZilber.standard_element(3)
+        y = CubicalEZ_element.standard_element(3)
         ds_y = s.boundary()(y)
         d_sy = s(y).boundary()
         sdy = s(y.boundary())

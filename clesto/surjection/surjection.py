@@ -2,8 +2,8 @@ from ..module import Module_element
 from ..symmetric import SymmetricGroup_element
 from ..symmetric import SymmetricRing_element, SymmetricRing
 
-from ..simplicial import Simplex, EilenbergZilber_element
-from ..cubical import CubicalEilenbergZilber_element
+from ..simplicial import Simplex, SimplicialEZ_element_element
+from ..cubical import CubicalEZ_element_element
 from ..utils import pairwise
 
 from itertools import chain, combinations, product, combinations_with_replacement
@@ -262,14 +262,14 @@ class Surjection_element(Module_element):
         cube or simplex represented by an arity 1 element in the (cubical)
         Eilenberg-Zilber operad.
 
-        >>> from clesto.simplicial import EilenbergZilber
+        >>> from clesto.simplicial import SimplicialEZ_element
         >>> s = Surjection_element({(1,2,1):1}, convention='McClure-Smith')
-        >>> x = EilenbergZilber.standard_element(2)
+        >>> x = SimplicialEZ_element.standard_element(2)
         >>> print(s(x))
         - ((0,1,2),(0,1)) + ((0,2),(0,1,2)) - ((0,1,2),(1,2))
 
-        >>> from clesto.cubical import CubicalEilenbergZilber
-        >>> x = CubicalEilenbergZilber.standard_element(2)
+        >>> from clesto.cubical import CubicalEZ_element
+        >>> x = CubicalEZ_element.standard_element(2)
         >>> print(s(x))
         - ((2,2),(1,2)) + ((2,1),(2,2)) + ((0,2),(2,2)) - ((2,2),(2,0))
 
@@ -389,11 +389,11 @@ class Surjection_element(Module_element):
 
         check_input(self, other, coord=1)
 
-        if isinstance(other, EilenbergZilber_element):
+        if isinstance(other, SimplicialEZ_element_element):
             if self.convention != 'McClure-Smith':
                 raise NotImplementedError
             return simplicial(self, other, coord)
-        elif isinstance(other, CubicalEilenbergZilber_element):
+        elif isinstance(other, CubicalEZ_element_element):
             return cubical(self, other)
         else:
             raise NotImplementedError

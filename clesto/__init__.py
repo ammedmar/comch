@@ -10,12 +10,12 @@ from .surjection import Surjection
 from .surjection import Surjection_element
 
 from .simplicial import Simplex
-from .simplicial import EilenbergZilber
-from .simplicial import EilenbergZilber_element
+from .simplicial import SimplicialEZ_element
+from .simplicial import SimplicialEZ_element_element
 
 from .cubical import Cube
-from .cubical import CubicalEilenbergZilber
-from .cubical import CubicalEilenbergZilber_element
+from .cubical import CubicalEZ_element
+from .cubical import CubicalEZ_element_element
 
 __all__ = [
     'Module_element',
@@ -27,9 +27,9 @@ __all__ = [
     'Surjection_element',
     'Surjection',
     'Simplex',
-    'EilenbergZilber',
-    'EilenbergZilber_element',
+    'SimplicialEZ_element',
+    'SimplicialEZ_element_element',
     'Cube',
-    'CubicalEilenbergZilber_element',
-    'CubicalEilenbergZilber'
+    'CubicalEZ_element_element',
+    'CubicalEZ_element'
 ]

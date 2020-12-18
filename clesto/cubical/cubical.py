@@ -25,7 +25,7 @@ class Cube(tuple):
         return Cube(answer)
 
 
-class CubicalEilenbergZilber_element(Module_element):
+class CubicalEZ_element_element(Module_element):
     """..."""
 
     dimenion: int = None
@@ -45,7 +45,7 @@ class CubicalEilenbergZilber_element(Module_element):
             dimension = dim_k.pop()  # they are all equal, using last.
             self.dimension = dimension
 
-        super(CubicalEilenbergZilber_element, self).__init__(
+        super(CubicalEZ_element_element, self).__init__(
             data=data, torsion=torsion)
 
     def __str__(self):
@@ -57,7 +57,7 @@ class CubicalEilenbergZilber_element(Module_element):
 
         ERROR: (2,2) --> [01]2 since no coma is left
 
-        >>> x = CubicalEilenbergZilber_element({((2,), (1,)): 1, ((0,), (2,)): 1})
+        >>> x = CubicalEZ_element_element({((2,), (1,)): 1, ((0,), (2,)): 1})
         >>> print(x._latex_())
         [01] \otimes [1] + [0] \otimes [01]
 
@@ -95,7 +95,7 @@ class CubicalEilenbergZilber_element(Module_element):
 
         # squares to zero
 
-        >>> elmt = CubicalEilenbergZilber_element({((0, 2), (2, 1), (2, 0)): 1})
+        >>> elmt = CubicalEZ_element_element({((0, 2), (2, 1), (2, 0)): 1})
         >>> print(elmt.boundary().boundary())
         0
 
@@ -120,7 +120,7 @@ class CubicalEilenbergZilber_element(Module_element):
 
         # chain map check:
 
-        >>> x = CubicalEilenbergZilber_element({((0, 2, 2, 1, 2),): 1})
+        >>> x = CubicalEZ_element_element({((0, 2, 2, 1, 2),): 1})
         >>> d_delta_x = x.iterated_diagonal(2).boundary()
         >>> delta_d_x = x.boundary().iterated_diagonal(2)
         >>> d_delta_x == delta_d_x
@@ -179,7 +179,7 @@ class CubicalEilenbergZilber_element(Module_element):
 
         # boundary of the join
 
-        >>> x = CubicalEilenbergZilber_element({((0, 0, 1), \
+        >>> x = CubicalEZ_element_element({((0, 0, 1), \
                                                  (1, 0, 0)): 1})
         >>> print(x.join().boundary() + x.boundary().join())
         ((1,0,0),) - ((0,0,1),)
@@ -243,9 +243,9 @@ class CubicalEilenbergZilber_element(Module_element):
         return answer
 
 
-class CubicalEilenbergZilber:
+class CubicalEZ_element:
     """.."""
 
     def standard_element(n, torsion=None):
         """..."""
-        return CubicalEilenbergZilber_element({((2,) * n, ): 1}, torsion=torsion)
+        return CubicalEZ_element_element({((2,) * n, ): 1}, torsion=torsion)

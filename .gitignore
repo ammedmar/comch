@@ -21,3 +21,7 @@ dev.py
 
 # egg
 clesto.egg-info/
+
+# sublime text
+*.sublime-project
+*.sublime-workspace

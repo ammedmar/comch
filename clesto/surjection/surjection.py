@@ -2,8 +2,8 @@ from ..module import Module_element
 from ..symmetric import SymmetricGroup_element
 from ..symmetric import SymmetricRing_element, SymmetricRing
 
-from ..eilenberg_zilber import Simplex, EilenbergZilber_element
-from ..eilenberg_zilber import CubicalEilenbergZilber_element
+from ..simplicial import Simplex, EilenbergZilber_element
+from ..cubical import CubicalEilenbergZilber_element
 from ..utils import pairwise
 
 from itertools import chain, combinations, product, combinations_with_replacement
@@ -262,14 +262,13 @@ class Surjection_element(Module_element):
         cube or simplex represented by an arity 1 element in the (cubical)
         Eilenberg-Zilber operad.
 
-        >>> from clesto.eilenberg_zilber import EilenbergZilber
+        >>> from clesto.simplicial import EilenbergZilber
         >>> s = Surjection_element({(1,2,1):1}, convention='McClure-Smith')
         >>> x = EilenbergZilber.standard_element(2)
         >>> print(s(x))
         - ((0,1,2),(0,1)) + ((0,2),(0,1,2)) - ((0,1,2),(1,2))
 
-        >>> from clesto.eilenberg_zilber import CubicalEilenbergZilber
-        >>> s = Surjection_element({(1,2,1):1})
+        >>> from clesto.cubical import CubicalEilenbergZilber
         >>> x = CubicalEilenbergZilber.standard_element(2)
         >>> print(s(x))
         - ((2,2),(1,2)) + ((2,1),(2,2)) + ((0,2),(2,2)) - ((2,2),(2,0))

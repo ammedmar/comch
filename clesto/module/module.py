@@ -276,7 +276,7 @@ class Module_element(Counter):
         Returns
         -------
 
-        created : type(*self*) object
+        type(*self*) object
             The initialized object with the given data
 
         Example
@@ -297,7 +297,7 @@ class Module_element(Counter):
         Returns
         -------
 
-        created : type(*self*) object
+        type(*self*) object
             The initialized empty object
 
         Example

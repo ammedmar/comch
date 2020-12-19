@@ -1,13 +1,7 @@
-Basics
-======
+:mod:`clesto.module`: Free modules
+==================================
 
 Module
 ------
 .. automodule:: clesto.module.module
    :members:
-
-Symmetric
----------
-.. automodule:: clesto.symmetric.symmetric
-   :members:   
-

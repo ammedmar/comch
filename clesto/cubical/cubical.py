@@ -5,14 +5,10 @@ from itertools import combinations, product
 
 class Cube(tuple):
     """Models an elementary cube"""
-    intervals: tuple
 
-    def __init__(self, data):
-        """Initialize"""
-
-        self.intervals = tuple(idx for idx, x in enumerate(data) if x == 2)
-
-        super(Cube, self).__init__()
+    @property
+    def intervals(self):
+        return tuple(idx for idx, x in enumerate(self) if x == 2)
 
     @property
     def dimension(self):
@@ -55,7 +51,7 @@ class CubicalEZ_element(Module_element):
         """
         string = str(self)
         string = string.replace('1', '[1]').replace('0', '[0]')
-        string = string.replace('2,', '[01]').replace(',2', '[01]')
+        string = string.replace('2,', '[01],').replace(',2', ',[01]')
         string = string.replace(',),(', r' \otimes ')
         string = string.replace('),(', r' \otimes ')
         string = string.replace(')', '').replace('((', '')

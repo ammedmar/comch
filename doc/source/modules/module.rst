@@ -1,7 +1,12 @@
-:mod:`clesto.module`: Free modules
-==================================
+:mod:`comch.module`: Free Modules 
+=================================
 
-Module
-------
-.. automodule:: clesto.module.module
-   :members:
+.. automodule:: comch.module
+
+   .. autosummary::
+      :template: class.rst
+
+      comch.module.ModuleElement
+
+   .. autoclass::
+      comch.module.ModuleElement

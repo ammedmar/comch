@@ -4,12 +4,12 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="clesto",
-    version="0.0.4",
+    name="comch",
+    version="0.1.0",
     author="Anibal M. Medina-Mardones",
     author_email="ammedmar@gmail.com",
-    description="A package to study Steenrod"
-               +"operations at the chain level",
+    description="A package to study commutativity"
+               +"up-to-coherent-homotopies",
     long_description=long_description,
     long_description_content_type="text/markdown",
     #url="https://github.com/pypa/sampleproject",
@@ -19,5 +19,5 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.6',
+    python_requires='>=3',
 )

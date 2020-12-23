@@ -9,7 +9,7 @@
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-#
+
 import sphinx_rtd_theme
 import os
 import sys
@@ -18,12 +18,12 @@ sys.path.insert(0, os.path.abspath('..'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'clesto'
+project = 'comch'
 copyright = '2020, Anibal M. Medina-Mardones'
 author = 'Anibal M. Medina-Mardones'
 
 # The full version, including alpha/beta/rc tags
-release = '0.0.3'
+# release = __version__
 
 # -- General configuration ---------------------------------------------------
 
@@ -37,7 +37,7 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.doctest',
     'sphinx.ext.intersphinx',
-    #'sphinx.ext.imgconverter',
+    # 'sphinx.ext.imgconverter',
     # 'sphinx_issues',
     'sphinx_rtd_theme',
     'sphinx.ext.napoleon'
@@ -47,17 +47,36 @@ extensions = [
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
+# generate autosummary even if no references
+autosummary_generate = True
+
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = []
 
+# If true, '()' will be appended to :func: etc. cross-reference text.
+add_function_parentheses = False
+
+# If true, the current module name will be prepended to all description
+# unit titles (such as .. function::).
+# add_module_names = True
+
+# If true, sectionauthor and moduleauthor directives will be shown in the
+# output. They are ignored by default.
+# show_authors = False
+
+# The name of the Pygments (syntax highlighting) style to use.
+pygments_style = 'sphinx'
+
+# A list of ignored prefixes for module index sorting.
+# modindex_common_prefix = []
 
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-#
+
 html_theme = "sphinx_rtd_theme"
 html_theme_options = {
     'collapse_navigation': False,

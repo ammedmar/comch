@@ -1,3 +1,3 @@
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/ammedmar/clesto/master?filepath=notebooks)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/ammedmar/comch/master?filepath=notebooks)
 
-# (C)hain (le)vel (St)eenrod (o)perations
+# Commutativity up to coherent homotopies

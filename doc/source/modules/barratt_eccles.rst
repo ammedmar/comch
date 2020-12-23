@@ -1,8 +1,16 @@
-Barratt-Eccles operad
-=====================
+:mod:`comch.barratt_eccles`: Barratt-Eccles operad 
+==================================================
 
-Barratt Eccles elements
------------------------
-.. automodule:: clesto.barratt_eccles.barratt_eccles
-   :members:
+.. automodule:: comch.barratt_eccles
 
+   .. autosummary::
+      :template: class.rst
+
+      comch.barratt_eccles.BarrattEcclesElement
+      comch.barratt_eccles.BarrattEccles
+
+   .. autoclass::
+      comch.barratt_eccles.BarrattEcclesElement
+
+   .. autoclass::
+      comch.barratt_eccles.BarrattEccles

@@ -9,6 +9,7 @@ This pages contains a list of available features in the library.
 
    module
    symmetric
-   barratt_eccles
    surjection
-
+   barratt_eccles
+   simplicial
+   cubical

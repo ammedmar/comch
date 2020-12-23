@@ -20,7 +20,7 @@ __pycache__/
 dev.py
 
 # egg
-clesto.egg-info/
+comch.egg-info/
 
 # sublime text
 *.sublime-project
@@ -29,5 +29,5 @@ clesto.egg-info/
 # development
 necklace.py
 
-# temp
-temp/
+# pycharm
+.idea/

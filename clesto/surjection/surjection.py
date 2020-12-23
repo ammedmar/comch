@@ -6,7 +6,7 @@ from ..simplicial import Simplex, SimplicialEZ_element
 from ..cubical import CubicalEZ_element
 from ..utils import pairwise
 
-from itertools import chain, combinations, product, combinations_with_replacement
+from itertools import combinations, product, combinations_with_replacement
 from operator import itemgetter
 from functools import reduce
 from math import floor, factorial
@@ -15,7 +15,7 @@ from math import floor, factorial
 class Surjection_element(Module_element):
     """Elements in the surjection operad
 
-    Examples
+    EXAMPLES
     --------
 
     >>> s = Surjection_element()
@@ -25,8 +25,7 @@ class Surjection_element(Module_element):
     >>> print(s)
     (1,2,1,3,1,3)
 
-
-    References
+    REFERENCES
     ----------
 
     [McS]: J. McClure, and J. Smith. "Multivariable cochain operations and little
@@ -99,14 +98,28 @@ class Surjection_element(Module_element):
         1
 
         """
-        complexities = [0]
+        complexity = 0
         for key in self.keys():
             for i, j in combinations(range(1, max(key) + 1), 2):
                 r = tuple(k for k in key if k == i or k == j)
                 cpxty = len([p for p, q in pairwise(r) if p != q]) - 1
-                complexities.append(cpxty)
+                complexity = max(cpxty, complexity)
 
-        return max(complexities)
+        return complexity
+
+    @property
+    def filtration(self):
+        """Filtration by sum of all pairwise complexities."""
+        filtration = 0
+        for key in self.keys():
+            binary_complexities = []
+            for i, j in combinations(range(1, max(key) + 1), 2):
+                r = tuple(k for k in key if k == i or k == j)
+                cpxty = len([p for p, q in pairwise(r) if p != q]) - 1
+                binary_complexities.append(cpxty)
+            filtration = max(filtration, sum(binary_complexities))
+
+        return filtration
 
     def boundary(self):
         """boundary of self

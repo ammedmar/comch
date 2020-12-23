@@ -3,10 +3,21 @@ from itertools import product
 
 
 class SymmetricGroup_element(tuple):
-    """Element in a finite symmetric group.
+    r"""Element in a finite symmetric group.
 
-    Create a ``SymmetricGroup_element`` from an iterable representing a
-    permutation of (1,2,...,r) thought of as an automorphism of {1,...,r}.
+    We refer to elements in the group of permutations of :math:`r` elements
+    :math:`\mathrm S_r` as symmetric elements of arity :math:`r`. An
+    element :math:`\pi \in \mathrm S_r` can be thought of as a bijections
+    from :math:`\{1,\dots,r\}` to itself, and can be represented by the
+    tuple of its images :math:`(\pi(1), \dots, \pi(r))`.
+
+    PARAMETERS
+    ----------
+        iterable : 'iterable'
+            Iterable representing a permutation of `(1,...,r)`.
+
+    EXAMPLE
+    -------
 
     >>> print(SymmetricGroup_element((1,3,2)))
     (1,3,2)
@@ -21,43 +32,60 @@ class SymmetricGroup_element(tuple):
     def sign(self):
         """Returns the sign of *self*.
 
-        The sign is defined as the mod 2 number of transpositions
-        required to express the element.
+        The sign is defined as the mod 2 number of transpositions required
+        to express the element.
+
+        RETURNS
+        -------
+
+        :class: `int`
+            The sign of *self*.
+
+        EXAMPLE
+        -------
 
         >>> SymmetricGroup_element((5,2,4,3,1)).sign
         1
 
         """
-
-        def to_cycles(self, singletons=False):
-            """Transforms from bijection to collection of cycles.
-
-            >>> SymmetricGroup_element((5,2,4,3,1)).to_cycles()
-            [(1, 5), (3, 4)]
-
-            """
-            p = list(self)
-            cycles = []
-            for i in range(len(p)):
-                if p[i] is False:
-                    continue
-                cycleFirst = i + 1
-                cycle = [cycleFirst]
-                p[i], next = False, p[i]
-                while next != cycleFirst:
-                    cycle.append(next)
-                    p[next - 1], next = False, p[next - 1]
-                # add the cycle to the list of cycles
-                if singletons or len(cycle) > 1:
-                    cycles.append(tuple(cycle))
-
-            return cycles
-
         if set(self) != set(range(1, len(self) + 1)):
             raise TypeError(f'defined for permutations of (1,...,r) ' +
                             f'only not {self}')
-        cycles = to_cycles(self)
+        cycles = self.to_cycles()
         return (-1)**sum(len(cycle) - 1 for cycle in cycles)
+
+    def to_cycles(self, singletons=False):
+        """Transforms from bijection to collection of cycles.
+
+        RETURNS
+        -------
+
+        :class: `list` of `tuple`
+            The representation of *self* as a product of cycles.
+
+        EXAMPLE
+        -------
+
+        >>> SymmetricGroup_element((5,2,4,3,1)).to_cycles()
+        [(1, 5), (3, 4)]
+
+        """
+        p = list(self)
+        cycles = []
+        for i in range(len(p)):
+            if p[i] is False:
+                continue
+            cycleFirst = i + 1
+            cycle = [cycleFirst]
+            p[i], next = False, p[i]
+            while next != cycleFirst:
+                cycle.append(next)
+                p[next - 1], next = False, p[next - 1]
+            # add the cycle to the list of cycles
+            if singletons or len(cycle) > 1:
+                cycles.append(tuple(cycle))
+
+        return cycles
 
     @property
     def arity(self):
@@ -66,28 +94,35 @@ class SymmetricGroup_element(tuple):
         The arity of a symmetric group element is defined as the
         cardinality of its domain.
 
+        RETURNS
+        -------
+
+        :class: `list` of 'tuple'
+            The arity of *self*.
+
+        EXAMPLE
+        -------
+
         >>> SymmetricGroup_element((5,2,4,3,1)).arity
         5
 
         """
         return max(self)
 
-    def inverse(self):
-        """Multiplicative inverse: self^{-1}.
-
-        >>> pi = SymmetricGroup_element((2,3,1))
-        >>> print(pi.inverse())
-        (3,1,2)
-
-        """
-        inverse = tuple(self.index(i + 1) + 1 for i in range(self.arity))
-        return SymmetricGroup_element(inverse)
-
     def __mul__(self, other):
-        """Product: *self* * *other*.
+        r"""Product: *self* * *other*.
 
         This product agrees with the composition of bijections:
-        *self* o *other*.
+        *self* :math:`\circ` *other*.
+
+        RETURNS
+        -------
+
+        :class: `clesto.symmetric.symmetric.SymmetricGroup_element` object
+            The product of *self* and *other*.
+
+        EXAMPLE
+        -------
 
         >>> x = SymmetricGroup_element((1,3,2))
         >>> y = SymmetricGroup_element((2,3,1))
@@ -95,7 +130,7 @@ class SymmetricGroup_element(tuple):
         (2,1,3)
 
         """
-        # default to method in other if type(other) != SymmetricGroup_element
+        # default to method in *other*
         if not isinstance(other, SymmetricGroup_element):
             self = SymmetricRing_element({self: 1}, torsion=other.torsion)
             return other.__rmul__(self)
@@ -105,8 +140,37 @@ class SymmetricGroup_element(tuple):
 
         return SymmetricGroup_element(tuple(self[i - 1] for i in other))
 
+    def inverse(self):
+        """Multiplicative inverse: *self*:math:`^{-1}`.
+
+        RETURNS
+        -------
+
+        :class: `clesto.symmetric.symmetric.SymmetricGroup_element` object
+            The multiplicative inverse of *self*.
+
+        EXAMPLES
+        -------
+
+        >>> pi = SymmetricGroup_element((2,3,1))
+        >>> print(pi.inverse())
+        (3,1,2)
+
+        """
+        inverse = tuple(self.index(i + 1) + 1 for i in range(self.arity))
+        return SymmetricGroup_element(inverse)
+
     def __pow__(self, times):
         """Iterated product of *self*: *self* * ... * *self*.
+
+        RETURNS
+        -------
+
+        :class: `clesto.symmetric.symmetric.SymmetricGroup_element` object
+            The product of *self* with itself *times* number of times.
+
+        EXAMPLE
+        -------
 
         >>> x = SymmetricGroup_element((2,3,4,5,1))
         >>> print(x**5)
@@ -122,7 +186,37 @@ class SymmetricGroup_element(tuple):
         return answer
 
     def compose(self, other, position):
-        """Operadic compositions: *self* o_*position* *other*.
+        r"""Operadic compositions: *self* :math:`\circ_{position}` *other*.
+
+        The (operadic) composition of symmetric elements is defined as follows:
+        Given :math:`\pi \in \Sigma_r`, :math:`\tau \in \Sigma_{s}` and
+        :math:`i \in \{1, \dots, r\}` produces a permutation in
+        :math:`\Sigma_{r + s - 1}`. We begin by considering
+        :math:`\{1, 2, \dots, r + s - 1\}` as an ordered set :math:`R` with
+        :math:`r` elements by grouping the subset
+        :math:`S = \{i, \dots, i+s-1\}` into a single element, then applying
+        :math:`\pi` to :math:`R` and :math:`\sigma` to the :math:`S`, and,
+        finally, forgetting the grupping. More precisely, for integers
+        :math:`r, s \geq 1` and :math:`i \in \{1, \ldots, r\}` the partial
+        composition is the linear map
+
+        .. math:: \circ_i : \Sigma_r \otimes \Sigma_s \to \Sigma_{r+s-1}
+
+        is defined for :math:`\pi = (\pi(1), \dots, \pi(r))` and
+        :math:`\sigma = (\sigma(1), \dots, \sigma(s))` to be the sequence
+        obtained by replacing in position :math:`i` of the sequence :math:`\pi`
+        the sequence obtained by adding :math:`i-1` to the entries of :math:`s`
+        and adding :math:`s-1` to the entries of :math:`\pi` that whose value
+        is greater than :math:`i`.
+
+        RETURNS
+        -------
+
+        :class: `clesto.symmetric.symmetric.SymmetricGroup_element` object
+            The composition of *self* and *other*.
+
+        EXAMPLE
+        -------
 
         >>> x = SymmetricGroup_element((1,3,2))
         >>> y = SymmetricGroup_element((2,1))

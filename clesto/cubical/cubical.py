@@ -42,8 +42,6 @@ class CubicalEZ_element(Module_element):
     def _latex_(self):
         r"""Representation in Latex.
 
-        ERROR: (2,2) --> [01]2 since no coma is left
-
         >>> x = CubicalEZ_element({((2,), (1,)): 1, ((0,), (2,)): 1})
         >>> print(x._latex_())
         [01] \otimes [1] + [0] \otimes [01]

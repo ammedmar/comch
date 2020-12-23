@@ -10,6 +10,8 @@ Contents
    :maxdepth: 2
    :caption: Contents:
    
+   overview
+   installation
    modules/index
 
 Indices and tables

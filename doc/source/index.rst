@@ -1,6 +1,6 @@
-####################
+###################
 ComCH documentation
-####################
+###################
 
 ComCH is a Python 3 package for the study of commutativity up-to-coherent-homotopies.
 
@@ -25,19 +25,11 @@ This package is written in Python 3 and has no dependencies. It can be installed
 :code:`python3 -m pip install comch`
 
 .. toctree::
-   :caption: Examples
-   :maxdepth: 1
-   
-   basics
-   barratt_eccles
-
-To interact with the provided examples, it is is also necesary to have Jupyter Notebook installed.
-
-.. toctree::
    :caption: API reference
    :maxdepth: 1
    
    modules/index
+
 
 References
 ----------
@@ -45,4 +37,3 @@ References
 [McS]: J. McClure, and J. Smith. "Multivariable cochain operations and little n-cubes." Journal of the American Mathematical Society 16.3 (2003): 681-704.
 
 [BF]: C. Berger, and B. Fresse. "Combinatorial operad actions on cochains." Mathematical Proceedings of the Cambridge Philosophical Society. Vol. 137. No. 1. Cambridge University Press, 2004.
-

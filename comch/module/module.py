@@ -2,7 +2,7 @@ from collections import Counter
 
 
 class ModuleElement(Counter):
-    r"""Elements in a free module over :math:`\mathbb{Z}` or
+    r"""Element in a free module over :math:`\mathbb{Z}` or
     :math:`\mathbb{Z}/n \mathbb{Z}`.
 
     Let :math:`R` be a ring and :math:`B` a set. The free :math:`R`-module
@@ -21,8 +21,7 @@ class ModuleElement(Counter):
 
     PARAMETERS
     ----------
-
-    data : dict or None, default: ``None``
+    data : ``dict`` or ``None``, default: ``None``
         Dictionary representing a linear cobination of basis elements.
         Items in the dict correspond with pairs (basis_element: coefficient).
     torsion : int or 'free', default 'free'
@@ -30,13 +29,11 @@ class ModuleElement(Counter):
 
     ATTRIBUTES
     ----------
-
     torsion : int or 'free'
         The torsion of the underlying ring.
 
     EXAMPLE
     -------
-
     >>> print(ModuleElement())
     0
     >>> print(ModuleElement({'a': 1, 'b': -1, 'c': 0}))
@@ -85,19 +82,16 @@ class ModuleElement(Counter):
 
         PARAMETERS
         ----------
-
-        other : :class:`comch.module.module.ModuleElement` object
+        other : :class:`comch.module.ModuleElement` object
             The element to add to *self*.
 
         RETURNS
         -------
-
-        :class:`comch.module.module.ModuleElement` object
+        :class:`comch.module.ModuleElement` object
             The sum of *self* and *other*.
 
         EXAMPLE
         -------
-
         >>> ModuleElement({'a': 1, 'b': 2}) + ModuleElement({'a': 1})
         ModuleElement({'a': 2, 'b': 2})
 
@@ -114,19 +108,16 @@ class ModuleElement(Counter):
 
         PARAMETERS
         ----------
-
-        other : :class:`comch.module.module.ModuleElement` object
+        other : :class:`comch.module.ModuleElement` object
             The element to substract from *self*.
 
         RETURNS
         -------
-
-        :class:`comch.module.module.ModuleElement` object
+        :class:`comch.module.ModuleElement` object
             The difference of *self* and *other*.
 
         EXAMPLE
         -------
-
         >>> ModuleElement({'a': 1, 'b': 2}) - ModuleElement({'a': 1})
         ModuleElement({'b': 2})
 
@@ -143,19 +134,16 @@ class ModuleElement(Counter):
 
         PARAMETERS
         ----------
-
         c : int
             The element to scale *self*. by.
 
         RETURNS
         -------
-
-        :class:`comch.module.module.ModuleElement` object
+        :class:`comch.module.ModuleElement` object
             The scaling of *self* by *other*.
 
         EXAMPLE
         -------
-
         >>> 3 * ModuleElement({'a':1, 'b':2})
         ModuleElement({'b': 6, 'a': 3})
 
@@ -171,13 +159,11 @@ class ModuleElement(Counter):
 
         RETURNS
         -------
-
-        :class:`comch.module.module.ModuleElement` object
+        :class:`comch.module.ModuleElement` object
             the additive inverse of *self*.
 
         EXAMPLE
         -------
-
         >>> - ModuleElement({'a': 1, 'b': 2})
         ModuleElement({'a': -1, 'b': -2})
 
@@ -189,13 +175,11 @@ class ModuleElement(Counter):
 
         PARAMETERS
         ----------
-
-        other : :class:`comch.module.module.ModuleElement` object
+        other : :class:`comch.module.ModuleElement` object
             The element to add to *self*.
 
         EXAMPLE
         -------
-
         >>> x = ModuleElement({'a': 1, 'b': 2})
         >>> x += ModuleElement({'a': 3, 'b': 6})
         >>> x
@@ -213,13 +197,11 @@ class ModuleElement(Counter):
 
         PARAMETERS
         ----------
-
-        other : :class:`comch.module.module.ModuleElement` object
+        other : :class:`comch.module.ModuleElement` object
             The element to substract from *self*.
 
         EXAMPLE
         -------
-
         >>> x = ModuleElement({'a': 1, 'b': 2})
         >>> x -= ModuleElement({'a': 3, 'b': 6})
         >>> x
@@ -241,7 +223,6 @@ class ModuleElement(Counter):
 
         EXAMPLE
         -------
-
         >>> ModuleElement({'a': 1, 'b': 2, 'c': 0})
         ModuleElement({'b': 2, 'a': 1})
 
@@ -261,13 +242,11 @@ class ModuleElement(Counter):
 
         PARAMETERS
         ----------
-
         torsion : int or 'free'
             The new `torsion` of *self*
 
         EXAMPLE
         -------
-
         >>> ModuleElement({'a': 1, 'b': 2}).set_torsion(2)
         ModuleElement({'a': 1})
 
@@ -281,19 +260,16 @@ class ModuleElement(Counter):
 
         PARAMETERS
         ----------
-
         other : dict or None, default: ``None``
             Data to be initialized.
 
         RETURNS
         -------
-
         type(*self*) object
             The initialized object with the given data
 
         EXAMPLE
         -------
-
         >>> x =  ModuleElement({'a': 1})
         >>> x + x.create({'b': 1})
         ModuleElement({'a': 1, 'b': 1})
@@ -308,13 +284,11 @@ class ModuleElement(Counter):
 
         RETURNS
         -------
-
         type(*self*) object
             The initialized empty object
 
         EXAMPLE
         -------
-
         >>> x = ModuleElement({'a': 1})
         >>> x + x.zero() == x
         True

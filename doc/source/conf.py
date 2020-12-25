@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.abspath('..'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'comch'
+project = 'ComCH'
 copyright = '2020, Anibal M. Medina-Mardones'
 author = 'Anibal M. Medina-Mardones'
 
@@ -31,6 +31,8 @@ author = 'Anibal M. Medina-Mardones'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    'nbsphinx_link',
+    'nbsphinx',
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
     # 'numpydoc',

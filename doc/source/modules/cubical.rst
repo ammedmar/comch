@@ -1,5 +1,5 @@
-:mod:`comch.cubical`: Cubical Tensor Products
-===================================================
+:mod:`comch.cubical`: Cubical tensor products
+=============================================
 
 .. automodule:: comch.cubical
 

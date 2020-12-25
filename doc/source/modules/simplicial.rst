@@ -1,4 +1,4 @@
-:mod:`comch.simplicial`: Simplicial Tensor Products
+:mod:`comch.simplicial`: Simplicial tensor products
 ===================================================
 
 .. automodule:: comch.simplicial

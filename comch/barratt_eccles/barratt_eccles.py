@@ -9,9 +9,52 @@ from itertools import product
 
 
 class BarrattEcclesElement(ModuleElement):
-    """Elements in the Barratt-Eccles operad
+    r"""Element in the Barratt-Eccles operad
 
-    Examples
+    For a non-negative integer :math:`r` define the simplicial set
+    :math:`E(\mathrm S_r)` by
+
+    .. math::
+
+       \begin{aligned}
+       E(\mathrm S_r)_n &=
+       \{ (\sigma_0, \dots, \sigma_n)\ |\ \sigma_i \in \mathrm{S}_r\}, \\
+       d_i(\sigma_0, \dots, \sigma_n) &=
+       (\sigma_0, \dots, \widehat{\sigma}_i, \dots, \sigma_n), \\
+       s_i(\sigma_0, \dots, \sigma_n) &=
+       (\sigma_0, \dots, \sigma_i, \sigma_i, \dots, \sigma_n),
+       \end{aligned}
+
+    corresponding to the unreduced bar construction on the monoid
+    :math:`\mathrm S_r`. It is equipped with a left
+    :math:`\mathrm S_r`-action defined on basis elements by
+
+    .. math::
+        \sigma (\sigma_0, \dots, \sigma_n) =
+        (\sigma \sigma_0, \dots, \sigma \sigma_n).
+
+    The chain complex resulting from applying the functor of integral
+    normalized chains to it is denoted :math:`\mathcal E(r)`, which
+    corresponds to the arity :math:`r` part of the Barratt-Eccles operad.
+
+    PARAMETERS
+    ----------
+
+    data : ``dict`` or ``None``, default: ``None``
+        Dictionary representing a linear cobination of basis elements.
+        Items in the dict correspond with pairs `basis_element: coefficient`.
+        Each basis_element must create a ``tuple`` of `SymmetricGroupElement`
+        and `coefficient` must be an ``int``.
+    torsion : ``int`` or ``string`` 'free', default 'free'
+        The torsion of the underlying ring.
+
+    ATTRIBUTES
+    ----------
+
+    torsion : int or 'free'
+        The torsion of the underlying ring.
+
+    EXAMPLES
     --------
 
     >>> x = BarrattEcclesElement()
@@ -20,14 +63,6 @@ class BarrattEcclesElement(ModuleElement):
     >>> y = BarrattEcclesElement({((1,3,2), (2,1,3)): -1})
     >>> print(y)
     - ((1,3,2),(2,1,3))
-
-
-    References
-    ----------
-
-    [BF]: C. Berger, and B. Fresse. "Combinatorial operad actions on cochains."
-    Mathematical Proceedings of the Cambridge Philosophical Society. Vol. 137.
-    No. 1. Cambridge University Press, 2004.
 
     """
 
@@ -52,6 +87,9 @@ class BarrattEcclesElement(ModuleElement):
         Defined as None if self is not homogeneous. The arity of a basis
         element agrees with arity of any of the symmetric group elements
 
+        EXAMPLE
+        -------
+
         >>> x = BarrattEcclesElement({((1,3,2), (2,3,1)): 1})
         >>> x.arity
         3
@@ -73,6 +111,9 @@ class BarrattEcclesElement(ModuleElement):
 
         Defined as None if self is not homogeneous. The degree of a basis
         surjection agrees with the cardinality of the tuple minus one.
+
+        EXAMPLE
+        -------
 
         >>> x = BarrattEcclesElement({((1,3,2), (2,3,1)): 1})
         >>> x.degree
@@ -276,7 +317,7 @@ class BarrattEcclesElement(ModuleElement):
 
         answer = ModuleElement(torsion=self.torsion)
         for k, v in self.items():
-            to_add = set(((k,),))
+            to_add = {(k,)}
             for s in range(1, r + 1):
                 to_add = set.union(*(split(multispx) for multispx in to_add))
             answer += ModuleElement(

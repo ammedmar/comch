@@ -1,4 +1,4 @@
-:mod:`comch.symmetric`: Symmetric groups and rings
+:mod:`comch.symmetric`: Symmetric Groups and Rings
 ==================================================
 
 .. automodule:: comch.symmetric

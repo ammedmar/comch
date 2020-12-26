@@ -30,7 +30,7 @@ focus on the category of chain complexes, and consider two models for
 the *E*<sub>∞</sub>-operad which are equipped with a filtrations by
 *E*<sub>*n*</sub>-operads. These models are respectively due to
 McClure-Smith [McS] and Berger-Fresse [BF] and are known as the
-surjection operad and Barratt-Eccles.
+surjection and Barratt-Eccles operads.
 
 ## Installation
 

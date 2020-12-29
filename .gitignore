@@ -26,8 +26,5 @@ comch.egg-info/
 *.sublime-project
 *.sublime-workspace
 
-# development
-necklace.py
-
 # pycharm
 .idea/

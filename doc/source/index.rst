@@ -14,7 +14,7 @@ Commutativity up-to-coherent-homotopies is a concept originated in algebraic top
 Mathematical overview
 ---------------------
 
-Following the pioneering work of Steenrod, Cartan, Adem, Stashef, Bordman-Vogt, May, Dyer-Lashof and others, today we understand the correct framework for the study of commutativity up-to-coherent-homotopies as the one provided by operads and PROPs. In particular, :math:`E_n`-operads play a central role parameterizing the different levels of homotopical commutativity. In this package, we focus on the category of chain complexes, and consider two models for the :math:`E_\infty`-operad which are equipped with a filtrations by :math:`E_n`-operads. These models are respectively due to McClure-Smith [McS] and Berger-Fresse [BF] and are known as the surjection operad and Barratt-Eccles.
+Following the pioneering work of Steenrod, Cartan, Adem, Stashef, Bordman-Vogt, May, Dyer-Lashof and others, today we understand the correct framework for the study of commutativity up-to-coherent-homotopies as the one provided by operads and PROPs. In particular, :math:`E_n`-operads play a central role parameterizing the different levels of homotopical commutativity. In this package, we focus on the category of chain complexes, and consider two models for the :math:`E_\infty`-operad which are equipped with a filtrations by :math:`E_n`-operads. These models are respectively due to McClure-Smith [McS] and Berger-Fresse [BF] and are known as the surjection and Barratt-Eccles operads.
 
 
 Installation

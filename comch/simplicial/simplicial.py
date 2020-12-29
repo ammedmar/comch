@@ -1,4 +1,4 @@
-from ..module import ModuleElement
+from ..module import FreeModuleElement
 from ..symmetric import SymmetricRingElement
 from ..utils import pairwise
 from itertools import chain, product, combinations_with_replacement
@@ -60,7 +60,7 @@ class Simplex(tuple):
         return empty_simplex or conseq_values
 
 
-class SimplicialElement(ModuleElement):
+class SimplicialElement(FreeModuleElement):
     """Element in the Eilenberg-Zilber operad
 
     This operad is the chain complex of natural transformations from
@@ -298,6 +298,12 @@ class SimplicialElement(ModuleElement):
                 answer += self.create({left + tuple(new_k) + right: v})
         return answer
 
+    def one_reduced(self):
+        answer = self.zero()
+        for k, v in self.items():
+            if all(spx.dimension != 1 for spx in k):
+                answer += self.create({k:v})
+        return answer
 
 class Simplicial():
     """Class producing Eilenberg-Zilber elements of special interest."""

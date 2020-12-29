@@ -1,1 +1,1 @@
-from .module import ModuleElement
+from .module import FreeModuleElement

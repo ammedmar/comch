@@ -1,4 +1,4 @@
-from comch.module import ModuleElement
+from comch.module import FreeModuleElement
 from itertools import product
 
 
@@ -22,7 +22,6 @@ class SymmetricGroupElement(tuple):
     (1,3,2)
 
     """
-
     def __str__(self):
         s = super().__str__()
         return s.replace(', ', ',')
@@ -54,9 +53,14 @@ class SymmetricGroupElement(tuple):
     def to_cycles(self, singletons=False):
         """Transforms from bijection to collection of cycles.
 
+        PARAMETERS
+        ----------
+        singletons : ``bool``
+            To show cycles of length 1.
+
         RETURNS
         -------
-        :class: `list` of `tuple`
+        :class: ``list`` of ``tuple``
             The representation of *self* as a product of cycles.
 
         EXAMPLE
@@ -110,7 +114,7 @@ class SymmetricGroupElement(tuple):
 
         RETURNS
         -------
-        :class: `comch.symmetric.symmetric.SymmetricGroupElement` object
+        :class: `comch.symmetric.SymmetricGroupElement` object
             The product of *self* and *other*.
 
         EXAMPLE
@@ -136,7 +140,7 @@ class SymmetricGroupElement(tuple):
 
         RETURNS
         -------
-        :class: `comch.symmetric.symmetric.SymmetricGroupElement` object
+        :class: `comch.symmetric.SymmetricGroupElement` object
             The multiplicative inverse of *self*.
 
         EXAMPLES
@@ -154,7 +158,7 @@ class SymmetricGroupElement(tuple):
 
         RETURNS
         -------
-        :class: `comch.symmetric.symmetric.SymmetricGroupElement` object
+        :class: `comch.symmetric.SymmetricGroupElement` object
             The product of *self* with itself *times* number of times.
 
         EXAMPLE
@@ -198,7 +202,7 @@ class SymmetricGroupElement(tuple):
 
         RETURNS
         -------
-        :class: `comch.symmetric.symmetric.SymmetricGroupElement` object
+        :class: `comch.symmetric.SymmetricGroupElement` object
             The composition of *self* and *other*.
 
         EXAMPLE
@@ -217,7 +221,7 @@ class SymmetricGroupElement(tuple):
         return SymmetricGroupElement(answer)
 
 
-class SymmetricRingElement(ModuleElement):
+class SymmetricRingElement(FreeModuleElement):
     r"""Element in the group ring of finite symmetric groups.
 
     Let :math:`R` be a ring and :math:`\Gamma` a group. The free
@@ -234,22 +238,21 @@ class SymmetricRingElement(ModuleElement):
 
     PARAMETERS
     ----------
-    data : dict or None, default: ``None``
+    data : :class:`int` or ``None``, default: ``None``
         Dictionary representing a linear cobination of basis elements.
-        Items in the dict correspond with pairs `basis_element: coefficient`.
-        Each basis_element must create a `SymmetricGroupElement` and
-        `coefficient` must be an `int`.
-    torsion : int or 'free', default 'free'
+        Items in the dictionary correspond to `basis_element: coefficient`
+        pairs. Each basis_element must create a `SymmetricGroupElement` and
+        `coefficient` must be an :class:`int`.
+    torsion : :class:`int` positive or :class:`string` equal to 'free'
         The torsion of the underlying ring.
 
     ATTRIBUTES
     ----------
-    torsion : int or 'free'
+    torsion : :class:`int` positive or :class:`string` equal to 'free'
         The torsion of the underlying ring.
 
     EXAMPLE
     -------
-
     >>> print(SymmetricGroupElement((1,3,2)))
     (1,3,2)
 
@@ -275,7 +278,7 @@ class SymmetricRingElement(ModuleElement):
 
         RETURNS
         -------
-        ``None`` or :class:`comch.module.ModuleElement` object
+        ``None`` or :class:`comch.module.FreeModuleElement` object
             The arity of *self* if homogeneous or ``None`` else
 
         EXAMPLE
@@ -318,7 +321,6 @@ class SymmetricRingElement(ModuleElement):
         (1,4,3,2) + 2(4,1,2,3)
 
         """
-
         if isinstance(other, int):
             return super().__rmul__(other)
 
@@ -367,7 +369,7 @@ class SymmetricRingElement(ModuleElement):
         ----------
         other : :class:`comch.symmetric.SymmetricRingElement` object
             The element to compose with *self*.
-        position : ``int`` positive
+        position : :class:`int` positive
             The position to compose at.
 
         RETURNS
@@ -407,9 +409,9 @@ class SymmetricRing:
 
         PARAMETERS
         ----------
-        arity : ``int`` positive
+        arity : :class:`int` positive
             The arity of :math:`\mathrm S_r`, i.e., :math:`r`
-        torsion : ``int`` positive
+        torsion : :class:`int` positive
             The torsion of the underlying ring.
 
         RETURNS
@@ -435,9 +437,9 @@ class SymmetricRing:
 
         PARAMETERS
         ----------
-        arity : ``int`` positive
+        arity : :class:`int` positive
             The arity of :math:`\mathrm S_r`, i.e., :math:`r`
-        torsion : ``int`` positive
+        torsion : :class:`int` positive
             The torsion of the underlying ring.
 
         RETURNS
@@ -460,9 +462,9 @@ class SymmetricRing:
 
         PARAMETERS
         ----------
-        arity : ``int`` positive
+        arity : :class:`int` positive
             The arity of :math:`\mathrm S_r`, i.e., :math:`r`
-        torsion : ``int`` positive
+        torsion : :class:`int` positive
             The torsion of the underlying ring.
 
         RETURNS
@@ -487,9 +489,9 @@ class SymmetricRing:
 
         PARAMETERS
         ----------
-        arity : ``int`` positive
+        arity : :class:`int` positive
             The arity of :math:`\mathrm S_r`, i.e., :math:`r`
-        torsion : ``int`` positive
+        torsion : :class:`int` positive
             The torsion of the underlying ring.
 
         RETURNS

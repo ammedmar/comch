@@ -1,4 +1,4 @@
-from ..module import ModuleElement
+from ..module import FreeModuleElement
 
 from ..symmetric import SymmetricGroupElement
 from ..symmetric import SymmetricRingElement, SymmetricRing
@@ -8,7 +8,7 @@ from ..utils import partitions, pairwise
 from itertools import product
 
 
-class BarrattEcclesElement(ModuleElement):
+class BarrattEcclesElement(FreeModuleElement):
     r"""Element in the Barratt-Eccles operad
 
     For a non-negative integer :math:`r` define the simplicial set
@@ -44,8 +44,8 @@ class BarrattEcclesElement(ModuleElement):
         Dictionary representing a linear cobination of basis elements.
         Items in the dict correspond with pairs `basis_element: coefficient`.
         Each basis_element must create a ``tuple`` of `SymmetricGroupElement`
-        and `coefficient` must be an ``int``.
-    torsion : ``int`` or ``string`` 'free', default 'free'
+        and `coefficient` must be an :class:`int`.
+    torsion : :class:`int` or :class:`string` 'free', default 'free'
         The torsion of the underlying ring.
 
     ATTRIBUTES
@@ -315,12 +315,12 @@ class BarrattEcclesElement(ModuleElement):
             a, b = multispx[0], multispx[1:]
             return set((a[:i + 1], a[i:]) + b for i in range(len(a)))
 
-        answer = ModuleElement(torsion=self.torsion)
+        answer = FreeModuleElement(torsion=self.torsion)
         for k, v in self.items():
             to_add = {(k,)}
             for s in range(1, r + 1):
                 to_add = set.union(*(split(multispx) for multispx in to_add))
-            answer += ModuleElement(
+            answer += FreeModuleElement(
                 {multispx: v for multispx in to_add}).copy_attrs_from(self)
 
         return answer

@@ -1,7 +1,7 @@
 from collections import Counter
 
 
-class ModuleElement(Counter):
+class FreeModuleElement(Counter):
     r"""Element in a free module over :math:`\mathbb{Z}` or
     :math:`\mathbb{Z}/n \mathbb{Z}`.
 
@@ -34,9 +34,9 @@ class ModuleElement(Counter):
 
     EXAMPLE
     -------
-    >>> print(ModuleElement())
+    >>> print(FreeModuleElement())
     0
-    >>> print(ModuleElement({'a': 1, 'b': -1, 'c': 0}))
+    >>> print(FreeModuleElement({'a': 1, 'b': -1, 'c': 0}))
     a - b
 
     """
@@ -50,7 +50,7 @@ class ModuleElement(Counter):
 
         self.torsion = torsion
 
-        super(ModuleElement, self).__init__(data)
+        super(FreeModuleElement, self).__init__(data)
 
         self.preferred_rep()
 
@@ -82,18 +82,18 @@ class ModuleElement(Counter):
 
         PARAMETERS
         ----------
-        other : :class:`comch.module.ModuleElement` object
+        other : :class:`comch.module.FreeModuleElement` object
             The element to add to *self*.
 
         RETURNS
         -------
-        :class:`comch.module.ModuleElement` object
+        :class:`comch.module.FreeModuleElement` object
             The sum of *self* and *other*.
 
         EXAMPLE
         -------
-        >>> ModuleElement({'a': 1, 'b': 2}) + ModuleElement({'a': 1})
-        ModuleElement({'a': 2, 'b': 2})
+        >>> FreeModuleElement({'a': 1, 'b': 2}) + FreeModuleElement({'a': 1})
+        FreeModuleElement({'a': 2, 'b': 2})
 
         """
         if self.torsion != other.torsion:
@@ -108,18 +108,18 @@ class ModuleElement(Counter):
 
         PARAMETERS
         ----------
-        other : :class:`comch.module.ModuleElement` object
+        other : :class:`comch.module.FreeModuleElement` object
             The element to substract from *self*.
 
         RETURNS
         -------
-        :class:`comch.module.ModuleElement` object
+        :class:`comch.module.FreeModuleElement` object
             The difference of *self* and *other*.
 
         EXAMPLE
         -------
-        >>> ModuleElement({'a': 1, 'b': 2}) - ModuleElement({'a': 1})
-        ModuleElement({'b': 2})
+        >>> FreeModuleElement({'a': 1, 'b': 2}) - FreeModuleElement({'a': 1})
+        FreeModuleElement({'b': 2})
 
         """
         if self.torsion != other.torsion:
@@ -139,13 +139,13 @@ class ModuleElement(Counter):
 
         RETURNS
         -------
-        :class:`comch.module.ModuleElement` object
+        :class:`comch.module.FreeModuleElement` object
             The scaling of *self* by *other*.
 
         EXAMPLE
         -------
-        >>> 3 * ModuleElement({'a':1, 'b':2})
-        ModuleElement({'b': 6, 'a': 3})
+        >>> 3 * FreeModuleElement({'a':1, 'b':2})
+        FreeModuleElement({'b': 6, 'a': 3})
 
         """
         if not isinstance(c, int):
@@ -159,13 +159,13 @@ class ModuleElement(Counter):
 
         RETURNS
         -------
-        :class:`comch.module.ModuleElement` object
+        :class:`comch.module.FreeModuleElement` object
             the additive inverse of *self*.
 
         EXAMPLE
         -------
-        >>> - ModuleElement({'a': 1, 'b': 2})
-        ModuleElement({'a': -1, 'b': -2})
+        >>> - FreeModuleElement({'a': 1, 'b': 2})
+        FreeModuleElement({'a': -1, 'b': -2})
 
         """
         return self.__rmul__(-1)
@@ -175,15 +175,15 @@ class ModuleElement(Counter):
 
         PARAMETERS
         ----------
-        other : :class:`comch.module.ModuleElement` object
+        other : :class:`comch.module.FreeModuleElement` object
             The element to add to *self*.
 
         EXAMPLE
         -------
-        >>> x = ModuleElement({'a': 1, 'b': 2})
-        >>> x += ModuleElement({'a': 3, 'b': 6})
+        >>> x = FreeModuleElement({'a': 1, 'b': 2})
+        >>> x += FreeModuleElement({'a': 3, 'b': 6})
         >>> x
-        ModuleElement({'b': 8, 'a': 4})
+        FreeModuleElement({'b': 8, 'a': 4})
 
         """
         if self.torsion != other.torsion:
@@ -197,15 +197,15 @@ class ModuleElement(Counter):
 
         PARAMETERS
         ----------
-        other : :class:`comch.module.ModuleElement` object
+        other : :class:`comch.module.FreeModuleElement` object
             The element to substract from *self*.
 
         EXAMPLE
         -------
-        >>> x = ModuleElement({'a': 1, 'b': 2})
-        >>> x -= ModuleElement({'a': 3, 'b': 6})
+        >>> x = FreeModuleElement({'a': 1, 'b': 2})
+        >>> x -= FreeModuleElement({'a': 3, 'b': 6})
         >>> x
-        ModuleElement({'a': -2, 'b': -4})
+        FreeModuleElement({'a': -2, 'b': -4})
 
         """
         if self.torsion != other.torsion:
@@ -223,8 +223,8 @@ class ModuleElement(Counter):
 
         EXAMPLE
         -------
-        >>> ModuleElement({'a': 1, 'b': 2, 'c': 0})
-        ModuleElement({'b': 2, 'a': 1})
+        >>> FreeModuleElement({'a': 1, 'b': 2, 'c': 0})
+        FreeModuleElement({'b': 2, 'a': 1})
 
         """
         # reducing coefficients mod torsion
@@ -247,8 +247,8 @@ class ModuleElement(Counter):
 
         EXAMPLE
         -------
-        >>> ModuleElement({'a': 1, 'b': 2}).set_torsion(2)
-        ModuleElement({'a': 1})
+        >>> FreeModuleElement({'a': 1, 'b': 2}).set_torsion(2)
+        FreeModuleElement({'a': 1})
 
         """
         setattr(self, 'torsion', torsion)
@@ -270,9 +270,9 @@ class ModuleElement(Counter):
 
         EXAMPLE
         -------
-        >>> x =  ModuleElement({'a': 1})
+        >>> x =  FreeModuleElement({'a': 1})
         >>> x + x.create({'b': 1})
-        ModuleElement({'a': 1, 'b': 1})
+        FreeModuleElement({'a': 1, 'b': 1})
 
         """
         answer = type(self)(other)
@@ -289,7 +289,7 @@ class ModuleElement(Counter):
 
         EXAMPLE
         -------
-        >>> x = ModuleElement({'a': 1})
+        >>> x = FreeModuleElement({'a': 1})
         >>> x + x.zero() == x
         True
 

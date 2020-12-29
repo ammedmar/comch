@@ -1,4 +1,6 @@
-from ..module import ModuleElement
+from ..module import FreeModuleElement
+from ..simplicial import Simplex
+from ..necklical import Necklace, NecklicalElement
 from ..utils import pairwise
 from itertools import combinations, product
 
@@ -17,11 +19,28 @@ class Cube(tuple):
     def face(self, i, epsilon):
         """..."""
         idx = self.intervals[i]
-        answer = self[:idx] + ((epsilon + 1) % 2, ) + self[idx + 1:]
+        answer = self[:idx] + ((epsilon + 1) % 2,) + self[idx + 1:]
         return Cube(answer)
 
+    def necklace(self):
+        ones = [idx for idx, i in enumerate(self) if i == 1]
+        twos = [idx for idx, i in enumerate(self) if i == 2]
+        aux = [0]
+        answer = []
+        for idx in range(len(self) + 2):
+            if idx in twos:
+                aux.append(idx + 1)
+            if idx in ones:
+                aux.append(idx + 1)
+                answer.append(Simplex(aux))
+                aux = [idx + 1]
+        if aux:
+            aux.append(len(self) + 1)
+            answer.append(Simplex(aux))
+        return Necklace(answer)
 
-class CubicalElement(ModuleElement):
+
+class CubicalElement(FreeModuleElement):
     """..."""
 
     def __init__(self, data=None, torsion=None):
@@ -94,7 +113,7 @@ class CubicalElement(ModuleElement):
                         new_cube = cube.face(i, epsilon)
                         new_k = k[:idx] + (new_cube,) + k[idx + 1:]
                         sign_exp = (acc_dim + i + epsilon) % 2
-                        answer += answer.create({new_k: v * (-1)**sign_exp})
+                        answer += answer.create({new_k: v * (-1) ** sign_exp})
         return answer
 
     def iterated_diagonal(self, n=1):
@@ -112,13 +131,14 @@ class CubicalElement(ModuleElement):
         True
 
         """
+
         def sign(p):
             """Counts the number of pairs appearing in reversed order.
 
             """
             to_count = filter(lambda x: x[0] > x[1], combinations(p, 2))
             sign_exp = sum(1 for _ in to_count) % 2
-            return (-1)**sign_exp
+            return (-1) ** sign_exp
 
         def elementary_summand(fixed, i):
             """Models as a function the element 0,...,0,2,1,...,1 appearing
@@ -170,6 +190,7 @@ class CubicalElement(ModuleElement):
         ((1,0,0),) - ((0,0,1),)
 
         """
+
         def is_zero(left, right):
             """Two conditions need to be satisfied for a triple
             (cube1, cube2, i) give a nonzero i-join: no intervals
@@ -223,14 +244,21 @@ class CubicalElement(ModuleElement):
                             non_zero = False
                             break
                     if non_zero:
-                        answer += answer.create({(cube, ): (-1)**sign_exp})
+                        answer += answer.create({(cube,): (-1) ** sign_exp})
 
+        return answer
+
+    def necklical_element(self):
+        answer = NecklicalElement(torsion=self.torsion)
+        for k, v in self.items():
+            new_k = tuple(cube.necklace() for cube in k)
+            answer += answer.create({new_k: v})
         return answer
 
 
 class Cubical:
-    """.."""
+    """..."""
 
     def standard_element(n, torsion=None):
         """..."""
-        return CubicalElement({((2,) * n, ): 1}, torsion=torsion)
+        return CubicalElement({((2,) * n,): 1}, torsion=torsion)

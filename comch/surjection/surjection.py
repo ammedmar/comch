@@ -116,9 +116,9 @@ class SurjectionElement(FreeModuleElement):
 
     @property
     def degree(self):
-        """Degree of self
+        """Degree of *self*.
 
-        Defined as ``None`` if self is not homogeneous. The degree of a basis
+        Defined as ``None`` if *self* is not homogeneous. The degree of a basis
         surjection agrees with the cardinality of its domain minus its arity.
 
         RETURNS
@@ -134,14 +134,14 @@ class SurjectionElement(FreeModuleElement):
         """
         if not self:
             return None
-        degs = set(len(surj) - max(surj) for surj in self.keys())
-        if len(degs) == 1:
-            return degs.pop()
+        degrees = set(len(surj) - max(surj) for surj in self.keys())
+        if len(degrees) == 1:
+            return degrees.pop()
         return None
 
     @property
     def complexity(self):
-        r"""Complexity of self.
+        r"""Complexity of *self*.
 
         Defined as ``None`` if self is not homogeneous. The complexity of a
         finite binary sequence (i.e. a sequence of two distinct values) is
@@ -167,12 +167,11 @@ class SurjectionElement(FreeModuleElement):
 
         """
         complexity = 0
-        for key in self.keys():
-            for i, j in combinations(range(1, max(key) + 1), 2):
-                r = tuple(k for k in key if k == i or k == j)
-                cpxty = len([p for p, q in pairwise(r) if p != q]) - 1
+        for k in self.keys():
+            for i, j in combinations(range(1, max(k) + 1), 2):
+                seq = filter(lambda x: x == i or x == j, k)
+                cpxty = len([p for p, q in pairwise(seq) if p != q]) - 1
                 complexity = max(cpxty, complexity)
-
         return complexity
 
     @property
@@ -201,10 +200,18 @@ class SurjectionElement(FreeModuleElement):
         return filtration
 
     def boundary(self):
-        """boundary of *self*.
+        r"""boundary of *self*.
 
         Up to signs, it is defined by taking the sum of all elements
-        obtained by removing one entry at the time.
+        obtained by removing one entry at the time. Explicitly, for
+        basis surjection elements we have
+
+        .. math::
+
+           \partial s =
+           \sum_{i=1}^{r+d} \pm s \circ \delta_i =
+           \sum_{i=1}^{r+d} \pm \big(s(1),\dots,\widehat{s(i)},\dots,s(n+r)\big).
+
         The sign of each summand depends on the convention, either
         'McClure-Smith' or 'Berger-Fresse'. See [McCS] and [BF] for
         details.
@@ -226,7 +233,6 @@ class SurjectionElement(FreeModuleElement):
 
         """
         answer = self.zero()
-
         if self.torsion == 2:
             for k in self.keys():
                 for idx in range(0, len(k)):
@@ -234,7 +240,6 @@ class SurjectionElement(FreeModuleElement):
                     if k[idx] in bdry_summand:
                         answer += self.create({bdry_summand: 1})
             return answer
-
         if self.convention == 'Berger-Fresse':
             for k, v in self.items():
                 # determining the signs of the summands
@@ -249,13 +254,11 @@ class SurjectionElement(FreeModuleElement):
                         signs[idx] = signs[max(occurs)] * (-1)
                     else:
                         signs[idx] = 0
-
                 # computing the summands
                 for idx in range(0, len(k)):
                     bdry_summand = k[:idx] + k[idx + 1:]
                     if k[idx] in bdry_summand:
                         answer += self.create({bdry_summand: signs[idx] * v})
-
         if self.convention == 'McClure-Smith':
             for k, v in self.items():
                 sign = 1
@@ -266,7 +269,6 @@ class SurjectionElement(FreeModuleElement):
                             answer += answer.create({new_k: v * sign})
                         sign *= -1
                     sign *= -1
-
         return answer
 
     def __rmul__(self, other):
@@ -279,7 +281,7 @@ class SurjectionElement(FreeModuleElement):
         PARAMETERS
         ----------
         other : :class:`int` or :class:`comch.symmetric.SymmetricRingElement`.
-            The element to left act *self* with.
+            The element to left act on *self* with.
 
         RETURNS
         _______
@@ -331,7 +333,7 @@ class SurjectionElement(FreeModuleElement):
         return answer
 
     def orbit(self, representation='trivial'):
-        """Returns the preferred element in the symmetric orbit of an element.
+        """The preferred representative of the symmetric orbit of *self*.
 
         The preferred representative in the orbit of basis surjections element
         is the one satisfying that the first occurence of each integer appear in
@@ -469,9 +471,8 @@ class SurjectionElement(FreeModuleElement):
                         sign = compute_sign(k1, k2)
                         deg_left = sum(len(spx) - 1 for spx in left) % 2
                         sign *= (-1) ** (deg_left * self.degree)
-
-                    answer += answer.create({left + tuple(new_k) + right:
-                                                 sign * v1 * v2})
+                    new_k = left + tuple(new_k) + right
+                    answer += answer.create({new_k: sign * v1 * v2})
             return answer
 
         def cubical(self, other):
@@ -526,9 +527,9 @@ class SurjectionElement(FreeModuleElement):
 
         PARAMETERS
         ----------
-        *other* : :class:`comch.surjection.SurjectionElement`.
+        other : :class:`comch.surjection.SurjectionElement`
             The element to operad compose *self* with.
-        *position* : :class:`int`, default 1.
+        position : :class:`int`
             The value at which the composition occurs.
 
         RETURNS
@@ -647,7 +648,7 @@ class SurjectionElement(FreeModuleElement):
         return answer
 
     def preferred_rep(self):
-        """Sets to 0 all degenerate surjections."""
+        """Preferred representative of *self*."""
         # removes non-surjective maps
         zeros = list()
         for k in self.keys():

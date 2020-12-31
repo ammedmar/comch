@@ -11,24 +11,30 @@ class SymmetricGroupElement(tuple):
     from :math:`\{1,\dots,r\}` to itself, and can be represented by the
     tuple of its images :math:`(\pi(1), \dots, \pi(r))`.
 
-    PARAMETERS
-    ----------
-    interable : 'iterable'
-        Iterable representing a permutation of `(1,...,r)`.
-
-    EXAMPLE
-    -------
-    >>> print(SymmetricGroupElement((1,3,2)))
-    (1,3,2)
-
     """
+    def __init__(self, iterable):
+        """Initializes *self*.
+
+        PARAMETERS
+        ----------
+        interable : :class:'iterable'
+            Used to create a :class:`tuple` representing a permutation of
+            (1,...,r) for some r.
+
+        EXAMPLE
+        -------
+        >>> print(SymmetricGroupElement((1,3,2)))
+        (1,3,2)
+        """
+        tuple.__init__(iterable)
+
     def __str__(self):
         s = super().__str__()
         return s.replace(', ', ',')
 
     @property
     def sign(self):
-        """Returns the sign of *self*.
+        """Sign of *self*.
 
         The sign is defined as the mod 2 number of transpositions required
         to express the element.
@@ -51,12 +57,12 @@ class SymmetricGroupElement(tuple):
         return (-1) ** sum(len(cycle) - 1 for cycle in cycles)
 
     def to_cycles(self, singletons=False):
-        """Transforms from bijection to collection of cycles.
+        """Collection of cycles representing *self*.
 
         PARAMETERS
         ----------
         singletons : ``bool``
-            To show cycles of length 1.
+            Show cycles of length 1.
 
         RETURNS
         -------

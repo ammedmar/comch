@@ -13,6 +13,7 @@ from math import floor, factorial
 
 
 class SurjectionElement(FreeModuleElement):
+
     r"""Element in the surjection operad.
 
     For a non-negative integer :math:`r` let :math:`\mathcal X(r)_d` be the
@@ -25,7 +26,6 @@ class SurjectionElement(FreeModuleElement):
     basis element :math:`s` in this complex is given
 
     .. math::
-
        \partial s =
        \sum_{i=1}^{r+d} \pm s \circ \delta_i =
        \sum_{i=1}^{r+d} \pm \big(s(1),\dots,\widehat{s(i)},\dots,s(n+r)\big).
@@ -40,31 +40,13 @@ class SurjectionElement(FreeModuleElement):
     corresponding sign conventions, and to the corresponding methods below for
     the operadic composition and complexity filtration.
 
-    PARAMETERS
-    ----------
-    data : :class:`dict` or ``None``, default: ``None``
-        Dictionary representing a linear cobination of basis elements.
-        Items in the dictionary correspond to `basis_element: coefficient`
-        pairs. Each basis_element must create a :class:`tuple` of
-        :class:`int` and `coefficient` must be an :class:`int`.
-    torsion : :class:`int` or :class:`string` 'free', default 'free'
-        The torsion of the underlying ring.
-
     ATTRIBUTES
     ----------
-    torsion : :class:`int` positive or :class:`string` equal to 'free'
-        The torsion of the underlying ring.
-    convention : :class:`string`, either 'Berger-Fresse' or 'McClure-Smith'
+    convention : :class:`string` 'Berger-Fresse' or 'McClure-Smith'.
         The sign convention used.
+    default_convention(class) : :class:`string` 'Berger-Fresse' or 'McClure-Smith'.
+        Used to define :attr:`convention` if not specified at initialization.
 
-    EXAMPLES
-    --------
-    >>> s = SurjectionElement()
-    >>> print(s)
-    0
-    >>> s = SurjectionElement({(1,2,1,3,1,3): 1})
-    >>> print(s)
-    (1,2,1,3,1,3)
 
     REFERENCES
     ----------
@@ -76,10 +58,29 @@ class SurjectionElement(FreeModuleElement):
     No. 1. Cambridge University Press, 2004.
 
     """
-
     default_convention = 'Berger-Fresse'
 
     def __init__(self, data=None, torsion=None, convention=None):
+        """
+        PARAMETERS
+        ----------
+        data : :class:`dict` or ``None``, default: ``None``
+            Dictionary representing a linear combination of basis elements.
+            Items in the dictionary correspond to `basis_element: coefficient`
+            pairs. Each basis_element must create a :class:`tuple` of
+            :class:`int` and `coefficient` must be an :class:`int`.
+        torsion : :class:`int` or :class:`string` 'free', default 'free'
+            The torsion of the underlying ring.
+
+        EXAMPLES
+        --------
+        >>> s = SurjectionElement()
+        >>> print(s)
+        0
+        >>> s = SurjectionElement({(1,2,1,3,1,3): 1})
+        >>> print(s)
+        (1,2,1,3,1,3)
+        """
         if convention is None:
             convention = SurjectionElement.default_convention
         self.convention = convention
@@ -386,7 +387,7 @@ class SurjectionElement(FreeModuleElement):
         other : :class:`comch.simplicial.SimplicialElement` or\
         :class:`comch.cubical.CubicalElement`.
             The element to which apply *self* to
-        *coord* : :class:`int`, default 1.
+        coord : :class:`int`, default 1.
             The tensor factor of *other* to apply *self* to.
 
         RETURNS
@@ -648,16 +649,29 @@ class SurjectionElement(FreeModuleElement):
         return answer
 
     def preferred_rep(self):
-        """Preferred representative of *self*."""
-        # removes non-surjective maps
+        """Preferred representative of *self*.
+
+        Removes pairs `basis_element: coefficient` which satisfy either of:
+        1) the basis element has equal consecutive permutations, 2) It does not
+        represent a surjection, or 3) the coefficient is 0.
+
+        RETURNS
+        _______
+        :class:`comch.surjection.SurjectionElement`
+            The preferred representative of *self*.
+
+        EXAMPLE
+        -------
+        >>> print(SurjectionElement({(1,1,2):1, (1,3):1, (1,2):0}))
+        0
+
+        """
         zeros = list()
         for k in self.keys():
             if set(k) != set(range(1, max(k) + 1)):
                 zeros.append(k)
         for k in zeros:
             del self[k]
-
-        # removes keys w/ equal consecutive values
         for k, v in self.items():
             for i in range(len(k) - 1):
                 if k[i] == k[i + 1]:
@@ -764,7 +778,9 @@ class Surjection:
     def steenrod_operation(p, s, q, bockstein=False):
         """Chain level representative of P_s or bP_s
 
-        Over the prime p acting on an element of degree q."""
+        Over the prime p acting on an element of degree q.
+
+        """
 
         # input check
         if not all(isinstance(i, int) for i in {p, s, q}):

@@ -17,41 +17,44 @@ class FreeModuleElement(Counter):
     :math:`R`-modules. The ring is specified via the class attribute
     ‘torsion‘, where ‘free’ sets :math:`R = \mathbb Z` and a positive
     ‘int‘ sets :math:`R = \mathbb Z/n\mathbb Z`. The class supports
-    addition, substraction and scaling.
-
-    PARAMETERS
-    ----------
-    data : ``dict`` or ``None``, default: ``None``
-        Dictionary representing a linear cobination of basis elements.
-        Items in the dict correspond with pairs (basis_element: coefficient).
-    torsion : int or 'free', default 'free'
-        The torsion of the underlying ring.
+    addition, subtraction and scaling.
 
     ATTRIBUTES
     ----------
-    torsion : int or 'free'
+    torsion : positive :class:`int` or :class:`string` 'free'.
         The torsion of the underlying ring.
-
-    EXAMPLE
-    -------
-    >>> print(FreeModuleElement())
-    0
-    >>> print(FreeModuleElement({'a': 1, 'b': -1, 'c': 0}))
-    a - b
+    default_torsion(class) : positive :class:`int` or :class:`string` 'free'.
+        Used to define :attr:`torsion` if not specified at initialization.
 
     """
 
     default_torsion = 'free'
 
     def __init__(self, data=None, torsion=None):
+        """Initializes *self*.
 
+        PARAMETERS
+        ----------
+        data : ``dict`` or ``None``, default: ``None``
+            Dictionary representing a linear cobination of basis elements.
+            Items in the dict correspond with pairs (basis_element: coefficient).
+        torsion : positive :class:`int`, :class:`string` 'free' or ``None``,\
+        default ``None``
+            The torsion of the underlying ring. If ``None`` use\
+            :attr:`default_torsion`.
+
+        EXAMPLE
+        -------
+        >>> print(FreeModuleElement())
+        0
+        >>> print(FreeModuleElement({'a': 1, 'b': -1, 'c': 0}))
+        a - b
+
+        """
         if torsion is None:
             torsion = type(self).default_torsion
-
         self.torsion = torsion
-
         super(FreeModuleElement, self).__init__(data)
-
         self.preferred_rep()
 
     def __hash__(self):
@@ -135,7 +138,7 @@ class FreeModuleElement(Counter):
         PARAMETERS
         ----------
         c : int
-            The element to scale *self*. by.
+            The element to scale *self* by.
 
         RETURNS
         -------

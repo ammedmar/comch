@@ -44,9 +44,6 @@ class SurjectionElement(FreeModuleElement):
     ----------
     convention : :class:`string` 'Berger-Fresse' or 'McClure-Smith'.
         The sign convention used.
-    default_convention(class) : :class:`string` 'Berger-Fresse' or 'McClure-Smith'.
-        Used to define :attr:`convention` if not specified at initialization.
-
 
     REFERENCES
     ----------

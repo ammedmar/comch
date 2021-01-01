@@ -23,8 +23,6 @@ class FreeModuleElement(Counter):
     ----------
     torsion : positive :class:`int` or :class:`string` 'free'.
         The torsion of the underlying ring.
-    default_torsion(class) : positive :class:`int` or :class:`string` 'free'.
-        Used to define :attr:`torsion` if not specified at initialization.
 
     """
 

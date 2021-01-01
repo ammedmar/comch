@@ -564,10 +564,11 @@ class BarrattEccles:
         return integral_answer
 
     @staticmethod
-    def steenrod_operation(p, s, q, bockstein=False, convention='McClure-Smith'):
+    def steenrod_operation(p, s, q, bockstein=False):
         r"""Chain level representative of :math:`P_s` or :math:`\beta P_s`.
 
         Where
+        
         .. math::
             P_s : H_\bullet(A; \mathbb F_2)
             \to
@@ -600,15 +601,8 @@ class BarrattEccles:
         RETURNS
         _______
         :class:`comch.barratt_eccles.BarrattEcclesElement`
-            The Barratt-Eccles element representing the given Steenrod
-            operation.
+            The Barratt-Eccles element representative.
 
-        REFERENCES
-        ----------
-        [May]: May, J. Peter. "A general algebraic approach to Steenrod
-        operations." The Steenrod Algebra and its Applications: a conference
-        to celebrate NE Steenrod's sixtieth birthday. Springer, Berlin,
-        Heidelberg, 1970.
 
         SEE ALSO
         --------

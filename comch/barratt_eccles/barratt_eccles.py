@@ -6,6 +6,7 @@ from ..symmetric import SymmetricRingElement, SymmetricRing
 from ..surjection import SurjectionElement
 from ..utils import partitions, pairwise
 from itertools import product, combinations
+from math import floor, factorial
 
 
 class BarrattEcclesElement(FreeModuleElement):
@@ -387,11 +388,52 @@ class BarrattEcclesElement(FreeModuleElement):
         raise NotImplementedError
 
     def table_reduction(self):
-        """Table reduction of *self*.
+        r"""Table reduction of *self*.
 
+        The table reduction morphisms :math:`TR : \mathcal E \to \mathcal X`
+        from the Barratt-Eccles to the surjection operad is a surjective weak
+        equivalence of operads introduced in [BF]. For a basis Barratt-Eccles
+        element :math:`(\sigma_0, \dots, \sigma_n) \in \mathcal E(r)_n` we have
+        that
+
+        .. math:: TR(\sigma_0, \dots, \sigma_n) = \sum_{a} s_{a}
+
+        with surjections
+
+        .. math:: s_{a} : \{1, \dots, n+r \} \to \{1, \dots, r\}
+
+        parametrized by all tuples of positive integers
+        :math:`a = (a_0, \dots, a_n)` with :math:`a_0 + \cdots + a_n = n + r`.
+        For one such tuple :math:`a` we now describe the surjection :math:`s_a`.
+        Define recursively
+
+        .. math:: A_{-1} = 0 \qquad A_i = A_{i-1} + a_{i.}
+
+        For :math:`k \in \{1, \dots, n+r\}` we identify
+        :math:`i \in \{1, \dots, n\}` such that :math:`A_{i-1} < k \leq A_{i}`
+        and define :math:`s_a(k)` to be the :math:`(k - A_{i-1})`-th element in
+        :math:`(\sigma_i(1), \dots, \sigma_i(r))` not in
+
+        .. math::
+            \big\{s_a(j)\ |\ j < k \text{ and } j \neq A_0, \dots, A_{i-1}\big\}.
+
+        This operad map preserves the :math:`E_n`-filtration.
+
+        RETURNS
+        _______
+        :class:`comch.surjection.SurjectionElement`
+            The image of *self* under the table reduction morphism
+
+        EXAMPLE
+        -------
         >>> b = BarrattEcclesElement({((1,2,3,4), (1,4,3,2), (1,2,4,3)): 1})
         >>> print(b.table_reduction())
         (1,2,4,2,4,3) + (1,2,4,3,2,3)
+
+        SEE ALSO
+        --------
+        :attr:`comch.surjection.SurjectionElement.complexity`
+        :attr:`comch.barratt_eccles.BarrattEcclesElement.complexity`
 
         """
         answer = SurjectionElement(torsion=self.torsion,
@@ -410,19 +452,15 @@ class BarrattEcclesElement(FreeModuleElement):
                     if i > 1:
                         removed += filtered[: i - 1]
                     k2 += filtered[: i]
-
                 if not degenerate:
                     answer += answer.create({tuple(k2): v})
-
         answer.preferred_rep()
-
         return answer
 
     def diagonal(self, r=1):
         """Alexander Whitney diagonal
 
-        Defined on basis elements by
-        sum_i [pi_0,...pi_i] tensor [pi_i,...,pi_d]
+        TBW
 
         """
 
@@ -470,13 +508,36 @@ class BarrattEccles:
     """Produces Barratt-Eccles elements of interest."""
 
     @staticmethod
-    def steenrod_product(arity, degree, torsion=None):
-        """Representative of the requested Steenrod product.
+    def steenrod_adem_structure(arity, degree, torsion=None):
+        r"""Representative of the requested Steenrod product.
 
-        Constructed recursively by mapping the minimal resolution W(r)
-        of Z[S_r] to E(r). We use the chain homotopy equivalence
-        of Surj(r) and Z defined using the chain contraction (i, p, s)
-        relating Surj(r-1) and Surj(r).
+        Returns the image under the Steenrod-Adem structure constructed in
+        [KMM] of the preferred basis element, of the given degree, of the
+        minimal free resolution of the base ring :math:`R` as an
+        :math:`R[\mathrm C_r]`-module.
+
+        PARAMETERS
+        ----------
+        arity : :class:`int`
+            The arity considered.
+        degree : :class:`int`
+            The degree considered.
+        torsion : :class:`int` or ``None``, default ``None``
+            The torsion of the underlying ring.
+
+        RETURNS
+        _______
+        :class:`comch.barratt_eccles.BarrattEcclesElement`
+            The image of the basis element under the Steenrod-Adem structure.
+
+        REFERENCES
+        ----------
+        [KMM]: Kaufmann, R. M., & Medina-Mardones, A. M. (2020). Chain level
+        Steenrod operations. arXiv preprint arXiv:2010.02571.
+        
+        SEE ALSO
+        --------
+        :meth:`comch.surjection.Surjection.steenrod_adem_structure`.
 
         """
         operators = {
@@ -501,3 +562,83 @@ class BarrattEccles:
         if torsion:
             integral_answer.set_torsion(torsion)
         return integral_answer
+
+    @staticmethod
+    def steenrod_operation(p, s, q, bockstein=False, convention='McClure-Smith'):
+        r"""Chain level representative of :math:`P_s` or :math:`\beta P_s`.
+
+        Where
+        .. math::
+            P_s : H_\bullet(A; \mathbb F_2)
+            \to
+            H_{\bullet + s}(A; \mathbb F_2)
+
+        and, for :math:`p > 2`,
+
+        .. math::
+           P_s : H_\bullet(A; \mathbb F_p)
+           \to
+           H_{\bullet + 2s(p-1)}(A; \mathbb F_p)
+           \qquad
+           \beta P_s : H_\bullet(A; \mathbb F_p)
+           \to
+           H_{\bullet+2s(p-1)-1}(A; \mathbb F_p)
+
+        are the steenrod operations.
+
+        PARAMETERS
+        ----------
+        p : :class:`int`
+            The prime considered.
+        s : :class:`int`
+            The subscript of the Steenrod operation.
+        q : :class:`int`
+            The degree of the class acted on.
+        bockstein : :class:`bool`, default ``False``
+            Determines the use of the bockstein homomorphism.
+
+        RETURNS
+        _______
+        :class:`comch.barratt_eccles.BarrattEcclesElement`
+            The Barratt-Eccles element representing the given Steenrod
+            operation.
+
+        REFERENCES
+        ----------
+        [May]: May, J. Peter. "A general algebraic approach to Steenrod
+        operations." The Steenrod Algebra and its Applications: a conference
+        to celebrate NE Steenrod's sixtieth birthday. Springer, Berlin,
+        Heidelberg, 1970.
+
+        SEE ALSO
+        --------
+        :meth:`comch.surjection.Surjection.steenrod_operation`
+
+        """
+
+        # input check
+        if not all(isinstance(i, int) for i in {p, s, q}):
+            raise TypeError('initialize with three int p,s,n')
+        if not isinstance(bockstein, bool):
+            raise TypeError('bockstein must be a boolean')
+        if p == 2 and bockstein:
+            raise TypeError('bP only defined for odd primes')
+
+        if p == 2:
+            coeff = 1
+            d = s - q
+            if d < 0:
+                return BarrattEcclesElement(torsion=2)
+        else:
+            b = int(bockstein)
+            # Serre convention: v(2j)=(-1)^j & v(2j+1)=v(2j)*m! w/ m=(p-1)/2
+            coeff = (-1) ** (floor(q / 2) + s)
+            if q / 2 - floor(q / 2):
+                coeff *= factorial((p - 1) / 2)
+            # degree of the element: (2s-q)(p-1)-b
+            d = (2 * s - q) * (p - 1) - b
+            if d < 0:
+                return BarrattEcclesElement(torsion=p)
+
+        return int(coeff) * BarrattEccles.steenrod_adem_structure(
+            p, d, torsion=p)

@@ -280,6 +280,7 @@ class FreeModuleElement(Counter):
         """
         answer = type(self)(other)
         answer.__dict__ = self.__dict__
+        answer.preferred_rep()
         return answer
 
     def zero(self):

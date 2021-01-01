@@ -14,9 +14,8 @@ areas. An important challenge for the application of the mathematical
 ideas sourraounding this concept, which are often defined
 non-constructively, is to describe them in effective terms suitable for
 concrete computations. This package serves to bridge the gap between
-theoretical ideas and concrete applications, by implementing the
-structures needed to interact effectively with commutativity
-up-to-coherent-homotopies.
+theoretical ideas and concrete applications, by implementing structures
+effectively modeling commutativity up-to-coherent-homotopies.
 
 ## Mathematical overview
 

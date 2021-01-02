@@ -1,4 +1,4 @@
-from ..module import FreeModuleElement
+from ..free_module import FreeModuleElement
 from ..symmetric import SymmetricRingElement
 from ..utils import pairwise
 from itertools import chain, product, combinations_with_replacement

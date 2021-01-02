@@ -1,4 +1,4 @@
-from ..module import FreeModuleElement
+from ..free_module import FreeModuleElement
 from ..symmetric import SymmetricGroupElement
 from ..symmetric import SymmetricRingElement, SymmetricRing
 

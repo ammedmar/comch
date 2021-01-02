@@ -85,12 +85,12 @@ class FreeModuleElement(Counter):
 
         PARAMETERS
         ----------
-        other : :class:`comch.module.FreeModuleElement` object
+        other : :class:`comch.free_module.FreeModuleElement` object
             The element to add to *self*.
 
         RETURNS
         -------
-        :class:`comch.module.FreeModuleElement` object
+        :class:`comch.free_module.FreeModuleElement` object
             The sum of *self* and *other*.
 
         EXAMPLE
@@ -111,12 +111,12 @@ class FreeModuleElement(Counter):
 
         PARAMETERS
         ----------
-        other : :class:`comch.module.FreeModuleElement` object
+        other : :class:`comch.free_module.FreeModuleElement` object
             The element to substract from *self*.
 
         RETURNS
         -------
-        :class:`comch.module.FreeModuleElement` object
+        :class:`comch.free_module.FreeModuleElement` object
             The difference of *self* and *other*.
 
         EXAMPLE
@@ -142,7 +142,7 @@ class FreeModuleElement(Counter):
 
         RETURNS
         -------
-        :class:`comch.module.FreeModuleElement` object
+        :class:`comch.free_module.FreeModuleElement` object
             The scaling of *self* by *other*.
 
         EXAMPLE
@@ -162,7 +162,7 @@ class FreeModuleElement(Counter):
 
         RETURNS
         -------
-        :class:`comch.module.FreeModuleElement` object
+        :class:`comch.free_module.FreeModuleElement` object
             the additive inverse of *self*.
 
         EXAMPLE
@@ -178,7 +178,7 @@ class FreeModuleElement(Counter):
 
         PARAMETERS
         ----------
-        other : :class:`comch.module.FreeModuleElement` object
+        other : :class:`comch.free_module.FreeModuleElement` object
             The element to add to *self*.
 
         EXAMPLE
@@ -200,7 +200,7 @@ class FreeModuleElement(Counter):
 
         PARAMETERS
         ----------
-        other : :class:`comch.module.FreeModuleElement` object
+        other : :class:`comch.free_module.FreeModuleElement` object
             The element to substract from *self*.
 
         EXAMPLE

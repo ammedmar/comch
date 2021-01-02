@@ -1,4 +1,4 @@
-from ..module import FreeModuleElement
+from ..free_module import FreeModuleElement
 from ..simplicial import Simplex, SimplicialElement
 from functools import reduce
 

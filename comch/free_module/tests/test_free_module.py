@@ -1,5 +1,5 @@
 import unittest
-from comch.module import FreeModuleElement
+from comch.free_module import FreeModuleElement
 
 
 class TestModule(unittest.TestCase):

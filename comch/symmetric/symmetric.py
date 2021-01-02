@@ -1,4 +1,4 @@
-from comch.module import FreeModuleElement
+from comch.free_module import FreeModuleElement
 from itertools import product
 
 
@@ -284,7 +284,7 @@ class SymmetricRingElement(FreeModuleElement):
 
         RETURNS
         -------
-        ``None`` or :class:`comch.module.FreeModuleElement` object
+        ``None`` or :class:`comch.free_module.FreeModuleElement` object
             The arity of *self* if homogeneous or ``None`` else
 
         EXAMPLE

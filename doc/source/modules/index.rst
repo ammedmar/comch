@@ -1,7 +1,7 @@
 .. toctree::
    :maxdepth: 3
 
-   module
+   free_module
    symmetric
    surjection
    barratt_eccles

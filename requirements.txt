@@ -1,6 +1,2 @@
-<<<<<<< HEAD
-sphinx
-=======
->>>>>>> master
 nbsphinx
 nbsphinx_link

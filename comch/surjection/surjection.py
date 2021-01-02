@@ -55,7 +55,10 @@ class SurjectionElement(FreeModuleElement):
     No. 1. Cambridge University Press, 2004.
 
     """
+
     default_convention = 'Berger-Fresse'
+    """Class attribute: Used if :attr:`convention` is ``None`` during
+        initialization."""
 
     def __init__(self, data=None, torsion=None, convention=None):
         """

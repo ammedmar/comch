@@ -5,3 +5,4 @@
    surjection.nblink
    barratt_eccles.nblink
    table_reduction.nblink
+   steenrod_operations.nblink

@@ -1,5 +1,5 @@
-:mod:`comch.surjection`: Surjection operad 
-==========================================
+:mod:`comch.surjection`: The surjection operad 
+==============================================
 
 .. automodule:: comch.surjection
 

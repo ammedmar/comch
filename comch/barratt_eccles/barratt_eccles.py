@@ -568,7 +568,7 @@ class BarrattEccles:
         r"""Chain level representative of :math:`P_s` or :math:`\beta P_s`.
 
         Where
-        
+
         .. math::
             P_s : H_\bullet(A; \mathbb F_2)
             \to

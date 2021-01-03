@@ -1,4 +1,5 @@
 from .free_module import FreeModuleElement
+
 from .symmetric import SymmetricGroupElement
 from .symmetric import SymmetricRing
 from .symmetric import SymmetricRingElement

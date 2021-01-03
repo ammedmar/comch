@@ -3,7 +3,8 @@
 # ComCH
 
 ComCH is a Python 3 package for the study of commutativity
-up-to-coherent-homotopies.
+up-to-coherent-homotopies. Its documentation is located
+[here](https://comch.readthedocs.io/en/latest/index.html).
 
 ## Motivation
 

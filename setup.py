@@ -5,14 +5,14 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="comch",
-    version="0.1.0",
+    version="0.1.1",
     author="Anibal M. Medina-Mardones",
     author_email="ammedmar@gmail.com",
     description="A package to study commutativity"
                +"up-to-coherent-homotopies",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    #url="https://github.com/pypa/sampleproject",
+    #url="https://github.com/ammedmar/comch",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",

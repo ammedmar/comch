@@ -133,17 +133,17 @@ class FreeModuleElement(Counter):
         return answer
 
     def __rmul__(self, c):
-        """Scaling: *c* * *self*.
+        """Left action: *c* * *self*.
 
         PARAMETERS
         ----------
         c : int
-            The element to scale *self* by.
+            The element to act *self* with.
 
         RETURNS
         -------
         :class:`comch.free_module.FreeModuleElement` object
-            The scaling of *self* by *other*.
+            The action of *c* on *self*.
 
         EXAMPLE
         -------
@@ -174,7 +174,7 @@ class FreeModuleElement(Counter):
         return self.__rmul__(-1)
 
     def __iadd__(self, other):
-        """In place addition: *self* += *other*.
+        """In place addition: *self* = *self* + *other*.
 
         PARAMETERS
         ----------
@@ -196,7 +196,7 @@ class FreeModuleElement(Counter):
         return self
 
     def __isub__(self, other):
-        """In place difference: *self* -= *other*.
+        """In place difference: *self* = *self* - *other*.
 
         PARAMETERS
         ----------
@@ -218,11 +218,11 @@ class FreeModuleElement(Counter):
         return self
 
     def preferred_rep(self):
-        """The preferred representative of *self*.
+        r"""The preferred representative of *self*.
 
-        The preferred representative has coefficient in {0,...,torsion-1}
-        if attribute torsion is not 'free', and no pairs key:value with
-        value = 0.
+        Consisting of pairs `basis_element: coefficient` with `coefficient`
+        different from 0 and in the set :math:`\{1, \dots, r-1\}` if
+        :attr:`torsion` is an :class:`int` denoted :math:`r`.
 
         EXAMPLE
         -------
@@ -245,7 +245,7 @@ class FreeModuleElement(Counter):
 
         PARAMETERS
         ----------
-        torsion : int or 'free'
+        torsion : :class:`int` or :class:`string` 'free'
             The new `torsion` of *self*
 
         EXAMPLE
@@ -259,7 +259,7 @@ class FreeModuleElement(Counter):
         return self
 
     def create(self, other=None):
-        """Instantiates data with same type and attribute values as *self*.
+        """Initializes with the same type and attribute values as *self*.
 
         PARAMETERS
         ----------
@@ -284,7 +284,7 @@ class FreeModuleElement(Counter):
         return answer
 
     def zero(self):
-        """Instantiates 0 with same type and attribute values as *self*.
+        """Initializes 0 with same type and attribute values as *self*.
 
         RETURNS
         -------

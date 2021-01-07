@@ -458,9 +458,32 @@ class BarrattEcclesElement(FreeModuleElement):
         return answer
 
     def diagonal(self, r=1):
-        """Alexander Whitney diagonal
+        r"""Alexander-Whitney diagonal.
 
-        TBW
+        The Alexander-Whitney chain approximation to the diagonal is the chain
+        map :math:`\Delta \colon \mathcal E \to \mathcal E \otimes \mathcal E`
+        defined on a basis element
+        :math:`(\sigma_0, \dots, \sigma_n) \in \mathcal E(r)_n` by the formula
+
+        .. math::
+            \Delta (\sigma_0, \dots, \sigma_n) =
+            \sum_{i=1}^n (\sigma_0, \dots, \sigma_i) \otimes
+            (\sigma_i, \dots, \sigma_n).
+
+        It defines a Hopf structure on the Barratt-Eccles operad.
+
+        RETURNS
+        _______
+        :class:`comch.free_module.FreeModuleElement`
+            The free module element representing the image of *self* under
+            the diagonal map. The keys are pairs of elements in
+            :class:`comch.barratt_eccles.BarrattEcclesElement` coefficient 1.
+
+        EXAMPLE
+        -------
+        >>> x = BarrattEcclesElement({((1,2), (2,1)):1})
+        >>> print(x.diagonal())
+        (((1, 2),), ((1, 2), (2, 1))) + (((1, 2), (2, 1)), ((2, 1),))
 
         """
 
@@ -473,10 +496,10 @@ class BarrattEcclesElement(FreeModuleElement):
             to_add = {(k,)}
             for s in range(1, r + 1):
                 to_add = set.union(*(split(multispx) for multispx in to_add))
-            answer += FreeModuleElement(
-                {multispx: v for multispx in to_add}).copy_attrs_from(self)
+            answer += answer.create({multispx: v for multispx in to_add})
 
         return answer
+
 
     def preferred_rep(self):
         """Preferred representative of *self*.

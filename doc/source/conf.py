@@ -31,8 +31,8 @@ author = 'Anibal M. Medina-Mardones'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'nbsphinx_link',
-    'nbsphinx',
+    # 'nbsphinx_link',
+    # 'nbsphinx',
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
     # 'numpydoc',

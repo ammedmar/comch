@@ -25,16 +25,16 @@ This package is written in Python 3 and has no dependencies. It can be installed
 :code:`python3 -m pip install comch`
 
 .. toctree::
-   :caption: Examples
-   :maxdepth: 1
-   
-   notebooks/index
-
-.. toctree::
    :caption: API reference
    :maxdepth: 1
    
    modules/index
+
+.. toctree::
+   :caption: Jupyter notebooks
+   :maxdepth: 1
+   
+   notebooks/index
 
 
 References
@@ -43,3 +43,5 @@ References
 [McS]: J. McClure, and J. Smith. "Multivariable cochain operations and little n-cubes." Journal of the American Mathematical Society 16.3 (2003): 681-704.
 
 [BF]: C. Berger, and B. Fresse. "Combinatorial operad actions on cochains." Mathematical Proceedings of the Cambridge Philosophical Society. Vol. 137. No. 1. Cambridge University Press, 2004.
+
+[KMM]: Kaufmann, R. M., & Medina-Mardones, A. M. (2020). Chain level Steenrod operations. arXiv preprint arXiv:2010.02571.

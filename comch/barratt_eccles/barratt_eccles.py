@@ -626,7 +626,6 @@ class BarrattEccles:
         :class:`comch.barratt_eccles.BarrattEcclesElement`
             The Barratt-Eccles element representative.
 
-
         SEE ALSO
         --------
         :meth:`comch.surjection.Surjection.steenrod_operation`

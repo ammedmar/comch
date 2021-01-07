@@ -1,8 +1,8 @@
 .. toctree::
    :maxdepth: 3
 
-   basics.nblink
-   surjection.nblink
-   barratt_eccles.nblink
-   table_reduction.nblink
-   steenrod_operations.nblink
+   basics
+   surjection
+   barratt_eccles
+   table_reduction
+   steenrod_operations

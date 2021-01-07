@@ -12,7 +12,7 @@ Commutativity up-to-coherent-homotopies is a concept originated in
 algebraic topology. It has found modern uses in topological data
 analysis, motion planning, condensed matter physics and several other
 areas. An important challenge for the application of the mathematical
-ideas sourraounding this concept, which are often defined
+ideas surrounding this concept, which are often defined
 non-constructively, is to describe them in effective terms suitable for
 concrete computations. This package serves to bridge the gap between
 theoretical ideas and concrete applications, by implementing structures

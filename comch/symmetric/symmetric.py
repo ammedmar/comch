@@ -436,10 +436,17 @@ class SymmetricRing:
 
     @staticmethod
     def rotation_element(arity, torsion=None):
-        r"""The element :math:`rho`.
+        r"""The element :math:`\rho`.
 
-        Defined as preferred generator of the cyclic subgroup of order
-        :math:`r` in :math:`\mathrm S_r`.
+        Defined as the preferred generator of the cyclic subgroup of order
+        :math:`r` in :math:`\mathrm S_r`. Explicitely,
+
+        .. math::
+            \rho(i) =
+            \begin{cases}
+            i+1 & i < r, \\
+            1   & i = r.
+            \end{cases}
 
         PARAMETERS
         ----------
@@ -464,7 +471,7 @@ class SymmetricRing:
 
     @staticmethod
     def transposition_element(arity, torsion=None):
-        r"""The element: :math:`\rho - \mathrm{id}`.
+        r"""The element :math:`\rho - \mathrm{id}`.
 
         PARAMETERS
         ----------
@@ -491,7 +498,7 @@ class SymmetricRing:
 
     @staticmethod
     def norm_element(arity, torsion=None):
-        r"""The element: :math:`\mathrm{id} + \rho + \cdots + \rho^{r-1}`.
+        r"""The element :math:`\mathrm{id} + \rho + \cdots + \rho^{r-1}`.
 
         PARAMETERS
         ----------

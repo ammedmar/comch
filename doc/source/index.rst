@@ -34,7 +34,7 @@ This package is written in Python 3 and has no dependencies. It can be installed
 
 .. toctree::
    :caption: Jupyter notebooks
-   :maxdepth: 1
+   :maxdepth: 0
    
    notebooks/index
 

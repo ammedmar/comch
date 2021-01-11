@@ -1,6 +1,6 @@
 import unittest
 from comch.barratt_eccles import BarrattEcclesElement, BarrattEccles
-from comch.symmetric import SymmetricRing
+from comch.symmetric import SymmetricRing, SymmetricRingElement
 
 
 class TestBarrattEcclesElement(unittest.TestCase):
@@ -40,11 +40,25 @@ class TestBarrattEcclesElement(unittest.TestCase):
         self.assertEqual(d_xy, dx_y + (-1)**(x.degree) * x_dy)
 
     def test_table_reduction(self):
+        # chain map
         b = BarrattEcclesElement({((1, 2, 3, 4), (1, 4, 3, 2)): 1,
                                    ((1, 2, 4, 3), (3, 4, 2, 1)): 2})
         dtr_b = b.table_reduction().boundary()
         trd_b = b.boundary().table_reduction()
         self.assertEqual(dtr_b, trd_b)
+
+        # equivariant
+        sym = SymmetricRingElement({(1, 3, 2, 4): 1,
+                                    (2, 1, 3, 4): -1})
+        sym_tr_b = sym * (b.table_reduction())
+        tr_sym_b = (sym * b).table_reduction()
+        self.assertEqual(sym_tr_b, tr_sym_b)
+
+        a = BarrattEcclesElement({((1, 2, 3), (1, 3, 2)): 1,
+                                  ((2, 1, 3), (1, 2, 3)): 2})
+        tr_ab = a.compose(b, 2).table_reduction()
+        tra_trb = a.table_reduction().compose(b.table_reduction(), 2)
+        self.assertEqual(tr_ab, tra_trb)
 
     def test_alexander_whitney(self):
         pass

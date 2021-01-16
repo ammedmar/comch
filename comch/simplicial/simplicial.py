@@ -5,63 +5,161 @@ from itertools import chain, product, combinations_with_replacement
 
 
 class Simplex(tuple):
-    """A standard simplex."""
+    r"""A simplex :math:`(v_0, \dots, v_n)`.
+
+    A simplex is a finite non-decreasing tuple of non-negative integers.
+
+    """
+
+    def __str__(self):
+        return super.__str__(self).replace(', ', ',')
 
     @property
     def dimension(self):
-        """The dimension of self
+        """The dimension of self.
 
-        Defined as the length of the tuple minus one."""
+        Defined as the length of the tuple minus one.
 
+        RETURNS
+        -------
+        :class:`int`
+            The dimension of *self*.
+
+        EXAMPLE
+        -------
+        >>> Simplex((1,3,4,5)).dimension
+        3
+
+        """
         return len(self) - 1
 
     def face(self, i):
-        """The i-th face of self
+        """The i-th face of *self*.
 
-        Obtained by removing the i-th entry of the tuple."""
+        Obtained by removing the i-th entry of the tuple.
+
+        RETURNS
+        -------
+        :class:`comch.simplicial.Simplex`
+            The i-th face of *self*.
+
+        EXAMPLE
+        -------
+        >>> Simplex((1,3,4,5)).face(2)
+        (1, 3, 5)
+
+        """
 
         return Simplex(self[:i] + self[i + 1:])
 
     def degeneracy(self, i):
-        """The i-th degeneracy of self
+        """The i-th degeneracy of *self*.
 
-        Obtained by repeating the i-th entry of the tuple."""
+        Obtained by repeating the i-th entry of the tuple.
+
+        RETURNS
+        -------
+        :class:`comch.simplicial.Simplex`
+            The i-th face of *self*.
+
+        EXAMPLE
+        -------
+        >>> Simplex((1,3,4,5)).degeneracy(2)
+        (1, 3, 4, 4, 5)
+
+        """
 
         return Simplex(self[:i + 1] + self[i:])
 
     def coface(self, i):
-        """The i-th coface of self
+        """The i-th coface of *self*.
 
         Obtained by adding 1 to each j-th entries with j
-        greater or equal to i."""
+        greater or equal to i.
+
+        RETURNS
+        -------
+        :class:`comch.simplicial.Simplex`
+            The i-th coface of *self*.
+
+        EXAMPLE
+        -------
+        >>> Simplex((1,3,4,5)).coface(2)
+        (1, 4, 5, 6)
+
+        """
 
         def d_i(i, j): return j + 1 if j >= i else j
 
         return tuple(d_i(i, j) for j in self)
 
     def codegeneracy(self, i):
-        """The i-th codegeneracy of self
+        """The i-th codegeneracy of *self*.
 
-        Obtained by substracting 1 from each j-th entries with j
-        greater than i."""
+        Obtained by subtracting 1 from each j-th entries with j
+        greater than i.
+
+        RETURNS
+        -------
+        :class:`comch.simplicial.Simplex`
+            The i-th codegeneracy of *self*.
+
+        EXAMPLE
+        -------
+        >>> Simplex((1,3,4,5)).codegeneracy(2)
+        (1, 2, 3, 4)
+
+        """
 
         def s_i(i, j): return j - 1 if j > i else j
 
         return tuple(s_i(i, j) for j in self)
 
     def is_degenerate(self):
-        """Returns True if self is degenerate
+        """Returns ``True`` if *self* is degenerate and ``False`` if not.
 
-        A simplex is degenerate if it is empty or if containes equal
-        consecutive values."""
+        A simplex is degenerate if it is empty or if contains equal consecutive
+        values.
 
+        RETURNS
+        -------
+        :class:`bool`
+            ``True`` if *self* is degenerate and ``False`` if not.
+
+        EXAMPLE
+        -------
+        >>> Simplex(()).is_degenerate()
+        True
+        >>> Simplex((1,1,2)).is_degenerate()
+        True
+
+        """
         conseq_values = any([i == j for i, j in pairwise(self)])
         empty_simplex = (self.dimension == -1)
         return empty_simplex or conseq_values
 
+    def is_nondegenerate(self):
+        """Returns ``True`` if *self* is nondegenerate and ``False`` if not.
+
+        A simplex is nondegenerate if it is not empty and contains no equal
+        consecutive values.
+
+        RETURNS
+        -------
+        :class:`bool`
+            ``True`` if *self* is nondegenerate and ``False`` if not.
+
+        EXAMPLE
+        -------
+        >>> Simplex((1,2,5)).is_nondegenerate()
+        True
+
+        """
+
+        return not self.is_degenerate()
 
 class SimplicialElement(FreeModuleElement):
-    """Element in the Eilenberg-Zilber operad
+    """Element in the
 
     This operad is the chain complex of natural transformations from
     the functor of normalized chains to its iterated tensor product
@@ -89,10 +187,9 @@ class SimplicialElement(FreeModuleElement):
         natural transformation at the given dimension.
 
         >>> x = SimplicialElement({((0,), (0, 1, 2)): 1,\
-                                              ((0, 1), (1, 2)): -1,\
-                                              ((0, 1, 2), (2,)): 1})
+                                   ((0, 1), (1, 2)): -1,\
+                                   ((0, 1, 2), (2,)): 1})
         """
-
         if data:
             if not dimension:
                 dimension = max(i for i in chain.from_iterable(
@@ -280,7 +377,6 @@ class SimplicialElement(FreeModuleElement):
         True
 
         """
-
         if self.degree is None:
             raise TypeError(f'only for homogeneous elements')
 
@@ -302,7 +398,7 @@ class SimplicialElement(FreeModuleElement):
         answer = self.zero()
         for k, v in self.items():
             if all(spx.dimension != 1 for spx in k):
-                answer += self.create({k:v})
+                answer += self.create({k: v})
         return answer
 
 class Simplicial():

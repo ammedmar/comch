@@ -24,7 +24,10 @@ class TestBarrattEcclesElement(unittest.TestCase):
         self.assertEqual(a, b)
 
     def test_iterated_diagonal(self):
-        pass
+        x = SimplicialElement({((0, 1, 2), (4, 6, 8)): 1})
+        dx = x.boundary()
+        self.assertEqual(dx.iterated_diagonal(3, 2),
+                         x.iterated_diagonal(3, 2).boundary())
 
 
 if __name__ == '__main__':

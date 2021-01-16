@@ -12,6 +12,7 @@ class SymmetricGroupElement(tuple):
     tuple of its images :math:`(\pi(1), \dots, \pi(r))`.
 
     """
+
     def __init__(self, iterable):
         """Initializes *self*.
 
@@ -25,6 +26,7 @@ class SymmetricGroupElement(tuple):
         -------
         >>> print(SymmetricGroupElement((1,3,2)))
         (1,3,2)
+
         """
         tuple.__init__(iterable)
 
@@ -247,8 +249,8 @@ class SymmetricRingElement(FreeModuleElement):
     data : :class:`int` or ``None``, default: ``None``
         Dictionary representing a linear cobination of basis elements.
         Items in the dictionary correspond to `basis_element: coefficient`
-        pairs. Each basis_element must create a `SymmetricGroupElement` and
-        `coefficient` must be an :class:`int`.
+        pairs. Each basis_element must create a :class:`SymmetricGroupElement`
+        and `coefficient` must be an :class:`int`.
     torsion : :class:`int` positive or :class:`string` equal to 'free'
         The torsion of the underlying ring.
 

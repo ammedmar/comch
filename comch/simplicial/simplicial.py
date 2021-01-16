@@ -8,8 +8,25 @@ class Simplex(tuple):
     r"""A simplex :math:`(v_0, \dots, v_n)`.
 
     A simplex is a finite non-decreasing tuple of non-negative integers.
+    We identity these with faces of the infinite simplex :math:`\Delta^\infty`.
 
     """
+
+    def __init__(self, iterable):
+        """Initializes *self*.
+
+        PARAMETERS
+        ----------
+        interable : :class:'iterable'
+            Used to create a :class:`tuple` of :class:`int`.
+
+        EXAMPLE
+        -------
+        >>> print(Simplex((1,2,4)))
+        (1,2,4)
+
+        """
+        tuple.__init__(iterable)
 
     def __str__(self):
         return super.__str__(self).replace(', ', ',')
@@ -49,7 +66,6 @@ class Simplex(tuple):
         (1, 3, 5)
 
         """
-
         return Simplex(self[:i] + self[i + 1:])
 
     def degeneracy(self, i):
@@ -134,9 +150,9 @@ class Simplex(tuple):
         True
 
         """
-        conseq_values = any([i == j for i, j in pairwise(self)])
+        consecutive_values = any([i == j for i, j in pairwise(self)])
         empty_simplex = (self.dimension == -1)
-        return empty_simplex or conseq_values
+        return empty_simplex or consecutive_values
 
     def is_nondegenerate(self):
         """Returns ``True`` if *self* is nondegenerate and ``False`` if not.
@@ -155,45 +171,75 @@ class Simplex(tuple):
         True
 
         """
-
         return not self.is_degenerate()
 
+
 class SimplicialElement(FreeModuleElement):
-    """Element in the
+    r"""Elements in an iterated tensor product of the chains on the
+    infinite simplex.
 
-    This operad is the chain complex of natural transformations from
-    the functor of normalized chains to its iterated tensor product
-    with itself. An element in arity r is identified with a sequence,
-    parametrized by a non-negative integer n, of elements in the
-    r-tensor product of the chains on the standard n-simplex which is
-    in the kernel of all codegeneracy maps.
+    The chains on the infinite simplex :math:`C = C_\bullet(\Delta^\infty; R)`
+    is the differential graded module :math:`C` with degree-:math:`n` part
+    :math:`C_n` freely generated as an :math:`R`-module by simplices of
+    dimension :math:`n`, and differential on these given by the sum of its
+    faces with alternating signs. Explicitly,
 
-    See: J. McClure, and J. Smith. "Multivariable cochain operations and
-    little n-cubes." Journal of the American Mathematical Society 16.3
-    (2003): 681-704.
+    .. math::
+        \partial (v_0, \dots, v_n) =
+        \sum_{i=0}^n (v_0, \dots, \widehat{v}_i, \dots, v_d).
 
-    This class models one element of the sequence at the given dimension n.
+    The degree-:math:`n` part of the tensor product :math:`C^{\otimes r}`
+    and its differential are recursively defined by
+
+    .. math::
+        (C^{\otimes r})_n = \bigoplus_{i+j=n} C_i \otimes (C^{\otimes r})_n
+
+    and
+
+    .. math::
+        \partial(c_1 \otimes c_2 \otimes \cdots \otimes c_r) =
+        (\partial c_1) \otimes c_2 \otimes \cdots \otimes c_r +
+        (-1)^{|c_1|} c_1 \otimes \partial (c_2 \otimes \cdots \otimes c_r).
+
+    ATTRIBUTES
+    ----------
+    torsion : :class:`int` positive or :class:`string` equal to 'free'.
+        The torsion of the underlying ring.
+    dimension : :class:`int` non-negative.
+        NOT SURE IF NEEDED.
 
     """
 
     def __init__(self, data=None, dimension=None, torsion=None):
-        """Initialize an instance of SimplicialElement
+        """Initializes *self*.
 
-        Create a new, empty SimplicialElement object representing
-        0, and, if given, initialize a SimplicialElement from a
-        dict with tuple of tuple of int keys and int values.
+        PARAMETERS
+        ----------
+        data : :class:`int` or ``None``, default: ``None``
+            Dictionary representing a linear cobination of basis elements.
+            Items in the dictionary correspond to `basis_element: coefficient`
+            pairs. Each basis_element must create a :class:`tuple` of
+            :class:`comch.simplicial.Simplex` and `coefficient` must be an
+            :class:`int`.
+        dimension : :class:`int`
+            NOT SURE IF NEEDED.
+        torsion : :class:`int` positive or :class:`string` equal to 'free'.
+            The torsion of the underlying ring.
 
-        Note: this corresponds to the element in the sequence representing a
-        natural transformation at the given dimension.
-
+        EXAMPLE
+        -------
         >>> x = SimplicialElement({((0,), (0, 1, 2)): 1,\
                                    ((0, 1), (1, 2)): -1,\
                                    ((0, 1, 2), (2,)): 1})
+        >>> print(x)
+        ((0,),(0,1,2)) - ((0,1),(1,2)) + ((0,1,2),(2,))
+
         """
+
         if data:
             if not dimension:
                 dimension = max(i for i in chain.from_iterable(
-                                chain.from_iterable(data.keys())))
+                    chain.from_iterable(data.keys())))
             new_data = {}
             for k, v in data.items():
                 new_k = tuple(Simplex(spx) for spx in k)
@@ -203,7 +249,7 @@ class SimplicialElement(FreeModuleElement):
         self.dimension = dimension
 
         super(SimplicialElement, self).__init__(data=data,
-                                                   torsion=torsion)
+                                                torsion=torsion)
 
     def __str__(self):
         string = super().__str__()
@@ -212,6 +258,13 @@ class SimplicialElement(FreeModuleElement):
     def _latex_(self):
         r"""Representation in LaTex.
 
+        RETURNS
+        -------
+        :class:`string`
+            A LaTex friendly representation.
+
+        EXAMPLE
+        -------
         >>> x = SimplicialElement({((0,), (0, 1, 2)): 1})
         >>> print(x._latex_())
         [0] \otimes [0,1,2]
@@ -228,11 +281,18 @@ class SimplicialElement(FreeModuleElement):
 
     @property
     def arity(self):
-        """Arity of self
+        """Arity of *self*.
 
-        Defined as None if self is not homogeneous. The arity of a basis
-        element corresponds to the number of simplices it contains.
+        Defined as ``None`` if *self* is not homogeneous. The arity of a basis
+        element is defined as the number of tensor factors making it.
 
+        RETURNS
+        -------
+        :class:`int` positive or ``None``.
+            The length of the keys of *self* or ``None`` if not well defined.
+
+        EXAMPLE
+        -------
         >>> x = SimplicialElement({((0,), (0, 1, 2)): 1})
         >>> x.arity
         2
@@ -245,12 +305,19 @@ class SimplicialElement(FreeModuleElement):
 
     @property
     def degree(self):
-        """Degree of self
+        """Degree of *self*.
 
-        Defined as None if self is not homogeneous. The degree of a basis
-        element agrees with the sum of the dimension of the simplices it
-        contains.
+        Defined as ``None`` if self is not homogeneous. The degree of a basis
+        element agrees with the sum of the dimension of the simplices making it.
 
+        RETURNS
+        -------
+        :class:`int` positive or ``None``.
+            The sum of the dimensions of the simplices of every key of *self* or
+            ``None`` if not well defined.
+
+        EXAMPLE
+        -------
         >>> x = SimplicialElement({((0,), (0, 1, 2)): 1})
         >>> x.degree
         2
@@ -262,10 +329,18 @@ class SimplicialElement(FreeModuleElement):
         return degs.pop()
 
     def boundary(self):
-        """Boundary of self
+        """Boundary of *self*.
 
-        Defined as the boundary of a tensor product of chains complexes.
+        As defined in the class's docstring.
 
+        RETURNS
+        _______
+        :class:`comch.simplicical.SimplicialElement`
+            The boundary of *self* as an element in a tensor product of
+            differential graded modules.
+
+        EXAMPLE
+        -------
         >>> x = SimplicialElement({((0, 1), (1, 2)): 1})
         >>> print(x.boundary())
         ((1,),(1,2)) - ((0,),(1,2)) - ((0,1),(2,)) + ((0,1),(1,))
@@ -279,14 +354,27 @@ class SimplicialElement(FreeModuleElement):
                     new_spx = spx.face(i)
                     new_k = k[:idx] + (new_spx,) + k[idx + 1:]
                     sign_exp = (acc_dim + i) % 2
-                    answer += answer.create({new_k: v * (-1)**sign_exp})
+                    answer += answer.create({new_k: v * (-1) ** sign_exp})
         return answer
 
     def __rmul__(self, other):
-        """Left action: other * self
+        """Left action: *other* ``*`` *self*
 
-        Left multiplication by a symmetric ring element or an integer.
+        Left multiplication by a symmetric group element or an integer.
+        Defined up to signs on basis elements by permutating the tensor factor.
 
+        PARAMETERS
+        ----------
+        other : :class:`int` or :class:`comch.simplicial.SimplicialElement`.
+            The element to left act on *self* with.
+
+        RETURNS
+        _______
+        :class:`comch.simplicial.SimplicialElement`
+            The product: *other* ``*`` *self* with Koszul's sign convention.
+
+        EXAMPLE
+        -------
         >>> x = SimplicialElement({((0, 1), (1, 2)): 1})
         >>> t = SymmetricRingElement({(2, 1): 1})
         >>> print(t * x)
@@ -299,7 +387,7 @@ class SimplicialElement(FreeModuleElement):
         def check_input(self, other):
             """Symmetric ring element with same attributes."""
             if not isinstance(other, SymmetricRingElement):
-                raise TypeError(f'right mult. by type int or \
+                raise TypeError(f'__rmul__ by type int or \
                     SymmetricRingElement not {type(other)}')
             if self.torsion != other.torsion:
                 raise TypeError('only defined for equal attribute torsion')
@@ -313,7 +401,7 @@ class SimplicialElement(FreeModuleElement):
                 right = [weights[perm.index(j)] for
                          j in perm[idx + 1:] if i > j]
                 sign_exp += sum(right) * weights[idx]
-            return (-1)**(sign_exp % 2)
+            return (-1) ** (sign_exp % 2)
 
         if isinstance(other, int):
             return super().__rmul__(other)
@@ -327,56 +415,41 @@ class SimplicialElement(FreeModuleElement):
             answer += self.create({tuple(new_key): new_sign * v1 * v2})
         return answer
 
-    def coface(self, i):
-        """Covariant action of the i-th coface."""
-
-        if i > self.dimension:
-            raise TypeError('coface out of range')
-
-        answer = self.zero()
-        for k, v in self.items():
-            new_k = tuple(tuple(spx.coface(i) for spx in k))
-            answer += answer.create({new_k: v})
-        return answer
-
-    def codegeneracy(self, i):
-        """Covariant action of the i-th codegeneracy. It is the zero map
-        on any element in the Eilenberg-Zilber operad.
-
-        """
-        if i > self.dimension - 1:
-            raise TypeError('codegeneracy out of range')
-
-        answer = self.zero()
-        for k, v in self.items():
-            new_k = tuple(spx.codegeneracy(i) for spx in k)
-            answer += answer.create({new_k: v})
-        return answer
-
-    def preferred_rep(self):
-        """Sets to 0 the summands with degenerate simplices."""
-
-        for k, v in self.items():
-            if any([spx.is_degenerate() for spx in k]):
-                self[k] = 0
-
-        super().preferred_rep()
-
     def iterated_diagonal(self, times=1, coord=1):
-        """Alexander-Whitney chain approximation to the diagonal applied
-        n-times.
+        r"""Iterated Alexander-Whitney diagonal applied at a specific tensor factor.
 
-        Examples
-        --------
+        The AW diagonal is the chain map :math:`\Delta \colon C \to C \otimes C`
+        defined on the chains of the infinite simplex by the formula
 
-        # chain map check:
+        .. math::
+            \Delta((v_0, dots, v_n)) =
+            \sum_{i=0}^n (v_0, dots, v_i) \otimes (v_i, dots, v_n).
 
+        It is coassociative, :math:`(\Delta \otimes \mathrm{id}) \Delta =
+        (\mathrm{id} \otimes \Delta) \Delta`, so it has a well defined iteration
+        :math:`\Delta^k`, and for every :math:`i \in \{1, \dots, r\}`, there is map
+        :math:`C^{\otimes r} \to C^{\otimes k+r}`.
+
+        PARAMETERS
+        ----------
+        times : :class:`int`
+            The number of times the AW diagonal is composed with itself.
+        coord : :class:`int`
+            The tensor position on which the iterated diagonal acts.
+
+        RETURNS
+        _______
+        :class:`comch.simplicial.SimplicialElement`
+            The action of the iterated AW diagonal on *self*.
+
+        EXAMPLE
+        -------
         >>> x = SimplicialElement({((0, 1, 2), ): 1})
-        >>> dx = x.boundary()
-        >>> dx.iterated_diagonal(3) == x.iterated_diagonal(3).boundary()
-        True
+        >>> print(x.iterated_diagonal())
+        ((0,),(0,1,2)) + ((0,1),(1,2)) + ((0,1,2),(2,))
 
         """
+
         if self.degree is None:
             raise TypeError(f'only for homogeneous elements')
 
@@ -395,18 +468,60 @@ class SimplicialElement(FreeModuleElement):
         return answer
 
     def one_reduced(self):
+        """Returns the 1-reduction of *self*.
+
+        The 1-reduction map is the map induced by the collapse of the
+        1-skeleton of the infinite simplex.
+
+        RETURNS
+        _______
+        :class:`comch.simplicial.SimplicialElement`
+            The preferred representative of *self*.
+
+        EXAMPLE
+        -------
+        >>> x = SimplicialElement({((1,2), (2,3,4)): 1})
+        >>> print(x.one_reduced())
+        0
+
+        """
         answer = self.zero()
         for k, v in self.items():
             if all(spx.dimension != 1 for spx in k):
                 answer += self.create({k: v})
         return answer
 
+    def preferred_rep(self):
+        """Preferred representative of *self*.
+
+        Removes pairs `basis element: coefficient` which satisfy either of:
+        1) The basis element has a degenerate tensor factor, or 2) the
+        coefficient is 0.
+
+        RETURNS
+        _______
+        :class:`comch.simplicial.SimplicialElement`
+            The preferred representative of *self*.
+
+        EXAMPLE
+        -------
+        >>> print(SimplicialElement({((1,3), (1,1)): 1}))
+        0
+
+        """
+        for k, v in self.items():
+            if any([spx.is_degenerate() for spx in k]):
+                self[k] = 0
+
+        super().preferred_rep()
+
+
 class Simplicial():
     """Class producing Eilenberg-Zilber elements of special interest."""
 
     def standard_element(n, torsion=None):
-        return SimplicialElement({(tuple(range(n + 1)), ): 1},
-                                    torsion=torsion)
+        return SimplicialElement({(tuple(range(n + 1)),): 1},
+                                 torsion=torsion)
 
     def boundary_element(n, torsion=None):
         """..."""
@@ -415,7 +530,7 @@ class Simplicial():
         answer = SimplicialElement(dimension=n, torsion=torsion)
         spx = Simplex(range(n + 1))
         for i in range(n + 1):
-            new_k = (spx[:i] + spx[i + 1:], )
+            new_k = (spx[:i] + spx[i + 1:],)
             answer += answer.create({new_k: sign[i % 2]})
         return answer
 

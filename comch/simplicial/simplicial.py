@@ -516,30 +516,27 @@ class SimplicialElement(FreeModuleElement):
         super().preferred_rep()
 
 
-class Simplicial():
-    """Class producing Eilenberg-Zilber elements of special interest."""
+class Simplicial:
+    """Produces simplicial elements of interest."""
 
-    def standard_element(n, torsion=None):
-        return SimplicialElement({(tuple(range(n + 1)),): 1},
-                                 torsion=torsion)
+    @staticmethod
+    def standard_element(n, times=1, torsion=None):
+        r"""The chain represented by the simplex :math:`(0, \dots, n)`.
 
-    def boundary_element(n, torsion=None):
-        """..."""
+        PARAMETERS
+        ----------
+        n : :class:`int`
+            The dimension of the standard simplex considered.
+        times : :class:`int`
+            The number of tensor copies.
+        torsion : :class:`int` positive or :class:`string` equal to 'free'
+        The torsion of the underlying ring.
 
-        sign = {0: 1, 1: -1}
-        answer = SimplicialElement(dimension=n, torsion=torsion)
-        spx = Simplex(range(n + 1))
-        for i in range(n + 1):
-            new_k = (spx[:i] + spx[i + 1:],)
-            answer += answer.create({new_k: sign[i % 2]})
-        return answer
+        EXAMPLES
+        --------
+        >>> print(Simplicial.standard_element(3, 2))
+        ((0,1,2,3),(0,1,2,3))
 
-    def coproduct_element(n, torsion=None):
-        """..."""
-
-        answer = SimplicialElement(dimension=n, torsion=torsion)
-        spx = Simplex(range(n + 1))
-        for i in range(1, n + 2):
-            new_k = (spx[:i], spx[i - 1:])
-            answer += answer.create({new_k: 1})
-        return answer
+        """
+        key = (tuple(range(n + 1)),) * times
+        return SimplicialElement({key: 1}, torsion=torsion)

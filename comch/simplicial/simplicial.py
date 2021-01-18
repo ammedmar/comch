@@ -42,7 +42,7 @@ class Simplex(tuple):
     def codegeneracy(self, i):
         """The i-th codegeneracy of self
 
-        Obtained by substracting 1 from each j-th entries with j
+        Obtained by subtracting 1 from each j-th entries with j
         greater than i."""
 
         def s_i(i, j): return j - 1 if j > i else j
@@ -52,7 +52,7 @@ class Simplex(tuple):
     def is_degenerate(self):
         """Returns True if self is degenerate
 
-        A simplex is degenerate if it is empty or if containes equal
+        A simplex is degenerate if it is empty or if contains equal
         consecutive values."""
 
         conseq_values = any([i == j for i, j in pairwise(self)])
@@ -65,16 +65,16 @@ class SimplicialElement(FreeModuleElement):
 
     This operad is the chain complex of natural transformations from
     the functor of normalized chains to its iterated tensor product
-    with itself. An element in arity r is identified with a sequence,
-    parametrized by a non-negative integer n, of elements in the
-    r-tensor product of the chains on the standard n-simplex which is
+    with itself. An element in arity *r* is identified with a sequence,
+    parametrized by a non-negative integer *n*, of elements in the
+    *r*-tensor product of the chains on the standard *n*-simplex which is
     in the kernel of all codegeneracy maps.
 
     See: J. McClure, and J. Smith. "Multivariable cochain operations and
     little n-cubes." Journal of the American Mathematical Society 16.3
     (2003): 681-704.
 
-    This class models one element of the sequence at the given dimension n.
+    This class models one element of the sequence at the given dimension *n*.
 
     """
 
@@ -82,8 +82,8 @@ class SimplicialElement(FreeModuleElement):
         """Initialize an instance of SimplicialElement
 
         Create a new, empty SimplicialElement object representing
-        0, and, if given, initialize a SimplicialElement from a
-        dict with tuple of tuple of int keys and int values.
+        0 and, if given, initialize a SimplicialElement from a
+        dict with a tuple of tuples of int keys and int values.
 
         Note: this corresponds to the element in the sequence representing a
         natural transformation at the given dimension.
@@ -131,9 +131,9 @@ class SimplicialElement(FreeModuleElement):
 
     @property
     def arity(self):
-        """Arity of self
+        """Arity of *self*
 
-        Defined as None if self is not homogeneous. The arity of a basis
+        Defined as None if *self* is not homogeneous. The arity of a basis
         element corresponds to the number of simplices it contains.
 
         >>> x = SimplicialElement({((0,), (0, 1, 2)): 1})
@@ -148,9 +148,9 @@ class SimplicialElement(FreeModuleElement):
 
     @property
     def degree(self):
-        """Degree of self
+        """Degree of *self*
 
-        Defined as None if self is not homogeneous. The degree of a basis
+        Defined as None if *self* is not homogeneous. The degree of a basis
         element agrees with the sum of the dimension of the simplices it
         contains.
 
@@ -165,7 +165,7 @@ class SimplicialElement(FreeModuleElement):
         return degs.pop()
 
     def boundary(self):
-        """Boundary of self
+        """Boundary of *self*
 
         Defined as the boundary of a tensor product of chains complexes.
 
@@ -186,7 +186,7 @@ class SimplicialElement(FreeModuleElement):
         return answer
 
     def __rmul__(self, other):
-        """Left action: other * self
+        """Left action: *other* * *self*
 
         Left multiplication by a symmetric ring element or an integer.
 
@@ -231,7 +231,7 @@ class SimplicialElement(FreeModuleElement):
         return answer
 
     def coface(self, i):
-        """Covariant action of the i-th coface."""
+        """Covariant action of the *i*-th coface."""
 
         if i > self.dimension:
             raise TypeError('coface out of range')
@@ -243,7 +243,7 @@ class SimplicialElement(FreeModuleElement):
         return answer
 
     def codegeneracy(self, i):
-        """Covariant action of the i-th codegeneracy. It is the zero map
+        """Covariant action of the *i*-th codegeneracy. It is the zero map
         on any element in the Eilenberg-Zilber operad.
 
         """
@@ -267,7 +267,7 @@ class SimplicialElement(FreeModuleElement):
 
     def iterated_diagonal(self, times=1, coord=1):
         """Alexander-Whitney chain approximation to the diagonal applied
-        n-times.
+        *n*-times.
 
         Examples
         --------

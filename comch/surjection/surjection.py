@@ -518,7 +518,7 @@ class SurjectionElement(FreeModuleElement):
             raise NotImplementedError
 
     def compose(self, other, position):
-        """Operadic compositions: *self* :math:`o_position` *other*.
+        r"""Operadic compositions: *self* :math:`\circ_{position}` *other*.
 
         We think of *other* being inserted into *self*, and in the
         Berger-Fresse convention this pair is ordered: self tensor other.

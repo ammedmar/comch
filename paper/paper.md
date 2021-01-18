@@ -22,13 +22,13 @@ bibliography: paper.bib
 
 # Summary
 
-All the basic notions of number, from the integers to the complex, are equipped with a commutative product, and it was believed until Hamilton's introduction of the quaternions, that the product of any number system must be commutative. Hamilton's discovery allowed the consideration of other algebraic structures where commutativity is not assumed, and the conceptual shift that followed is only comparable to the effect non-euclidean geometries had in the study of shapes. Around a century later, after the development of the novel fields of topology and homotopy, mathematicians returned to the question of commutativity and identified different levels laying in between the basic dichotomy. These intermediate structures correspond to coherent systems correcting homotopically the lack of strict commutativity, and constitute the focus of extensive research.
+All the basic notions of number, from the integers to the complex, are equipped with a commutative product, and it was believed until Hamilton's introduction of the quaternions, that the product of any number system must be commutative. Hamilton's discovery allowed for the consideration of other algebraic structures where commutativity is not assumed, and the conceptual shift that followed is only comparable to the effect non-euclidean geometries had in the study of shapes. Around a century later, after the development of the novel fields of topology and homotopy, mathematicians returned to the question of commutativity and identified different levels laying in between the basic dichotomy. These intermediate structures correspond to coherent systems correcting homotopically the lack of strict commutativity, and constitute the focus of extensive research.
 
 # Statement of need
 
-`ComCH` is a specialized computer algebra system for the study of commutativity up-to-coherent-homotopies. It is built on `Python` and is free of dependencies. An important challenge for the application of commutativity up-to-coherent-homotopies and related notions, which are often defined non-constructively, is to describe them in effective terms suitable for concrete computations. This package serves to bridge this gap between theoretical concepts and concrete applications, by providing effective models for complexes parameterizing different levels of homotopical commutativity.
+`ComCH` is a specialized computer algebra system for the study of commutativity up-to-coherent-homotopies. It is built on `Python` and is free of dependencies. An important challenge for the application of commutativity up-to-coherent-homotopies and related notions, which are often defined non-constructively, is to describe them in effective terms suitable for concrete computations. This package serves to bridge the gap between theoretical concepts and concrete applications in this context, by providing effective models for complexes parameterizing different levels of homotopical commutativity.
 
-The theoretical concepts covered in this work have already found modern uses in topological data analysis, condensed matter physics, motion planning, and several other areas, see for example [@mm_persistence, @kapustin_thorngren, @g_lm_rm], with the notion of cohomology operations at the chain level [@mm, @kaufmann_mm, @brumfiel_mm_morgan] playing a central role.
+The theoretical concepts covered in this work have already found modern uses in topological data analysis, condensed matter physics, motion planning, and several other areas, see for example [@mm_persistence], [@kapustin_thorngren], and [@g_lm_rm]. A notion that plays a central role in these applications is that of cohomology operations at the chain level, which is carefully implemented in `ComCH` in several different forms. See [@mm], [@kaufmann_mm], [@brumfiel_mm_morgan] for more details.
 
 # Mathematical overview
 
@@ -36,6 +36,6 @@ Following the pioneering work of Steenrod, Cartan, Adem, Stashef, Boardman-Vogt,
 
 # Acknowledgements
 
-We gratefully acknowledge the support of Kathryn Hess and contributions from Djian Post and Wojciech Reise. Work partially supported by Innosuisse grant 32875.1 IP-ICT - 1.
+We gratefully acknowledge the support of Kathryn Hess, contributions from Djian Post and Wojciech Reise, and stimulating conversations with Dennis Sullivan, Greg Brumfiel, John Morgan, Ralph Kaufmann, and Paolo Salvatore. Work partially supported by Innosuisse grant 32875.1 IP-ICT - 1.
 
 # References

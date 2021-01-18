@@ -33,7 +33,7 @@ class Simplex(tuple):
 
     @property
     def dimension(self):
-        """The dimension of self.
+        """The dimension of *self*.
 
         Defined as the length of the tuple minus one.
 
@@ -53,7 +53,7 @@ class Simplex(tuple):
     def face(self, i):
         """The i-th face of *self*.
 
-        Obtained by removing the i-th entry of the tuple.
+        Obtained by removing the i-th entry of *self*.
 
         RETURNS
         -------

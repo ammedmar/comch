@@ -6,23 +6,94 @@ from itertools import combinations, product
 
 
 class Cube(tuple):
-    """Models an elementary cube"""
+    r"""A cube :math:`(I_1, \dots, I_n)`.
 
-    @property
-    def intervals(self):
-        return tuple(idx for idx, x in enumerate(self) if x == 2)
+    A cube is a finite tuple of elements in :math:`\{0,1,2\}`, where we think
+    of :math:`2` as the interval :math:`[0,1]` and :math:`0,1` as its endpoints.
+    We identity these with faces of the infinite cube :math:`\mathbb I^\infty`.
+
+    """
+
+    def __init__(self, iterable):
+        """Initializes *self*.
+
+        PARAMETERS
+        ----------
+        interable : :class:'iterable'
+            Used to create a :class:`tuple` of :class:`int` with values
+            0, 1 or 2.
+
+        EXAMPLE
+        -------
+        >>> print(Cube((1,2,0,2)))
+        (1,2,0,2)
+
+        """
+        tuple.__init__(iterable)
+
+    def __str__(self):
+        return super.__str__(self).replace(', ', ',')
 
     @property
     def dimension(self):
+        """The dimension of *self*.
+
+        Defined as the number of values in the tuple that are equal to 2.
+
+        RETURNS
+        -------
+        :class:`int`
+            The dimension of *self*.
+
+        EXAMPLE
+        -------
+        >>> Cube((1,2,0,2)).dimension
+        2
+
+        """
         return self.count(2)
 
+    @property
+    def intervals(self):
+        """The positions of intervals in *self*.
+
+        Corresponds to the tuple of indices where *self* contains 2.
+
+        RETURNS
+        -------
+        :class:`tuple`
+            The indices of intervals in *self*.
+
+        EXAMPLE
+        -------
+        >>> Cube((1,2,0,2)).intervals
+        (1, 3)
+
+        """
+        return tuple(idx for idx, x in enumerate(self) if x == 2)
+
     def face(self, i, epsilon):
-        """..."""
+        r"""The i-th :math:`\epsilon` face of *self*.
+
+        Obtained by replacing the i-th entry of *self* by :math:`\epsilon`.
+
+        RETURNS
+        -------
+        :class:`comch.simplicial.Simplex`
+            The i-th face of *self*.
+
+        EXAMPLE
+        -------
+        >>> Cube((1,2,0,2)).face(1, 0)
+        (1, 2, 0, 1)
+
+        """
         idx = self.intervals[i]
         answer = self[:idx] + ((epsilon + 1) % 2,) + self[idx + 1:]
         return Cube(answer)
 
     def necklace(self):
+        """..."""
         ones = [idx for idx, i in enumerate(self) if i == 1]
         twos = [idx for idx, i in enumerate(self) if i == 2]
         aux = [0]

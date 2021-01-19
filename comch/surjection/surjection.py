@@ -2,8 +2,8 @@ from ..free_module import FreeModuleElement
 from ..symmetric import SymmetricGroupElement
 from ..symmetric import SymmetricRingElement, SymmetricRing
 
-from ..simplicial import Simplex, SimplicialElement
-from ..cubical import CubicalElement
+from ..simplicial import Simplex, SimplicialElement, Simplicial
+from ..cubical import CubicalElement, Cubical
 from ..utils import pairwise
 
 from itertools import combinations, product, combinations_with_replacement
@@ -919,6 +919,58 @@ class Surjection:
 
         return int(coeff) * Surjection.steenrod_adem_structure(
             p, d, torsion=p, convention=convention)
+
+    @staticmethod
+    def steenrod_chain(p, s, q, bockstein=False, shape='simplex'):
+        """Chain representative of a Steenrod operation.
+
+        Given the parameters of a Steenrod operation: prime p, subindex s, and
+        cochain degree q, and bockstein, it returns the chain in the tensor
+        product of a standard simplex on which the iterated tensor product of
+        the cochain acts defining a cochain representative of its image under
+        the operation.
+
+        PARAMETERS
+        ----------
+        p : :class:`int`
+            The prime considered.
+        s : :class:`int`
+            The subscript of the Steenrod operation.
+        q : :class:`int`
+            The degree of the class acted on.
+        bockstein : :class:`bool`, default ``False``
+            Determines the use of the bockstein homomorphism.
+        shape: :class:`string`, 'simplex' or 'cube'
+            Action on the standard simplex or cube
+
+        EXAMPLES
+        --------
+        >>> print(Surjection.steenrod_chain(2, -1, -2))
+        ((0,2,3),(0,1,2)) + ((0,1,3),(1,2,3))
+
+        """
+
+        def filter_homogeneous(element):
+            homogeneous = {}
+            for k, v in element.items():
+                if len(set(elmt.dimension for elmt in k)) == 1:
+                    homogeneous[k] = v
+            return element.create(homogeneous)
+
+        surj = Surjection.steenrod_operation(p, s, q, bockstein=bockstein)
+        b = int(bockstein)
+
+        if p == 2:
+            d = q + s
+        else:
+            d = q + 2 * s * (p - 1) - b
+
+        if shape == 'simplex':
+            element = Simplicial.standard_element(-d, torsion=p)
+        elif shape == 'cube':
+            element = Cubical.standard_element(-d, torsion=p)
+
+        return filter_homogeneous(surj(element))
 
     @staticmethod
     def basis(arity, degree, complexity=None):

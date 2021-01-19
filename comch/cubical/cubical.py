@@ -6,44 +6,157 @@ from itertools import combinations, product
 
 
 class Cube(tuple):
-    """Models an elementary cube"""
+    r"""A cube :math:`(I_1, \dots, I_n)`.
 
-    @property
-    def intervals(self):
-        return tuple(idx for idx, x in enumerate(self) if x == 2)
+    A cube is a finite tuple of elements in :math:`\{0,1,2\}`, where we think
+    of :math:`2` as the interval :math:`[0,1]` and :math:`0,1` as its endpoints.
+    We identity these with faces of the infinite cube :math:`\mathbb I^\infty`.
+
+    """
+
+    def __init__(self, iterable):
+        """Initializes *self*.
+
+        PARAMETERS
+        ----------
+        interable : :class:'iterable'
+            Used to create a :class:`tuple` of :class:`int` with values
+            0, 1 or 2.
+
+        EXAMPLE
+        -------
+        >>> print(Cube((1,2,0,2)))
+        (1,2,0,2)
+
+        """
+        tuple.__init__(iterable)
+
+    def __str__(self):
+        return super.__str__(self).replace(', ', ',')
 
     @property
     def dimension(self):
+        """The dimension of *self*.
+
+        Defined as the number of values in the tuple that are equal to 2.
+
+        RETURNS
+        -------
+        :class:`int`
+            The dimension of *self*.
+
+        EXAMPLE
+        -------
+        >>> Cube((1,2,0,2)).dimension
+        2
+
+        """
         return self.count(2)
 
+    @property
+    def intervals(self):
+        """The positions of intervals in *self*.
+
+        Corresponds to the tuple of indices where *self* contains 2.
+
+        RETURNS
+        -------
+        :class:`tuple`
+            The indices of intervals in *self*.
+
+        EXAMPLE
+        -------
+        >>> Cube((1,2,0,2)).intervals
+        (1, 3)
+
+        """
+        return tuple(idx for idx, x in enumerate(self) if x == 2)
+
     def face(self, i, epsilon):
-        """..."""
+        r"""The i-th :math:`\epsilon` face of *self*.
+
+        Obtained by replacing the i-th entry of *self* by :math:`\epsilon`.
+
+        RETURNS
+        -------
+        :class:`comch.simplicial.Simplex`
+            The i-th face of *self*.
+
+        EXAMPLE
+        -------
+        >>> Cube((1,2,0,2)).face(1, 0)
+        (1, 2, 0, 1)
+
+        """
         idx = self.intervals[i]
         answer = self[:idx] + ((epsilon + 1) % 2,) + self[idx + 1:]
         return Cube(answer)
 
-    def necklace(self):
-        ones = [idx for idx, i in enumerate(self) if i == 1]
-        twos = [idx for idx, i in enumerate(self) if i == 2]
-        aux = [0]
-        answer = []
-        for idx in range(len(self) + 2):
-            if idx in twos:
-                aux.append(idx + 1)
-            if idx in ones:
-                aux.append(idx + 1)
-                answer.append(Simplex(aux))
-                aux = [idx + 1]
-        if aux:
-            aux.append(len(self) + 1)
-            answer.append(Simplex(aux))
-        return Necklace(answer)
-
-
 class CubicalElement(FreeModuleElement):
-    """..."""
+    r"""Elements in an iterated tensor product of the chains on the
+    infinite cube.
+
+    The chains on the infinite cube :math:`C = C_\bullet(\Delta^\infty; R)`
+    is the differential graded module :math:`C` with degree-:math:`n` part
+    :math:`C_n` freely generated as an :math:`R`-module by cubes of
+    dimension :math:`n`, and differential on these given by the sum of its
+    faces with alternating signs. Explicitly, for $x \in C_n$ we have
+
+    .. math::
+        \partial x =
+        \sum_{i = 1}^{n} (-1)^{i-1}(d^0_i x - d^1_i x)
+
+    The differential graded module :math:`C` is isomorphic to
+
+    .. math::
+        \bigoplus_{k \geq 0} C_\bullet^{CW}(I; R)^{\otimes k}
+
+    where :math:`I` is the interval with its usual cellular structure.
+
+    The degree-:math:`n` part of the tensor product :math:`C^{\otimes r}`
+    and its differential are recursively defined by
+
+    .. math::
+        (C^{\otimes r})_n = \bigoplus_{i+j=n} C_i \otimes (C^{\otimes r})_n
+
+    and
+
+    .. math::
+        \partial(c_1 \otimes c_2 \otimes \cdots \otimes c_r) =
+        (\partial c_1) \otimes c_2 \otimes \cdots \otimes c_r +
+        (-1)^{|c_1|} c_1 \otimes \partial (c_2 \otimes \cdots \otimes c_r).
+
+    ATTRIBUTES
+    ----------
+    torsion : :class:`int` positive or :class:`string` equal to 'free'.
+        The torsion of the underlying ring.
+
+    """
 
     def __init__(self, data=None, torsion=None):
+        """Initializes *self*.
+
+        PARAMETERS
+        ----------
+        data : :class:`int` or ``None``, default: ``None``
+            Dictionary representing a linear cobination of basis elements.
+            Items in the dictionary correspond to `basis element: coefficient`
+            pairs. Each basis element must create a :class:`tuple` of
+            :class:`comch.cubical.Cube` and `coefficient` must be an
+            :class:`int`.
+        torsion : :class:`int` positive or :class:`string` equal to 'free'.
+            The torsion of the underlying ring.
+
+        EXAMPLE
+        -------
+        >>> x = CubicalElement({((0,2), (0,1)): 1,\
+                                ((2,1), (1,2)): -1,\
+                                ((1,2), (2,0)): 1})
+        >>> print(x)
+        ((0,2),(0,1)) - ((2,1),(1,2)) + ((1,2),(2,0))
+
+        """
+
         if data:
             new_data = {}
             for k, v in data.items():
@@ -59,7 +172,15 @@ class CubicalElement(FreeModuleElement):
         return string.replace(', ', ',')
 
     def _latex_(self):
-        r"""Representation in Latex.
+        r"""Representation in LaTex.
+
+        RETURNS
+        -------
+        :class:`string`
+            A LaTex friendly representation.
+
+        EXAMPLE
+        -------
 
         >>> x = CubicalElement({((2,), (1,)): 1, ((0,), (2,)): 1})
         >>> print(x._latex_())
@@ -79,7 +200,23 @@ class CubicalElement(FreeModuleElement):
 
     @property
     def arity(self):
-        """..."""
+        """Arity of *self*.
+
+        Defined as ``None`` if *self* is not homogeneous. The arity of a basis
+        element is defined as the number of tensor factors making it.
+
+        RETURNS
+        -------
+        :class:`int` positive or ``None``.
+            The length of the keys of *self* or ``None`` if not well defined.
+
+        EXAMPLE
+        -------
+        >>> x = CubicalElement({((0,2), (0,1)): 1})
+        >>> x.arity
+        2
+
+        """
         arities = set(len(multicube) for multicube in self.keys())
         if len(arities) != 1:
             return None
@@ -87,21 +224,45 @@ class CubicalElement(FreeModuleElement):
 
     @property
     def degree(self):
-        """..."""
-        degs = {sum(cube.dimension for cube in k) for k in self.keys()}
-        if len(degs) != 1:
+        """Degree of *self*.
+
+        Defined as ``None`` if self is not homogeneous. The degree of a basis
+        element agrees with the sum of the dimension of the simplices making it.
+
+        RETURNS
+        -------
+        :class:`int` positive or ``None``.
+            The sum of the dimensions of the simplices of every key of *self* or
+            ``None`` if not well defined.
+
+        EXAMPLE
+        -------
+        >>> x = CubicalElement({((0,2), (0,1)): 1})
+        >>> x.degree
+        1
+
+        """
+        degrees = {sum(cube.dimension for cube in k) for k in self.keys()}
+        if len(degrees) != 1:
             return None
-        return degs.pop()
+        return degrees.pop()
 
     def boundary(self):
-        """Boundary of an element in a tensor product of the standard
-        chains.
+        """Boundary of *self*.
 
-        # squares to zero
+        As defined in the class's docstring.
 
-        >>> elmt = CubicalElement({((0, 2), (2, 1), (2, 0)): 1})
-        >>> print(elmt.boundary().boundary())
-        0
+        RETURNS
+        _______
+        :class:`comch.cubical.CubicalElement`
+            The boundary of *self* as an element in a tensor product of
+            differential graded modules.
+
+        EXAMPLE
+        -------
+        >>> x = CubicalElement({((0, 2), (2, 1)): 1})
+        >>> print(x.boundary())
+        ((0,1),(2,1)) - ((0,0),(2,1)) - ((0,2),(1,1)) + ((0,2),(0,1))
 
         """
         answer = self.zero()
@@ -116,35 +277,80 @@ class CubicalElement(FreeModuleElement):
                         answer += answer.create({new_k: v * (-1) ** sign_exp})
         return answer
 
-    def iterated_diagonal(self, n=1):
-        """Serre chain approximation to the diagonal applied n-times.
+    def __rmul__(self, other):
+        """Left action: *other* ``*`` *self*
 
-        Examples
-        --------
+        Left multiplication by a symmetric group element or an integer.
+        Defined up to signs on basis elements by permuting the tensor factor.
 
-        # chain map check:
+        PARAMETERS
+        ----------
+        other : :class:`int` or :class:`comch.simplicial.SimplicialElement`.
+            The symmetric ring element left acting on *self*.
 
-        >>> x = CubicalElement({((0, 2, 2, 1, 2),): 1})
-        >>> d_delta_x = x.iterated_diagonal(2).boundary()
-        >>> delta_d_x = x.boundary().iterated_diagonal(2)
-        >>> d_delta_x == delta_d_x
-        True
+        RETURNS
+        _______
+        :class:`comch.cubical.CubicalElement`
+            The product: *other* ``*`` *self* with Koszul's sign convention.
+
+        EXAMPLE
+        -------
+        ...
+
+        """
+
+        pass
+
+    def iterated_diagonal(self, times=1, coord=1):
+        r"""Iterated Serre diagonal applied at a specific tensor factor.
+
+        The Serre diagonal is the chain map :math:`\Delta \colon C \to C \otimes C`
+        defined on the chains of the infinite cube by the formula
+
+        .. math::
+            \Delta (x_1 \otimes \cdots \otimes x_n) =
+            \sum \pm \left( x_1^{(1)} \otimes \cdots \otimes x_n^{(1)} \right) \otimes
+            \left( x_1^{(2)} \otimes \cdots \otimes x_n^{(2)} \right),
+
+        where the sign is determined using the Koszul convention, and we are
+        using Sweedler’s notation
+
+        .. math::
+            \Delta(x_i) = \sum x_i^{(1)} \otimes x_i^{(2)}.
+
+        It is coassociative, :math:`(\Delta \otimes \mathrm{id}) \Delta =
+        (\mathrm{id} \otimes \Delta) \Delta`, so it has a well defined iteration
+        :math:`\Delta^k`, and for every :math:`i \in \{1, \dots, r\}`, there is map
+        :math:`C^{\otimes r} \to C^{\otimes k+r}` sending
+        :math:`(x_1 \otimes \cdots \otimes x_n)` to
+        :math:`(x_1 \otimes \cdots \otimes \Delta^k(k_i) \cdots \otimes x_n)`.
+
+        PARAMETERS
+        ----------
+        times : :class:`int`
+            The number of times the AW diagonal is composed with itself.
+        coord : :class:`int`
+            The tensor position on which the iterated diagonal acts.
+
+        RETURNS
+        _______
+        :class:`comch.simplicial.SimplicialElement`
+            The action of the iterated AW diagonal on *self*.
+
+        EXAMPLE
+        -------
 
         """
 
         def sign(p):
-            """Counts the number of pairs appearing in reversed order.
-
-            """
+            """Counts the number of pairs appearing in reversed order."""
             to_count = filter(lambda x: x[0] > x[1], combinations(p, 2))
             sign_exp = sum(1 for _ in to_count) % 2
             return (-1) ** sign_exp
 
         def elementary_summand(fixed, i):
             """Models as a function the element 0,...,0,2,1,...,1 appearing
-            as one of the summands of the iterated diagonal of an interval.
-
-            """
+            as one of the summands of the iterated diagonal of an interval."""
             if i < fixed:
                 return 0
             elif i == fixed:
@@ -154,24 +360,23 @@ class CubicalElement(FreeModuleElement):
 
         if self.degree is None:
             raise TypeError(f'only for homogeneous elements')
-
-        if self.arity != 1:
-            raise TypeError(f'only for arity 1 elements')
+        if self.arity < coord:
+            raise TypeError(f'arity = {self.arity} < coord = {coord}')
 
         answer = self.zero()
         for k, v in self.items():
-            cube = k[0]
+            left, cube, right = k[:coord - 1], k[coord - 1], k[coord:]
             intervals = cube.intervals
             base = [i for idx, i in enumerate(cube) if idx not in intervals]
-            for p in product(range(n + 1), repeat=self.degree):
-                multibase = [list(base) for _ in range(n + 1)]
+            for p in product(range(times + 1), repeat=cube.count(2)):
+                multibase = [list(base) for _ in range(times + 1)]
                 for idx, fixed in enumerate(p):
                     at = intervals[idx]
                     for i, new_base in enumerate(multibase):
                         to_insert = elementary_summand(fixed, i)
                         new_base.insert(at, to_insert)
                 new_k = tuple(Cube(x) for x in multibase)
-                answer += answer.create({new_k: v * sign(p)})
+                answer += answer.create({left + new_k + right: v * sign(p)})
         return answer
 
     def join(self):
@@ -184,8 +389,7 @@ class CubicalElement(FreeModuleElement):
 
         # boundary of the join
 
-        >>> x = CubicalElement({((0, 0, 1), \
-                                                 (1, 0, 0)): 1})
+        >>> x = CubicalElement({((0, 0, 1), (1, 0, 0)): 1})
         >>> print(x.join().boundary() + x.boundary().join())
         ((1,0,0),) - ((0,0,1),)
 

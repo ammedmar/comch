@@ -12,6 +12,7 @@ class SymmetricGroupElement(tuple):
     tuple of its images :math:`(\pi(1), \dots, \pi(r))`.
 
     """
+
     def __init__(self, iterable):
         """Initializes *self*.
 
@@ -25,6 +26,7 @@ class SymmetricGroupElement(tuple):
         -------
         >>> print(SymmetricGroupElement((1,3,2)))
         (1,3,2)
+
         """
         tuple.__init__(iterable)
 
@@ -247,8 +249,8 @@ class SymmetricRingElement(FreeModuleElement):
     data : :class:`int` or ``None``, default: ``None``
         Dictionary representing a linear combination of basis elements.
         Items in the dictionary correspond to `basis_element: coefficient`
-        pairs. Each basis_element must create a `SymmetricGroupElement` and
-        `coefficient` must be an :class:`int`.
+        pairs. Each basis_element must create a :class:`SymmetricGroupElement`
+        and `coefficient` must be an :class:`int`.
     torsion : :class:`int` positive or :class:`string` equal to 'free'
         The torsion of the underlying ring.
 
@@ -436,10 +438,17 @@ class SymmetricRing:
 
     @staticmethod
     def rotation_element(arity, torsion=None):
-        r"""The element :math:`rho`.
+        r"""The element :math:`\rho`.
 
-        Defined as preferred generator of the cyclic subgroup of order
-        :math:`r` in :math:`\mathrm S_r`.
+        Defined as the preferred generator of the cyclic subgroup of order
+        :math:`r` in :math:`\mathrm S_r`. Explicitely,
+
+        .. math::
+            \rho(i) =
+            \begin{cases}
+            i+1 & i < r, \\
+            1   & i = r.
+            \end{cases}
 
         PARAMETERS
         ----------
@@ -464,7 +473,7 @@ class SymmetricRing:
 
     @staticmethod
     def transposition_element(arity, torsion=None):
-        r"""The element: :math:`\rho - \mathrm{id}`.
+        r"""The element :math:`\rho - \mathrm{id}`.
 
         PARAMETERS
         ----------
@@ -491,7 +500,7 @@ class SymmetricRing:
 
     @staticmethod
     def norm_element(arity, torsion=None):
-        r"""The element: :math:`\mathrm{id} + \rho + \cdots + \rho^{r-1}`.
+        r"""The element :math:`\mathrm{id} + \rho + \cdots + \rho^{r-1}`.
 
         PARAMETERS
         ----------

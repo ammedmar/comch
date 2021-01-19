@@ -361,12 +361,12 @@ class SimplicialElement(FreeModuleElement):
         """Left action: *other* ``*`` *self*
 
         Left multiplication by a symmetric group element or an integer.
-        Defined up to signs on basis elements by permutating the tensor factor.
+        Defined up to signs on basis elements by permuting the tensor factor.
 
         PARAMETERS
         ----------
         other : :class:`int` or :class:`comch.simplicial.SimplicialElement`.
-            The element to left act on *self* with.
+            The symmetric ring element left acting on *self*.
 
         RETURNS
         _______
@@ -428,7 +428,9 @@ class SimplicialElement(FreeModuleElement):
         It is coassociative, :math:`(\Delta \otimes \mathrm{id}) \Delta =
         (\mathrm{id} \otimes \Delta) \Delta`, so it has a well defined iteration
         :math:`\Delta^k`, and for every :math:`i \in \{1, \dots, r\}`, there is map
-        :math:`C^{\otimes r} \to C^{\otimes k+r}`.
+        :math:`C^{\otimes r} \to C^{\otimes k+r}` sending
+        :math:`(x_1 \otimes \cdots \otimes x_n)` to
+        :math:`(x_1 \otimes \cdots \otimes \Delta^k(k_i) \cdots \otimes x_n)`.
 
         PARAMETERS
         ----------
@@ -452,7 +454,6 @@ class SimplicialElement(FreeModuleElement):
 
         if self.degree is None:
             raise TypeError(f'only for homogeneous elements')
-
         if self.arity < coord:
             raise TypeError(f'arity = {self.arity} < coord = {coord}')
 

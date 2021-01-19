@@ -2,6 +2,24 @@ from ..free_module import FreeModuleElement
 from ..simplicial import Simplex, SimplicialElement
 from functools import reduce
 
+# a method in the class Cube
+def necklace(self):
+    """..."""
+    ones = [idx for idx, i in enumerate(self) if i == 1]
+    twos = [idx for idx, i in enumerate(self) if i == 2]
+    aux = [0]
+    answer = []
+    for idx in range(len(self) + 2):
+        if idx in twos:
+            aux.append(idx + 1)
+        if idx in ones:
+            aux.append(idx + 1)
+            answer.append(Simplex(aux))
+            aux = [idx + 1]
+    if aux:
+        aux.append(len(self) + 1)
+        answer.append(Simplex(aux))
+    return Necklace(answer)
 
 class Necklace(tuple):
     """Tuple of simplices."""

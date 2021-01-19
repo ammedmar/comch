@@ -5,7 +5,6 @@
 ComCH is a Python 3 package for the study of commutativity up-to-coherent-homotopies. Its documentation is located [here](https://comch.readthedocs.io/en/latest/index.html).
 
 ## Motivation
-
 Commutativity up-to-coherent-homotopies is a concept originated in algebraic topology. It has found modern uses in topological data analysis, motion planning, condensed matter physics and several other areas. An important challenge for the application of the mathematical ideas surrounding this concept, which are often defined non-constructively, is to describe them in effective terms suitable for concrete computations. This package, a specialized computer algebra system, serves to bridge this gap between theoretical concepts and concrete applications.
 
 ## Mathematical overview

@@ -292,7 +292,7 @@ class BarrattEcclesElement(FreeModuleElement):
         return answer
 
     def compose(self, other, position):
-        r"""Operadic compositions: *self* :math:`o_position` *other*.
+        r"""Operadic compositions: *self* :math:`\circ_{position}` *other*.
 
         The operadic composition can be described in terms of the composition of
         symmetric group elements using the Eilenberg-Zilber map. Let us notice
@@ -608,7 +608,7 @@ class BarrattEccles:
            \to
            H_{\bullet+2s(p-1)-1}(A; \mathbb F_p)
 
-        are the steenrod operations.
+        are the Steenrod operations.
 
         PARAMETERS
         ----------
@@ -619,7 +619,7 @@ class BarrattEccles:
         q : :class:`int`
             The degree of the class acted on.
         bockstein : :class:`bool`, default ``False``
-            Determines the use of the bockstein homomorphism.
+            Determines the use of the Bockstein homomorphism.
 
         RETURNS
         _______

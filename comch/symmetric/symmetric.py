@@ -7,7 +7,7 @@ class SymmetricGroupElement(tuple):
 
     We refer to elements in the group of permutations of :math:`r` elements
     :math:`\mathrm S_r` as symmetric group elements of arity :math:`r`. An
-    element :math:`\pi \in \mathrm S_r` can be thought of as a bijections
+    element :math:`\pi \in \mathrm S_r` can be thought of as a bijection
     from :math:`\{1,\dots,r\}` to itself, and can be represented by the
     tuple of its images :math:`(\pi(1), \dots, \pi(r))`.
 
@@ -195,7 +195,7 @@ class SymmetricGroupElement(tuple):
         :math:`r` elements by grouping the subset
         :math:`S = \{i, \dots, i+s-1\}` into a single element, then applying
         :math:`\pi` to :math:`R` and :math:`\sigma` to the :math:`S`, and,
-        finally, forgetting the grupping. More precisely, for integers
+        finally, forgetting the grouping. More precisely, for integers
         :math:`r, s \geq 1` and :math:`i \in \{1, \ldots, r\}` the partial
         composition is the linear map
 
@@ -247,7 +247,7 @@ class SymmetricRingElement(FreeModuleElement):
     PARAMETERS
     ----------
     data : :class:`int` or ``None``, default: ``None``
-        Dictionary representing a linear cobination of basis elements.
+        Dictionary representing a linear combination of basis elements.
         Items in the dictionary correspond to `basis_element: coefficient`
         pairs. Each basis_element must create a :class:`SymmetricGroupElement`
         and `coefficient` must be an :class:`int`.
@@ -368,7 +368,7 @@ class SymmetricRingElement(FreeModuleElement):
         return answer
 
     def compose(self, other, position):
-        """Linear operadic compositions: *self* o_position *other*.
+        """Linear operadic compositions: *self* :math:`\circ_{position}` *other*.
 
         The operadic composition is defined by extending linearly the
         operadic composition of symmetric group elements.

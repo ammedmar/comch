@@ -36,7 +36,7 @@ class FreeModuleElement(Counter):
         PARAMETERS
         ----------
         data : ``dict`` or ``None``, default: ``None``
-            Dictionary representing a linear cobination of basis elements. Items
+            Dictionary representing a linear combination of basis elements. Items
             in the dict correspond with pairs (basis_element: coefficient).
         torsion : positive :class:`int`, :class:`string` 'free' or ``None``,\
         default ``None``
@@ -112,7 +112,7 @@ class FreeModuleElement(Counter):
         PARAMETERS
         ----------
         other : :class:`comch.free_module.FreeModuleElement` object
-            The element to substract from *self*.
+            The element to subtract from *self*.
 
         RETURNS
         -------
@@ -201,7 +201,7 @@ class FreeModuleElement(Counter):
         PARAMETERS
         ----------
         other : :class:`comch.free_module.FreeModuleElement` object
-            The element to substract from *self*.
+            The element to subtract from *self*.
 
         EXAMPLE
         -------

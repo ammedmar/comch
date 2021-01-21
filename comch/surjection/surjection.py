@@ -144,7 +144,7 @@ class SurjectionElement(FreeModuleElement):
     def complexity(self):
         r"""Complexity of *self*.
 
-        Defined as ``None`` if self is not homogeneous. The complexity of a
+        Defined as ``None`` if *self* is not homogeneous. The complexity of a
         finite binary sequence (i.e. a sequence of two distinct values) is
         defined as the number of consecutive distinct elements in it. For
         example, (1,2,2,1) and (1,1,1,2) have complexities 2 and 1
@@ -201,7 +201,7 @@ class SurjectionElement(FreeModuleElement):
         return filtration
 
     def boundary(self):
-        r"""boundary of *self*.
+        r"""Boundary of *self*.
 
         Up to signs, it is defined by taking the sum of all elements
         obtained by removing one entry at the time. Explicitly, for
@@ -378,7 +378,7 @@ class SurjectionElement(FreeModuleElement):
     def __call__(self, other, coord=1):
         """The action: *self*(*other*).
 
-        The action of *self* on an the tensor factor specified by *coord* on an
+        The action of *self* on the tensor factor specified by *coord* on an
         element in the tensor product of normalized chains of a standard simplex
         or of a standard cube.
 
@@ -875,7 +875,7 @@ class Surjection:
         q : :class:`int`
             The degree of the class acted on.
         bockstein : :class:`bool`, default ``False``
-            Determines the use of the bockstein homomorphism.
+            Determines the use of the Bockstein homomorphism.
         convention : :class:`string` default 'McClure-Smith'
             The sign convention used.
 

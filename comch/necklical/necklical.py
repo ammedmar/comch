@@ -1,10 +1,6 @@
-from ..free_module import FreeModuleElement
-from ..simplicial import Simplex, SimplicialElement
-from functools import reduce
-
+"""
 # a method in the class Cube
 def necklace(self):
-    """..."""
     ones = [idx for idx, i in enumerate(self) if i == 1]
     twos = [idx for idx, i in enumerate(self) if i == 2]
     aux = [0]
@@ -20,6 +16,19 @@ def necklace(self):
         aux.append(len(self) + 1)
         answer.append(Simplex(aux))
     return Necklace(answer)
+
+# from CubicalElement
+def necklical_element(self):
+    answer = NecklicalElement(torsion=self.torsion)
+    for k, v in self.items():
+        new_k = tuple(cube.necklace() for cube in k)
+        answer += answer.create({new_k: v})
+    return answer
+"""
+from ..free_module import FreeModuleElement
+from ..simplicial import Simplex, SimplicialElement
+from functools import reduce
+
 
 class Necklace(tuple):
     """Tuple of simplices."""

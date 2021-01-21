@@ -92,6 +92,7 @@ class Cube(tuple):
         answer = self[:idx] + ((epsilon + 1) % 2,) + self[idx + 1:]
         return Cube(answer)
 
+
 class CubicalElement(FreeModuleElement):
     r"""Elements in an iterated tensor product of the chains on the
     infinite cube.
@@ -400,9 +401,7 @@ class CubicalElement(FreeModuleElement):
             (cube1, cube2, i) give a nonzero i-join: no intervals
             in cube1 can have indices greater or equal to i, and
             no intervals in cube2 can have indices less than or
-            equal to i.
-
-            """
+            equal to i."""
             if left == tuple() or right == tuple():
                 return False
             if isinstance(right, int):
@@ -411,9 +410,7 @@ class CubicalElement(FreeModuleElement):
                 return left >= min(right)
 
         def _join(i, cube1, cube2, sign_exp):
-            """the i-th elementary join keeping track of signs.
-
-            """
+            """the i-th elementary join keeping track of signs."""
             cube = Cube(cube1[:i] + (2,) + cube2[i + 1:])
             p, q = cube1[i], cube2[i]
             if (p, q) == (0, 1):
@@ -452,17 +449,27 @@ class CubicalElement(FreeModuleElement):
 
         return answer
 
-    def necklical_element(self):
-        answer = NecklicalElement(torsion=self.torsion)
-        for k, v in self.items():
-            new_k = tuple(cube.necklace() for cube in k)
-            answer += answer.create({new_k: v})
-        return answer
-
 
 class Cubical:
-    """..."""
+    """Produces cubical elements of interest."""
 
-    def standard_element(n, torsion=None):
-        """..."""
-        return CubicalElement({((2,) * n,): 1}, torsion=torsion)
+    @staticmethod
+    def standard_element(n, times=1, torsion=None):
+        r"""The chain represented by the cube :math:`[0,1]^{n}`.
+
+        PARAMETERS
+        ----------
+        n : :class:`int`
+            The dimension of the standard cube considered.
+        times : :class:`int`
+            The number of tensor copies.
+        torsion : :class:`int` positive or :class:`string` equal to 'free'
+        The torsion of the underlying ring.
+
+        EXAMPLES
+        --------
+        >>> print(Cubical.standard_element(3, 2))
+        ((2,2,2),(2,2,2))
+        """
+        key = ((2,) * n,) * times
+        return CubicalElement({key: 1}, torsion=torsion)

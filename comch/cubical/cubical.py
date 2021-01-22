@@ -1,6 +1,4 @@
 from ..free_module import FreeModuleElement
-from ..simplicial import Simplex
-from ..necklical import Necklace, NecklicalElement
 from ..utils import pairwise
 from itertools import combinations, product
 
@@ -340,6 +338,9 @@ class CubicalElement(FreeModuleElement):
 
         EXAMPLE
         -------
+        >>> x = CubicalElement({((2,2), (2,)):1})
+        >>> print(x.iterated_diagonal(1,2))
+        ((2,2),(2,),(1,)) + ((2,2),(0,),(2,))
 
         """
 
@@ -446,7 +447,6 @@ class CubicalElement(FreeModuleElement):
                             break
                     if non_zero:
                         answer += answer.create({(cube,): (-1) ** sign_exp})
-
         return answer
 
 

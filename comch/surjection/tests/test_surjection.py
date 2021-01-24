@@ -44,11 +44,11 @@ class TestSurjectionElement(unittest.TestCase):
             x = SurjectionElement({(1, 3, 1, 2, 1): 1}, convention=conv)
             a = x.orbit(representation='trivial')
             self.assertEqual(a, SurjectionElement({(1, 2, 1, 3, 1): 1},
-                                                   convention=conv))
+                                                  convention=conv))
 
             b = x.orbit(representation='sign')
             self.assertEqual(b, SurjectionElement({(1, 2, 1, 3, 1): -1},
-                                                   convention=conv))
+                                                  convention=conv))
 
     def test_call_simplicial(self):
         s = self.x
@@ -57,13 +57,13 @@ class TestSurjectionElement(unittest.TestCase):
         ds_x = s.boundary()(x)
         d_sx = s(x).boundary()
         s_dx = s(x.boundary())
-        self.assertEqual(d_sx - ((-1)**(s.degree)) * s_dx, ds_x)
+        self.assertEqual(d_sx - ((-1) ** s.degree) * s_dx, ds_x)
 
         x = SimplicialElement({((0, 1, 2), (3, 4), (5, 6)): 1})
         ds_x = s.boundary()(x, 2)
         d_sx = s(x, 2).boundary()
         s_dx = s(x.boundary(), 2)
-        self.assertEqual(d_sx - ((-1)**(s.degree)) * s_dx, ds_x)
+        self.assertEqual(d_sx - ((-1) ** s.degree) * s_dx, ds_x)
 
     def test_call_cubical(self):
         s = self.x
@@ -71,32 +71,32 @@ class TestSurjectionElement(unittest.TestCase):
         ds_y = s.boundary()(y)
         d_sy = s(y).boundary()
         sdy = s(y.boundary())
-        self.assertEqual(d_sy - ((-1)**(s.degree)) * sdy, ds_y)
+        self.assertEqual(d_sy - ((-1) ** s.degree) * sdy, ds_y)
 
     def test_compose_bf(self):
         i = 3
         x = SurjectionElement({(3, 2, 1, 2, 1, 3): 1},
-                               convention='Berger-Fresse')
+                              convention='Berger-Fresse')
         y = SurjectionElement({(3, 1, 2, 1, 4, 3): 1},
-                               convention='Berger-Fresse')
+                              convention='Berger-Fresse')
         dx, dy = x.boundary(), y.boundary()
         dx_y, x_dy = dx.compose(y, i), x.compose(dy, i)
         xy = x.compose(y, i)
         d_xy = xy.boundary()
-        self.assertEqual(d_xy - dx_y - (-1)**(x.degree) * x_dy, x.zero())
+        self.assertEqual(d_xy - dx_y - (-1) ** (x.degree) * x_dy, x.zero())
 
     def test_suspension(self):
         x = SurjectionElement({(1, 3, 2, 1, 2, 3, 4): 1},
-                               convention='Berger-Fresse')
+                              convention='Berger-Fresse')
         y = SurjectionElement({(1, 2, 3, 1, 2, 3): 1},
-                               convention='Berger-Fresse')
+                              convention='Berger-Fresse')
         sx = x.suspension()
         sy = y.suspension()
         xy = x.compose(y, 1)
         self.assertEqual(xy.suspension(), sx.compose(sy, 1))
 
         z = SurjectionElement({(1, 2, 1, 3, 1, 2, 3): 1},
-                               convention='Berger-Fresse')
+                              convention='Berger-Fresse')
         sz = z.suspension()
         xz = x.compose(z, 2)
         self.assertEqual(xz.suspension(), sx.compose(sz, 1))
@@ -119,9 +119,9 @@ class TestSurjection(unittest.TestCase):
 
         t = SymmetricRing.transposition_element(arity)
         x = Surjection.steenrod_adem_structure(arity, 3,
-                                        convention='McClure-Smith').boundary()
+                                               convention='McClure-Smith').boundary()
         y = t * Surjection.steenrod_adem_structure(arity, 2,
-                                            convention='McClure-Smith')
+                                                   convention='McClure-Smith')
         self.assertEqual(x, y)
 
 

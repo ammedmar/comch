@@ -657,8 +657,8 @@ class SurjectionElement(FreeModuleElement):
         """Preferred representative of *self*.
 
         Removes pairs `basis_element: coefficient` which satisfy either of:
-        1) the basis element has equal consecutive permutations, 2) It does not
-        represent a surjection, or 3) the coefficient is 0.
+        1) the basis element has equal consecutive values, 2) the basis
+        element does not represent a surjection, or 3) the coefficient is 0.
 
         RETURNS
         _______
@@ -780,21 +780,16 @@ class Surjection:
                 return p(p(surj, iterate=iterate - 1))
 
         def s(surj):
-            """Chain homotopy from the identity to the composition pi
-
+            """Chain homotopy from the identity to the composition pi.
             Explicitly, id - ip = ds + sd."""
-
             answer = surj.zero()
             for k, v in surj.items():
                 answer += answer.create({(1,) + tuple(j for j in k): v})
             return answer
 
         def h(surj):
-            """Chain homotopy from the identiy to i...i p..p
-
-            In Surj(r), realizing its contractibility to Surj(1).
-
-            """
+            """Chain homotopy from the identity to i...i p..p.
+            In Surj(r), realizing its contractibility to Surj(1)."""
             answer = s(surj)
             for r in range(1, arity - 1):
                 answer += i(s(p(surj, r)), r)
@@ -807,7 +802,6 @@ class Surjection:
 
         def psi(arity, degree, convention=convention):
             """Recursive definition of steenrod product over the integers."""
-
             if degree == 0:
                 return SurjectionElement({tuple(range(1, arity + 1)): 1},
                                          convention=convention)
@@ -819,7 +813,6 @@ class Surjection:
 
         if convention is None:
             convention = SurjectionElement.default_convention
-
         integral_answer = psi(arity, degree, convention=convention)
         if torsion:
             integral_answer.set_torsion(torsion)
@@ -953,6 +946,13 @@ class Surjection:
         shape: :class:`string`, 'simplex' or 'cube'
             Action on the standard simplex or cube
 
+        RETURNS
+        _______
+        :class:`comch.simplicial.SimplicialElement`\
+        or :class:`comch.cubical.CubicalElement`
+            The tensor product elment obtained by applying the representative
+            of the specified Steenrod operation.
+
         EXAMPLES
         --------
         >>> print(Surjection.steenrod_chain(2, -1, -2))
@@ -984,9 +984,29 @@ class Surjection:
 
     @staticmethod
     def basis(arity, degree, complexity=None):
-        """Basis of the chain complex
+        r"""Basis of the chain complex.
 
-        In the given arity, degree and complexity.
+        Basis of :math:`\mathcal X` In the given arity, degree and complexity.
+
+        PARAMETERS
+        ----------
+        arity : :class:`int`
+            The arity considered.
+        degree : :class:`int`
+            The degree considered.
+        complexity : :class:`int`, default ``None``
+            The complexity considered.
+
+        RETURNS
+        _______
+        :class:`list` of :class:`tuple` of :class:`int`
+            The basis for the complex of surjection in the given arity, degree
+            and complexity.
+
+        EXAMPLES
+        --------
+        >>> Surjection.basis(2,1)
+        [(1, 2, 1), (2, 1, 2)]
 
         """
         if complexity is None:
@@ -997,5 +1017,4 @@ class Surjection:
             surj = SurjectionElement({s: 1})
             if surj and surj.complexity <= c and surj.arity == a:
                 basis.append(s)
-
         return basis

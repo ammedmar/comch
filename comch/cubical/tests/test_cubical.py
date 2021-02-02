@@ -19,7 +19,9 @@ class TestBarrattEcclesElement(unittest.TestCase):
         self.assertEqual(self.x.boundary().boundary(), self.x.zero())
 
     def test_rmul(self):
-        pass
+        rho = SymmetricRing.rotation_element(2)
+        a, b = (rho * self.x).boundary(), rho * self.x.boundary()
+        self.assertEqual(a, b)
 
     def test_iterated_diagonal(self):
         delta_d_x = self.x.boundary().iterated_diagonal(3, 2)

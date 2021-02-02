@@ -365,7 +365,7 @@ class SimplicialElement(FreeModuleElement):
 
         PARAMETERS
         ----------
-        other : :class:`int` or :class:`comch.simplicial.SimplicialElement`.
+        other : :class:`int` or :class:`comch.symmetric.SymmetricElement`.
             The symmetric ring element left acting on *self*.
 
         RETURNS
@@ -395,7 +395,7 @@ class SimplicialElement(FreeModuleElement):
                 raise TypeError('Unequal arity attribute')
 
         def sign(perm, multispx):
-            weights = [spx.dimension % 2 for spx in k1]
+            weights = [spx.dimension % 2 for spx in multispx]
             sign_exp = 0
             for idx, i in enumerate(perm):
                 right = [weights[perm.index(j)] for
@@ -405,6 +405,7 @@ class SimplicialElement(FreeModuleElement):
 
         if isinstance(other, int):
             return super().__rmul__(other)
+
         check_input(self, other)
         answer = self.zero()
         for (k1, v1), (k2, v2) in product(self.items(), other.items()):

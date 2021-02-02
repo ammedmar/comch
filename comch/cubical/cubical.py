@@ -1,4 +1,5 @@
 from ..free_module import FreeModuleElement
+from ..symmetric import SymmetricRingElement
 from ..utils import pairwise
 from itertools import combinations, product
 
@@ -284,7 +285,7 @@ class CubicalElement(FreeModuleElement):
 
         PARAMETERS
         ----------
-        other : :class:`int` or :class:`comch.simplicial.SimplicialElement`.
+        other : :class:`int` or :class:`comch.symmetric.SymmetricElement`.
             The symmetric ring element left acting on *self*.
 
         RETURNS
@@ -294,11 +295,46 @@ class CubicalElement(FreeModuleElement):
 
         EXAMPLE
         -------
-        ...
+        >>> x = CubicalElement({((0, 2), (1, 2)): 1})
+        >>> t = SymmetricRingElement({(2, 1): 1})
+        >>> print(t * x)
+        - ((1,2),(0,2))
+        >>> print(3 * x)
+        3((0,2),(1,2))
 
         """
+
+        def check_input(self, other):
+            """Symmetric ring element with same attributes."""
+            if not isinstance(other, SymmetricRingElement):
+                raise TypeError(f'__rmul__ by type int or \
+                    SymmetricRingElement not {type(other)}')
+            if self.torsion != other.torsion:
+                raise TypeError('only defined for equal attribute torsion')
+            if self.arity != other.arity:
+                raise TypeError('Unequal arity attribute')
+
+        def sign(perm, multicube):
+            weights = [cube.dimension % 2 for cube in multicube]
+            sign_exp = 0
+            for idx, i in enumerate(perm):
+                right = [weights[perm.index(j)] for
+                         j in perm[idx + 1:] if i > j]
+                sign_exp += sum(right) * weights[idx]
+            return (-1) ** (sign_exp % 2)
+
         if isinstance(other, int):
             return super().__rmul__(other)
+
+        check_input(self, other)
+        answer = self.zero()
+        for (k1, v1), (k2, v2) in product(self.items(), other.items()):
+            new_key = [None] * len(k2)
+            for idx, i in enumerate(k2):
+                new_key[i - 1] = k1[idx]
+            new_sign = sign(k2, k1)
+            answer += self.create({tuple(new_key): new_sign * v1 * v2})
+        return answer
 
     def iterated_diagonal(self, times=1, coord=1):
         r"""Iterated Serre diagonal applied at a specific tensor factor.
@@ -406,7 +442,7 @@ class CubicalElement(FreeModuleElement):
 
         with the convention
 
-        .. math:: x_{<1} = y_{<1} = x_{>n} = y_{>n} = 1 \in \Z,
+        .. math:: x_{<1} = y_{<1} = x_{>n} = y_{>n} = 1 \in \mathbb Z,
 
         and the only non-zero values of :math:`x_i \ast y_i` are
 
@@ -420,7 +456,7 @@ class CubicalElement(FreeModuleElement):
         RETURNS
         _______
         :class:`comch.cubical.CubicalElement`
-            The join of this *self*.
+            The join of *self*.
 
         Examples
         --------

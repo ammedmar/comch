@@ -297,8 +297,8 @@ class CubicalElement(FreeModuleElement):
         ...
 
         """
-
-        pass
+        if isinstance(other, int):
+            return super().__rmul__(other)
 
     def iterated_diagonal(self, times=1, coord=1):
         r"""Iterated Serre diagonal applied at a specific tensor factor.
@@ -327,14 +327,14 @@ class CubicalElement(FreeModuleElement):
         PARAMETERS
         ----------
         times : :class:`int`
-            The number of times the AW diagonal is composed with itself.
+            The number of times the Serre diagonal is composed with itself.
         coord : :class:`int`
             The tensor position on which the iterated diagonal acts.
 
         RETURNS
         _______
-        :class:`comch.simplicial.SimplicialElement`
-            The action of the iterated AW diagonal on *self*.
+        :class:`comch.cubical.CubicalElement`
+            The action of the iterated Serre diagonal on *self*.
 
         EXAMPLE
         -------
@@ -382,18 +382,51 @@ class CubicalElement(FreeModuleElement):
         return answer
 
     def join(self):
-        """Join of an element in the cubical EZ operad thought of
-        as an element in the tensor product, computed using the left
-        comb. (I suspect it is associative product though.)
+        r"""Join of *self*.
+
+        The join is a map from :math:`C_\bullet^{\otimes 2}`
+        to :math:`C_\bullet` of degree 1. It is define by
+
+        .. math::
+           \begin{aligned}
+           (x_1 \otimes \cdots \otimes x_n) \ast (y_1 \otimes \cdots \otimes y_n)
+           = (-1)^{|x|} \sum_{i=1}^n x_{<i} \epsilon(y_{<i}) \otimes
+           x_i \ast y_i \otimes \epsilon(x_{>i})y_{>i},
+           \end{aligned}
+
+        where
+
+        .. math::
+           \begin{aligned}
+           x_{<i} & = x_1 \otimes \cdots \otimes x_{i-1}, &
+           y_{<i} & = y_1 \otimes \cdots \otimes y_{i-1}, \\
+           x_{>i} & = x_{i+1} \otimes \cdots \otimes x_n, &
+           y_{>i} & = y_{i+1} \otimes \cdots \otimes y_n,
+           \end{aligned}
+
+        with the convention
+
+        .. math:: x_{<1} = y_{<1} = x_{>n} = y_{>n} = 1 \in \Z,
+
+        and the only non-zero values of :math:`x_i \ast y_i` are
+
+        .. math:: \ast([0] \otimes [1]) = [0, 1], \qquad  \ast([1] \otimes [0]) = -[0, 1].
+
+        PARAMETERS
+        ----------
+        :class:`comch.cubical.CubicalElement`, of arity 2
+            The element to take the join of.
+
+        RETURNS
+        _______
+        :class:`comch.cubical.CubicalElement`
+            The join of this *self*.
 
         Examples
         --------
-
-        # boundary of the join
-
         >>> x = CubicalElement({((0, 0, 1), (1, 0, 0)): 1})
-        >>> print(x.join().boundary() + x.boundary().join())
-        ((1,0,0),) - ((0,0,1),)
+        >>> print(x.join())
+        ((2,0,0),) - ((0,0,2),)
 
         """
 
@@ -412,10 +445,11 @@ class CubicalElement(FreeModuleElement):
 
         def _join(i, cube1, cube2, sign_exp):
             """the i-th elementary join keeping track of signs."""
+            sign_exp += cube1.dimension
             cube = Cube(cube1[:i] + (2,) + cube2[i + 1:])
             p, q = cube1[i], cube2[i]
             if (p, q) == (0, 1):
-                return cube, sign_exp
+                return cube, sign_exp % 2
             elif (p, q) == (1, 0):
                 return cube, (1 + sign_exp) % 2
             else:
@@ -429,9 +463,9 @@ class CubicalElement(FreeModuleElement):
 
         answer = self.zero()
         for k, v in self.items():
-            for inds in combinations(range(len(k[0])), self.arity - 1):
+            for indices in combinations(range(len(k[0])), self.arity - 1):
                 skip = False
-                for i, (cube1, cube2) in zip(inds, pairwise(k)):
+                for i, (cube1, cube2) in zip(indices, pairwise(k)):
                     if (is_zero(cube1.intervals, i) or
                             is_zero(i, cube2.intervals)):
                         skip = True
@@ -440,13 +474,13 @@ class CubicalElement(FreeModuleElement):
                     non_zero = True
                     sign_exp = 0
                     cube = k[0]
-                    for i, next_cube in zip(inds, k[1:]):
+                    for i, next_cube in zip(indices, k[1:]):
                         cube, sign_exp = _join(i, cube, next_cube, sign_exp)
                         if cube is None:
                             non_zero = False
                             break
                     if non_zero:
-                        answer += answer.create({(cube,): (-1) ** sign_exp})
+                        answer += answer.create({(cube,): (-1) ** sign_exp * v})
         return answer
 
 

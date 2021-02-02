@@ -18,9 +18,6 @@ from .cubical import Cube
 from .cubical import CubicalElement
 from .cubical import Cubical
 
-from .necklical import Necklace
-from .necklical import NecklicalElement
-
 __all__ = [
     'FreeModuleElement',
     'SymmetricGroupElement',
@@ -35,7 +32,5 @@ __all__ = [
     'Simplicial',
     'Cube',
     'CubicalElement',
-    'Cubical',
-    'Necklace',
-    'NecklicalElement'
+    'Cubical'
 ]

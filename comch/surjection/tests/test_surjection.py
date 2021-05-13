@@ -104,23 +104,23 @@ class TestSurjectionElement(unittest.TestCase):
 
 class TestSurjection(unittest.TestCase):
 
-    def test_steenrod_adem_structure(self):
+    def test_may_steenrod_structure(self):
         arity = 6
         t = SymmetricRing.transposition_element(arity)
-        x = Surjection.steenrod_adem_structure(arity, 3).boundary()
-        y = t * Surjection.steenrod_adem_structure(arity, 2)
+        x = Surjection.may_steenrod_structure(arity, 3).boundary()
+        y = t * Surjection.may_steenrod_structure(arity, 2)
         self.assertEqual(x, y)
 
         arity = 5
         n = SymmetricRing.norm_element(arity, torsion=7)
-        x = Surjection.steenrod_adem_structure(arity, 4, torsion=7).boundary()
-        y = n * Surjection.steenrod_adem_structure(arity, 3, torsion=7)
+        x = Surjection.may_steenrod_structure(arity, 4, torsion=7).boundary()
+        y = n * Surjection.may_steenrod_structure(arity, 3, torsion=7)
         self.assertEqual(x, y)
 
         t = SymmetricRing.transposition_element(arity)
-        x = Surjection.steenrod_adem_structure(arity, 3,
+        x = Surjection.may_steenrod_structure(arity, 3,
                                                convention='McClure-Smith').boundary()
-        y = t * Surjection.steenrod_adem_structure(arity, 2,
+        y = t * Surjection.may_steenrod_structure(arity, 2,
                                                    convention='McClure-Smith')
         self.assertEqual(x, y)
 

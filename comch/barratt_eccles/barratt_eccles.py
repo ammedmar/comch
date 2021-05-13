@@ -531,7 +531,7 @@ class BarrattEccles:
     """Produces Barratt-Eccles elements of interest."""
 
     @staticmethod
-    def steenrod_adem_structure(arity, degree, torsion=None):
+    def may_steenrod_structure(arity, degree, torsion=None):
         r"""Representative of the requested Steenrod product.
 
         Returns the image under the Steenrod-Adem structure constructed in
@@ -560,7 +560,7 @@ class BarrattEccles:
         
         SEE ALSO
         --------
-        :meth:`comch.surjection.Surjection.steenrod_adem_structure`.
+        :meth:`comch.surjection.Surjection.may_steenrod_structure`.
 
         """
         operators = {
@@ -656,5 +656,5 @@ class BarrattEccles:
             if d < 0:
                 return BarrattEcclesElement(torsion=p)
 
-        return int(coeff) * BarrattEccles.steenrod_adem_structure(
+        return int(coeff) * BarrattEccles.may_steenrod_structure(
             p, d, torsion=p)

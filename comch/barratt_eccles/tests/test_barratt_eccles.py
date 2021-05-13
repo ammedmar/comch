@@ -65,15 +65,15 @@ class TestBarrattEcclesElement(unittest.TestCase):
 
 
 class TestBarrattEccles(unittest.TestCase):
-    def test_steenrod_adem_structure(self):
+    def test_may_steenrod_structure(self):
         t = SymmetricRing.transposition_element(6)
-        x = BarrattEccles.steenrod_adem_structure(6, 3).boundary()
-        y = t * BarrattEccles.steenrod_adem_structure(6, 2)
+        x = BarrattEccles.may_steenrod_structure(6, 3).boundary()
+        y = t * BarrattEccles.may_steenrod_structure(6, 2)
         self.assertEqual(x, y)
 
         n = SymmetricRing.norm_element(5, torsion=7)
-        x = BarrattEccles.steenrod_adem_structure(5, 6, torsion=7).boundary()
-        y = n * BarrattEccles.steenrod_adem_structure(5, 5, torsion=7)
+        x = BarrattEccles.may_steenrod_structure(5, 6, torsion=7).boundary()
+        y = n * BarrattEccles.may_steenrod_structure(5, 5, torsion=7)
         self.assertEqual(x, y)
 
 

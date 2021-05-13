@@ -35,11 +35,6 @@ class SurjectionElement(FreeModuleElement):
     corresponding sign conventions, and to the corresponding methods below for
     the operadic composition and complexity filtration.
 
-    ATTRIBUTES
-    ----------
-    convention : :class:`string` 'Berger-Fresse' or 'McClure-Smith'.
-        The sign convention used.
-
     REFERENCES
     ----------
     [McS]: J. McClure, and J. Smith. "Multivariable cochain operations and little
@@ -48,6 +43,11 @@ class SurjectionElement(FreeModuleElement):
     [BF]: C. Berger, and B. Fresse. "Combinatorial operad actions on cochains."
     Mathematical Proceedings of the Cambridge Philosophical Society. Vol. 137.
     No. 1. Cambridge University Press, 2004.
+
+    ATTRIBUTES
+    ----------
+    convention : :class:`string` 'Berger-Fresse' or 'McClure-Smith'.
+        The sign convention used.
 
     """
 
@@ -688,7 +688,7 @@ class Surjection:
     """Produces surjection elements of interest."""
 
     @staticmethod
-    def steenrod_adem_structure(arity, degree, torsion=None, convention=None):
+    def may_steenrod_structure(arity, degree, torsion=None, convention=None):
         r"""Representative of the requested Steenrod product.
 
         Let :math:`\mathrm{C}_n` be the cyclic group of order :math:`n` thought
@@ -920,7 +920,7 @@ class Surjection:
             if d < 0:
                 return SurjectionElement(torsion=p)
 
-        return int(coeff) * Surjection.steenrod_adem_structure(
+        return int(coeff) * Surjection.may_steenrod_structure(
             p, d, torsion=p, convention=convention)
 
     @staticmethod

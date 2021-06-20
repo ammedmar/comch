@@ -708,7 +708,7 @@ class Surjection:
         of :math:`R` by a free differential graded :math:`R[C_r]`-module. We denote
         a preferred basis element of :math:`W(r)_i` by :math:`e_i`.
 
-        A Steenrod-Adem structure on an operad :math:`\mathcal O` is a
+        A May-Steenrod structure on an operad :math:`\mathcal O` is a
         morphism of :math:`\mathrm{C}`-modules
         :math:`\mathcal W \stackrel{\psi}{\longrightarrow} \mathcal O` for which
         there exists a factorization through an :math:`E_\infty`-operad
@@ -720,7 +720,7 @@ class Surjection:
         such that :math:`\iota` is a weak equivalence and :math:`\phi` a
         morphism of operads.
 
-        This method returns the image under the Steenrod-Adem structure
+        This method returns the image under the May-Steenrod structure
         constructed in [KMM] of the preferred basis element of :math:`W(r)_i`.
 
         PARAMETERS
@@ -737,7 +737,7 @@ class Surjection:
         RETURNS
         _______
         :class:`comch.surjection.SurjectionElement`
-            The image of the basis element under the Steenrod-Adem structure.
+            The image of the basis element under the May-Steenrod structure.
 
         REFERENCES
         ----------
@@ -823,7 +823,7 @@ class Surjection:
         r"""Chain level representative of :math:`P_s` or :math:`\beta P_s`.
 
         Let :math:`A` be such that :math:`\mathrm{End}_A` is equipped with a
-        Steenrod-Adem structure
+        May-Steenrod structure
 
         .. math:: \psi : W \to \mathrm{End}_A.
 

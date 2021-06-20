@@ -534,7 +534,7 @@ class BarrattEccles:
     def may_steenrod_structure(arity, degree, torsion=None):
         r"""Representative of the requested Steenrod product.
 
-        Returns the image under the Steenrod-Adem structure constructed in
+        Returns the image under the May-Steenrod structure constructed in
         [KMM] of the preferred basis element, of the given degree, of the
         minimal free resolution of the base ring :math:`R` as an
         :math:`R[\mathrm C_r]`-module.
@@ -551,7 +551,7 @@ class BarrattEccles:
         RETURNS
         _______
         :class:`comch.barratt_eccles.BarrattEcclesElement`
-            The image of the basis element under the Steenrod-Adem structure.
+            The image of the basis element under the May-Steenrod structure.
 
         REFERENCES
         ----------

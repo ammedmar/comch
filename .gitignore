@@ -28,3 +28,9 @@ comch.egg-info/
 
 # pycharm
 .idea/
+
+# distribution
+/comch.egg-info
+/.eggs
+/dist
+/build

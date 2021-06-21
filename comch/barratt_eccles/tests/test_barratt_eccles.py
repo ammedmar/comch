@@ -10,6 +10,9 @@ class TestBarrattEcclesElement(unittest.TestCase):
     def test_arity(self):
         self.assertEqual(self.x.arity, 3)
 
+    def test_complexity(self):
+        self.assertEqual(self.x.complexity, 1)
+
     def test_degree(self):
         self.assertEqual(self.x.degree, 1)
 

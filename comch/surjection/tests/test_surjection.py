@@ -17,7 +17,7 @@ class TestSurjectionElement(unittest.TestCase):
         self.assertEqual(self.x.degree, 2)
 
     def test_complexity(self):
-        self.assertEqual(self.x.complexity, 1)
+        self.assertEqual(self.x.complexity, 2)
 
     def test_boundary(self):
         self.assertEqual(self.x.boundary().boundary(), self.x.zero())

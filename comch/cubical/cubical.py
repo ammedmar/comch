@@ -1,5 +1,6 @@
 from ..free_module import FreeModuleElement
 from ..symmetric import SymmetricRingElement
+from ..simplicial import Simplex
 from ..utils import pairwise
 from itertools import combinations, product
 
@@ -78,7 +79,7 @@ class Cube(tuple):
 
         RETURNS
         -------
-        :class:`comch.simplicial.Simplex`
+        :class:`comch.cubical.Cube`
             The i-th face of *self*.
 
         EXAMPLE
@@ -90,6 +91,33 @@ class Cube(tuple):
         idx = self.intervals[i]
         answer = self[:idx] + ((epsilon + 1) % 2,) + self[idx + 1:]
         return Cube(answer)
+
+    def cartan_serre_collapse(self):
+        r"""The image *self* under the Cartan-Serre collapse map.
+
+        Obtained by sending the cell :math:`x_1 \times \dots \times x_n` to
+        :math:`[q_1-1, \dots, q_m-1, p-1]` where :math:`q_1 < q_2 < \dots` are
+        the positions of the intervals and :math:`q_m < p` and :math:`p` with
+        :math:`p = \min\{i \mid x_i = [0]\}` or :math:`p = n+1` if empty.
+
+
+        RETURNS
+        -------
+        :class:`comch.simplicial.Simplex`
+            The image of *self* under the Cartan-Serre collapse map.
+
+        EXAMPLE
+        -------
+        >>> Cube((2,1,2)).cartan_serre_collapse()
+        (0, 2, 3)
+
+        """
+        end = len(self)
+        if 0 in self:
+            end = self.index(0)
+        vertices = tuple(i for i in self.intervals if i < end) + (end,)
+        spx = Simplex(vertices)
+        return spx
 
 
 class CubicalElement(FreeModuleElement):

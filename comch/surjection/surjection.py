@@ -159,7 +159,7 @@ class SurjectionElement(FreeModuleElement):
         EXAMPLE
         -------
         >>> SurjectionElement({(1,2,1,3,1): 1}).complexity
-        1
+        2
 
         """
         complexity = 0
@@ -182,7 +182,7 @@ class SurjectionElement(FreeModuleElement):
         EXAMPLE
         -------
         >>> SurjectionElement({(1,2,1,3,2): 1}).filtration
-        3
+        6
 
         """
         filtration = 0
@@ -1010,7 +1010,7 @@ class Surjection:
 
         """
         if complexity is None:
-            complexity = degree
+            complexity = degree + 1
         a, d, c = arity, degree, complexity
         basis = []
         for s in product(range(1, a + 1), repeat=a + d):

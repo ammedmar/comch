@@ -166,7 +166,7 @@ class BarrattEcclesElement(FreeModuleElement):
         EXAMPLE
         -------
         >>> BarrattEcclesElement({((1,2,3), (1,3,2), (1,2,3)): 1}).complexity
-        1
+        2
 
         """
         complexity = 0

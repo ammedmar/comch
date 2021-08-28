@@ -1,5 +1,6 @@
-from comch.free_module import FreeModuleElement
-from itertools import product
+from ..free_module import FreeModuleElement
+from ..utils import pairwise
+from itertools import product, permutations
 
 
 class SymmetricGroupElement(tuple):
@@ -265,7 +266,6 @@ class SymmetricRingElement(FreeModuleElement):
     (1,3,2)
 
     """
-
     def __init__(self, data=None, torsion=None):
         if data:
             data = {SymmetricGroupElement(k): v for k, v in data.items()}
@@ -406,6 +406,58 @@ class SymmetricRingElement(FreeModuleElement):
             to_add = self.create({new_k: new_v})
             answer += to_add
         return answer
+
+
+class SymmetricGroup:
+    @staticmethod
+    def all(n):
+        """All permutations of arity (length) `n`.
+
+        PARAMETERS
+        ----------
+        n : `int`
+            The arity (length) considered.
+
+        RETURNS
+        -------
+        :class: iterator of `comch.symmetric.SymmetricGroupElement` object
+            The permutations of arity `n`.
+
+        EXAMPLES
+        -------
+        >>> print(tuple(SymmetricGroup.all(3)))
+        ((1, 2, 3), (1, 3, 2), (2, 1, 3), (2, 3, 1), (3, 1, 2), (3, 2, 1))
+
+        """
+        for p in permutations(range(1, n + 1)):
+            yield SymmetricGroupElement(p)
+
+    @staticmethod
+    def shuffles(i, j):
+        """All :math:`(i,j)`-shuffles.
+
+        PARAMETERS
+        ----------
+        i : `int`
+        j : `int`
+
+        RETURNS
+        -------
+        :class: iterator of `comch.symmetric.SymmetricGroupElement` object
+            All :math:`(i,j)`-shuffles.
+
+        EXAMPLES
+        -------
+        >>> print(tuple(SymmetricGroup.shuffles(1, 2)))
+        ((1, 2, 3), (2, 1, 3), (3, 1, 2))
+
+        """
+        for p in permutations(range(1, i + j + 1)):
+            admissible = True
+            admissible &= all([x < y for x, y in pairwise(p[:i])])
+            admissible &= all([x < y for x, y in pairwise(p[i:])])
+            if admissible:
+                yield SymmetricGroupElement(p)
 
 
 class SymmetricRing:

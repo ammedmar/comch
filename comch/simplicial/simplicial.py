@@ -1,7 +1,7 @@
 from ..free_module import FreeModuleElement
 from ..symmetric import SymmetricRingElement
 from ..utils import pairwise
-from itertools import chain, product, combinations_with_replacement
+from itertools import chain, product, combinations, combinations_with_replacement
 
 
 class Simplex(tuple):
@@ -238,8 +238,12 @@ class SimplicialElement(FreeModuleElement):
 
         if data:
             if not dimension:
-                dimension = max(i for i in chain.from_iterable(
-                    chain.from_iterable(data.keys())))
+                dims = (i for i in chain.from_iterable(
+                        chain.from_iterable(data.keys())))
+                try:
+                    dimensions = max(dims)
+                except ValueError:
+                    dimensions = -1
             new_data = {}
             for k, v in data.items():
                 new_k = tuple(Simplex(spx) for spx in k)
@@ -349,7 +353,7 @@ class SimplicialElement(FreeModuleElement):
         answer = self.zero()
         for k, v in self.items():
             for idx, spx in enumerate(k):
-                acc_dim = sum((spx_l.dimension for spx_l in k[:idx]))
+                acc_dim = sum((spx_left.dimension for spx_left in k[:idx]))
                 for i in range(spx.dimension + 1):
                     new_spx = spx.face(i)
                     new_k = k[:idx] + (new_spx,) + k[idx + 1:]
@@ -542,3 +546,24 @@ class Simplicial:
         """
         key = (tuple(range(n + 1)),) * times
         return SimplicialElement({key: 1}, torsion=torsion)
+
+    @staticmethod
+    def basis(n, torsion=None):
+        r"""Iterator of all basis elements in the chain complex of a n-simplex.
+
+         PARAMETERS
+        ----------
+        n : :class:`int`
+            The dimension of the standard simplex considered.
+        torsion : :class:`int` positive or :class:`string` equal to 'free'
+        The torsion of the underlying ring.
+
+        EXAMPLES
+        --------
+        >>> print([str(b) for b in Simplicial.basis(1)])
+        ['((0,),)', '((1,),)', '((0,1),)']
+
+        """
+        for m in range(1, n+2):
+            for b in combinations(range(n+1), m):
+                yield SimplicialElement({(b,): 1}, torsion=torsion)

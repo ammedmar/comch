@@ -1,6 +1,6 @@
 from ..free_module import FreeModuleElement
 from ..symmetric import SymmetricRingElement
-from ..simplicial import Simplex
+from ..simplicial import Simplex, SimplicialElement
 from ..utils import pairwise
 from itertools import combinations, product
 
@@ -92,14 +92,13 @@ class Cube(tuple):
         answer = self[:idx] + ((epsilon + 1) % 2,) + self[idx + 1:]
         return Cube(answer)
 
-    def cartan_serre_collapse(self):
+    def cartan_serre_map(self):
         r"""The image *self* under the Cartan-Serre collapse map.
 
         Obtained by sending the cell :math:`x_1 \times \dots \times x_n` to
         :math:`[q_1-1, \dots, q_m-1, p-1]` where :math:`q_1 < q_2 < \dots` are
-        the positions of the intervals and :math:`q_m < p` and :math:`p` with
+        the positions of the intervals and :math:`q_m < p` with
         :math:`p = \min\{i \mid x_i = [0]\}` or :math:`p = n+1` if empty.
-
 
         RETURNS
         -------
@@ -108,7 +107,7 @@ class Cube(tuple):
 
         EXAMPLE
         -------
-        >>> Cube((2,1,2)).cartan_serre_collapse()
+        >>> Cube((2,1,2)).cartan_serre_map()
         (0, 2, 3)
 
         """
@@ -547,6 +546,34 @@ class CubicalElement(FreeModuleElement):
                         answer += answer.create({(cube,): (-1) ** sign_exp * v})
         return answer
 
+    def cartan_serre_map(self):
+        r"""The image *self* under the Cartan-Serre collapse map.
+
+        Image of *self* via the chain map induced by the Cartan-Serre map defined
+        for cubes.
+
+        RETURNS
+        -------
+        :class:`comch.simplicial.SimplicialElement`
+            The image of *self* under the Cartan-Serre chain map.
+
+        EXAMPLE
+        -------
+        >>> CubicalElement({((2,1,2), (2,2,0)): 1}).cartan_serre_map()
+        SimplicialElement({((0, 2, 3), (0, 1, 2)): 1})
+
+        """
+        answer = SimplicialElement(torsion=self.torsion)
+        if self == self.zero():
+            return answer
+        for k, v in self.items():
+            old_dim = sum(cube.dimension for cube in k)
+            new_k = tuple(cube.cartan_serre_map() for cube in k)
+            new_dim = sum(spx.dimension for spx in new_k)
+            if old_dim == new_dim:
+                answer += answer.create({new_k: v})
+        return answer
+
 
 class Cubical:
     """Produces cubical elements of interest."""
@@ -571,3 +598,23 @@ class Cubical:
         """
         key = ((2,) * n,) * times
         return CubicalElement({key: 1}, torsion=torsion)
+
+    @staticmethod
+    def basis(n, torsion=None):
+        r"""Iterator of all basis elements in the chain complex of a n-cube.
+
+         PARAMETERS
+        ----------
+        n : :class:`int`
+            The dimension of the standard cube considered.
+        torsion : :class:`int` positive or :class:`string` equal to 'free'
+        The torsion of the underlying ring.
+
+        EXAMPLES
+        --------
+        >>> print([str(b) for b in Cubical.basis(1)])
+        ['((0,),)', '((1,),)', '((2,),)']
+
+        """
+        for b in product({0, 1, 2}, repeat=n):
+            yield CubicalElement({(b,): 1}, torsion=torsion)

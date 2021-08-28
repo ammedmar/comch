@@ -40,6 +40,14 @@ class TestBarrattEcclesElement(unittest.TestCase):
         left = c.join().boundary() + da_b.join() + (-1) ** b.degree * a_db.join()
         self.assertEqual(left, - a)
 
+    def test_cartan_serre_map(self):
+        d = 6
+        chain_map = True
+        for c in Cubical.basis(d):
+            d_cs_c = c.cartan_serre_map().boundary()
+            cs_d_c = c.boundary().cartan_serre_map()
+            chain_map &= (d_cs_c == cs_d_c)  # in place 'and'
+        print(chain_map)
 
 if __name__ == '__main__':
     unittest.main()

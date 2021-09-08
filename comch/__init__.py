@@ -1,6 +1,7 @@
 from .free_module import FreeModuleElement
 
 from .symmetric import SymmetricGroupElement
+from .symmetric import SymmetricGroup
 from .symmetric import SymmetricRing
 from .symmetric import SymmetricRingElement
 
@@ -21,6 +22,7 @@ from .cubical import Cubical
 __all__ = [
     'FreeModuleElement',
     'SymmetricGroupElement',
+    'SymmetricGroup',
     'SymmetricRingElement',
     'SymmetricRing',
     'BarrattEcclesElement',

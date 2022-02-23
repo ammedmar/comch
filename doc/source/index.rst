@@ -53,4 +53,4 @@ References
 
 [BF]: C. Berger, and B. Fresse. "Combinatorial operad actions on cochains." Mathematical Proceedings of the Cambridge Philosophical Society. Vol. 137. No. 1. Cambridge University Press, 2004.
 
-[KMM]: Kaufmann, R. M., & Medina-Mardones, A. M. (2020). Cochain level May-Steenrod operations. arXiv preprint arXiv:2010.02571.
+[KMM]: R. Kaufmann, and A. Medina-Mardones. "Cochain level May-Steenrod operations." Forum Mathematicum 33 (2021), no. 6, 1507--1526.

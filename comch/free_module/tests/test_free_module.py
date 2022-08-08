@@ -23,6 +23,11 @@ class TestModule(unittest.TestCase):
         self.c = 3
         self.assertEqual(3 * self.x, FreeModuleElement({'a': 9, 'b': 3}))
 
+    def test_truediv(self):
+        self.c = 3
+        z = FreeModuleElement({'a': 1, 'b': 2}, torsion=5)
+        self.assertEqual(z / 3, FreeModuleElement({'a': 2, 'b': 4}, torsion=5))
+
     def test_neg(self):
         self.assertEqual(- self.x, FreeModuleElement({'a': -3, 'b': -1}))
 

@@ -157,6 +157,36 @@ class FreeModuleElement(Counter):
         scaled = {k: c * v for k, v in self.items()}
         return self.create(scaled)
 
+    def __truediv__(self, c):
+        """Division of *self* by *c*.
+
+        When c has a multiplicative inverse in the ground ring, divides *self* by *c*.
+
+        PARAMETERS
+        ----------
+        c : int
+            The element to divide *self* by.
+
+        RETURNS
+        -------
+        :class:`comch.free_module.FreeModuleElement` object
+            The action of *1/c* on *self*.
+
+        EXAMPLE
+        -------
+        >>> FreeModuleElement({'a': 1, 'b': 2}, torsion=5) / 3
+        FreeModuleElement({'b': 4, 'a': 2})
+
+        """
+        if not isinstance(c, int):
+            raise TypeError(f'Act only by int not by type {type(c)}')
+        if self.torsion == 'free' and c not in {-1, 1}:
+            raise TypeError(f'{c} is not invertible over the integers')
+
+        inv = pow(c, -1, self.torsion)
+        scaled = {k: inv * v for k, v in self.items()}
+        return self.create(scaled)
+
     def __neg__(self):
         """Additive inverse: - *self*.
 

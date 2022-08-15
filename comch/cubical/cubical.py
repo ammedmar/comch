@@ -10,7 +10,7 @@ class Cube(tuple):
 
     A cube is a finite tuple of elements in :math:`\{0,1,2\}`, where we think
     of :math:`2` as the interval :math:`[0,1]` and :math:`0,1` as its endpoints.
-    We identity these with faces of the infinite cube :math:`\mathbb I^\infty`.
+    We identify these with faces of the infinite cube :math:`\mathbb I^\infty`.
 
     """
 
@@ -155,8 +155,8 @@ class CubicalElement(FreeModuleElement):
 
     ATTRIBUTES
     ----------
-    torsion : :class:`int` positive or :class:`string` equal to 'free'.
-        The torsion of the underlying ring.
+    torsion : :class:`int`
+        The non-neg int :math:`n` of the ring :math:`\mathbb Z/n \mathbb Z`.
 
     """
 
@@ -171,8 +171,8 @@ class CubicalElement(FreeModuleElement):
             pairs. Each basis element must create a :class:`tuple` of
             :class:`comch.cubical.Cube` and `coefficient` must be an
             :class:`int`.
-        torsion : :class:`int` positive or :class:`string` equal to 'free'.
-            The torsion of the underlying ring.
+        torsion : :class:`int`
+            The non-neg int :math:`n` of the ring :math:`\mathbb Z/n \mathbb Z`.
 
         EXAMPLE
         -------
@@ -588,8 +588,8 @@ class Cubical:
             The dimension of the standard cube considered.
         times : :class:`int`
             The number of tensor copies.
-        torsion : :class:`int` positive or :class:`string` equal to 'free'
-        The torsion of the underlying ring.
+        torsion : :class:`int`
+            The non-neg int :math:`n` of the ring :math:`\mathbb Z/n \mathbb Z`.
 
         EXAMPLES
         --------
@@ -603,12 +603,12 @@ class Cubical:
     def basis(n, torsion=None):
         r"""Iterator of all basis elements in the chain complex of an n-cube.
 
-         PARAMETERS
+        PARAMETERS
         ----------
         n : :class:`int`
             The dimension of the standard cube considered.
-        torsion : :class:`int` positive or :class:`string` equal to 'free'
-        The torsion of the underlying ring.
+        torsion : :class:`int`
+            The non-neg int :math:`n` of the ring :math:`\mathbb Z/n \mathbb Z`.
 
         EXAMPLES
         --------

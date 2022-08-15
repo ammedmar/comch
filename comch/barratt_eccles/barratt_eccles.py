@@ -57,8 +57,8 @@ class BarrattEcclesElement(FreeModuleElement):
             Each basis_element must create a :class:`tuple` of
             :class:`commch.symmetric.SymmetricGroupElement` and `coefficient` must
             be an :class:`int`.
-        torsion : :class:`int` or :class:`string` 'free', default 'free'
-            The torsion of the underlying ring.
+        torsion : :class:`int`
+            The non-neg int :math:`n` of the ring :math:`\mathbb Z/n \mathbb Z`.
 
         EXAMPLES
         --------
@@ -546,7 +546,7 @@ class BarrattEccles:
         degree : :class:`int`
             The degree considered.
         torsion : :class:`int` or ``None``, default ``None``
-            The torsion of the underlying ring.
+            The non-neg int :math:`n` of the ring :math:`\mathbb Z/n \mathbb Z`.
 
         RETURNS
         _______

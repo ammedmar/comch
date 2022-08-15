@@ -203,9 +203,9 @@ class SimplicialElement(FreeModuleElement):
 
     ATTRIBUTES
     ----------
-    torsion : :class:`int` positive or :class:`string` equal to 'free'.
-        The torsion of the underlying ring.
-    dimension : :class:`int` non-negative.
+    torsion : :class:`int`
+        The non-neg int :math:`n` of the ring :math:`\mathbb Z/n \mathbb Z`.
+    dimension : :class:`int` non-negative
         NOT SURE IF NEEDED.
 
     """
@@ -223,8 +223,8 @@ class SimplicialElement(FreeModuleElement):
             :class:`int`.
         dimension : :class:`int`
             NOT SURE IF NEEDED.
-        torsion : :class:`int` positive or :class:`string` equal to 'free'.
-            The torsion of the underlying ring.
+        torsion : :class:`int`
+            The non-neg int :math:`n` of the ring :math:`\mathbb Z/n \mathbb Z`.
 
         EXAMPLE
         -------
@@ -535,8 +535,8 @@ class Simplicial:
             The dimension of the standard simplex considered.
         times : :class:`int`
             The number of tensor copies.
-        torsion : :class:`int` positive or :class:`string` equal to 'free'
-        The torsion of the underlying ring.
+        torsion : :class:`int`
+            The non-neg int :math:`n` of the ring :math:`\mathbb Z/n \mathbb Z`.
 
         EXAMPLES
         --------
@@ -551,12 +551,12 @@ class Simplicial:
     def basis(n, torsion=None):
         r"""Iterator of all basis elements in the chain complex of a n-simplex.
 
-         PARAMETERS
+        PARAMETERS
         ----------
         n : :class:`int`
             The dimension of the standard simplex considered.
-        torsion : :class:`int` positive or :class:`string` equal to 'free'
-        The torsion of the underlying ring.
+        torsion : :class:`int`
+            The non-neg int :math:`n` of the ring :math:`\mathbb Z/n \mathbb Z`.
 
         EXAMPLES
         --------

@@ -64,8 +64,8 @@ class SurjectionElement(FreeModuleElement):
             Items in the dictionary correspond to `basis_element: coefficient`
             pairs. Each basis_element must create a :class:`tuple` of
             :class:`int` and `coefficient` must be an :class:`int`.
-        torsion : :class:`int` or :class:`string` 'free', default 'free'
-            The torsion of the underlying ring.
+        torsion : :class:`int`
+            The non-neg int :math:`n` of the ring :math:`\mathbb Z/n \mathbb Z`.
 
         EXAMPLES
         --------
@@ -730,7 +730,7 @@ class Surjection:
         degree : :class:`int`
             The degree considered.
         torsion : :class:`int` or ``None``, default ``None``
-            The torsion of the underlying ring.
+            The non-neg int :math:`n` of the ring :math:`\mathbb Z/n \mathbb Z`.
         convention : :class:`string` or ``None``, default ``None``
             The sign convention of the surjection operad.
 

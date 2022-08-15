@@ -304,13 +304,13 @@ class SymmetricRingElement(FreeModuleElement):
         Items in the dictionary correspond to `basis_element: coefficient`
         pairs. Each basis_element must create a :class:`SymmetricGroupElement`
         and `coefficient` must be an :class:`int`.
-    torsion : :class:`int` positive or :class:`string` equal to 'free'
-        The torsion of the underlying ring.
+    torsion : :class:`int`
+        The non-neg int :math:`n` of the ring :math:`\mathbb Z/n \mathbb Z`.
 
     ATTRIBUTES
     ----------
-    torsion : :class:`int` positive or :class:`string` equal to 'free'
-        The torsion of the underlying ring.
+    torsion : :class:`int`
+        The non-neg int :math:`n` of the ring :math:`\mathbb Z/n \mathbb Z`.
 
     EXAMPLE
     -------
@@ -472,7 +472,7 @@ class SymmetricRing:
         arity : :class:`int` positive
             The arity of :math:`\mathrm S_r`, i.e., :math:`r`
         torsion : :class:`int` positive
-            The torsion of the underlying ring.
+            The non-neg int :math:`n` of the ring :math:`\mathbb Z/n \mathbb Z`.
 
         RETURNS
         -------
@@ -507,7 +507,7 @@ class SymmetricRing:
         arity : :class:`int` positive
             The arity of :math:`\mathrm S_r`, i.e., :math:`r`
         torsion : :class:`int` positive
-            The torsion of the underlying ring.
+            The non-neg int :math:`n` of the ring :math:`\mathbb Z/n \mathbb Z`.
 
         RETURNS
         -------
@@ -532,7 +532,7 @@ class SymmetricRing:
         arity : :class:`int` positive
             The arity of :math:`\mathrm S_r`, i.e., :math:`r`
         torsion : :class:`int` positive
-            The torsion of the underlying ring.
+            The non-neg int :math:`n` of the ring :math:`\mathbb Z/n \mathbb Z`.
 
         RETURNS
         -------
@@ -559,7 +559,7 @@ class SymmetricRing:
         arity : :class:`int` positive
             The arity of :math:`\mathrm S_r`, i.e., :math:`r`
         torsion : :class:`int` positive
-            The torsion of the underlying ring.
+            The non-neg int :math:`n` of the ring :math:`\mathbb Z/n \mathbb Z`.
 
         RETURNS
         -------

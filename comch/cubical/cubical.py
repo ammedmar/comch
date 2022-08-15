@@ -601,7 +601,7 @@ class Cubical:
 
     @staticmethod
     def basis(n, torsion=None):
-        r"""Iterator of all basis elements in the chain complex of a n-cube.
+        r"""Iterator of all basis elements in the chain complex of an n-cube.
 
          PARAMETERS
         ----------

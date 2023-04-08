@@ -61,18 +61,17 @@ class FreeModuleElement(Counter):
             return '0'
         else:
             answer = ''
-            for key, value in self.items():
-                if value < -1:
-                    answer += f'- {abs(value)}{key} '
-                elif value == -1:
-                    answer += f'- {key} '
-                elif value == 1:
-                    answer += f'+ {key} '
-                elif value > 1:
-                    answer += f'+ {value}{key} '
+            for k, v in self.items():
+                if v < -1:
+                    answer += f'- {abs(v)}{str(k)} '
+                elif v == -1:
+                    answer += f'- {str(k)} '
+                elif v == 1:
+                    answer += f'+ {str(k)} '
+                elif v > 1:
+                    answer += f'+ {v}{str(k)} '
             if answer[0] == '+':
                 answer = answer[2:]
-
             return answer[:-1]
 
     def __add__(self, other):
@@ -257,13 +256,13 @@ class FreeModuleElement(Counter):
         """
         # reducing coefficients mod torsion
         if self.torsion != 0:
-            for key, value in self.items():
-                self[key] = value % self.torsion
+            for k, v in self.items():
+                self[k] = v % self.torsion
 
-        # removing key:value pairs with value = 0
+        # removing k:v pairs with v = 0
         zeros = [k for k, v in self.items() if not v]
-        for key in zeros:
-            del self[key]
+        for k in zeros:
+            del self[k]
 
     def set_torsion(self, torsion):
         """Sets the torsion of *self*.

@@ -5,6 +5,9 @@ from .symmetric import SymmetricGroup
 from .symmetric import SymmetricRing
 from .symmetric import SymmetricRingElement
 
+from .cyclic import CyclicGroupElement
+from .cyclic import CyclicModuleElement
+
 from .barratt_eccles import BarrattEccles
 from .barratt_eccles import BarrattEcclesElement
 
@@ -27,6 +30,8 @@ __all__ = [
     'SymmetricRing',
     'BarrattEcclesElement',
     'BarrattEccles',
+    'CyclicGroupElement',
+    'CyclicModuleElement',
     'SurjectionElement',
     'Surjection',
     'Simplex',

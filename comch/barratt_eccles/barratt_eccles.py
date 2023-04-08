@@ -500,7 +500,6 @@ class BarrattEcclesElement(FreeModuleElement):
 
         return answer
 
-
     def preferred_rep(self):
         """Preferred representative of *self*.
 

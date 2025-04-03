@@ -56,7 +56,7 @@ class SurjectionElement(FreeModuleElement):
         initialization."""
 
     def __init__(self, data=None, torsion=None, convention=None):
-        """
+        r"""
         PARAMETERS
         ----------
         data : :class:`dict` or ``None``, default: ``None``
@@ -328,8 +328,8 @@ class SurjectionElement(FreeModuleElement):
         """The preferred representative of the symmetric orbit of *self*.
 
         The preferred representative in the orbit of basis surjections element
-        is the one satisfying that the first occurence of each integer appear in
-        increasing order.
+        is the one satisfying that the first occurrence of each integer appear
+        in increasing order.
 
         The representation used can be either 'trivial' or 'sign'.
 
@@ -819,7 +819,8 @@ class Surjection:
         return integral_answer
 
     @staticmethod
-    def steenrod_operation(p, s, q, bockstein=False, convention='McClure-Smith'):
+    def steenrod_operation(p, s, q, bockstein=False,
+                           convention='McClure-Smith'):
         r"""Chain level representative of :math:`P_s` or :math:`\beta P_s`.
 
         Let :math:`A` be such that :math:`\mathrm{End}_A` is equipped with a
@@ -950,7 +951,7 @@ class Surjection:
         _______
         :class:`comch.simplicial.SimplicialElement`\
         or :class:`comch.cubical.CubicalElement`
-            The tensor product elment obtained by applying the representative
+            The tensor product element obtained by applying the representative
             of the specified Steenrod operation.
 
         EXAMPLES

@@ -17,7 +17,7 @@ class Simplex(tuple):
 
         PARAMETERS
         ----------
-        interable : :class:'iterable'
+        iterable : :class:'iterable'
             Used to create a :class:`tuple` of :class:`int`.
 
         EXAMPLE
@@ -211,12 +211,12 @@ class SimplicialElement(FreeModuleElement):
     """
 
     def __init__(self, data=None, dimension=None, torsion=None):
-        """Initializes *self*.
+        r"""Initializes *self*.
 
         PARAMETERS
         ----------
         data : :class:`int` or ``None``, default: ``None``
-            Dictionary representing a linear cobination of basis elements.
+            Dictionary representing a linear combination of basis elements.
             Items in the dictionary correspond to `basis_element: coefficient`
             pairs. Each basis_element must create a :class:`tuple` of
             :class:`comch.simplicial.Simplex` and `coefficient` must be an
@@ -241,9 +241,9 @@ class SimplicialElement(FreeModuleElement):
                 dims = (i for i in chain.from_iterable(
                         chain.from_iterable(data.keys())))
                 try:
-                    dimensions = max(dims)
+                    dimension = max(dims)
                 except ValueError:
-                    dimensions = -1
+                    dimension = -1
             new_data = {}
             for k, v in data.items():
                 new_k = tuple(Simplex(spx) for spx in k)
@@ -458,7 +458,7 @@ class SimplicialElement(FreeModuleElement):
         """
 
         if self.degree is None:
-            raise TypeError(f'only for homogeneous elements')
+            raise TypeError('only for homogeneous elements')
         if self.arity < coord:
             raise TypeError(f'arity = {self.arity} < coord = {coord}')
 

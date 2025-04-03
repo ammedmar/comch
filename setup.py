@@ -11,7 +11,7 @@ setuptools.setup(
     description="A specialized computer algebra system for the study of commutativity up to coherent homotopies",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    #url="https://github.com/ammedmar/comch",
+    # url="https://github.com/ammedmar/comch",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",

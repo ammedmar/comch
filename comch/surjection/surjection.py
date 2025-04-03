@@ -56,7 +56,8 @@ class SurjectionElement(FreeModuleElement):
         initialization."""
 
     def __init__(self, data=None, torsion=None, convention=None):
-        r"""
+        r"""Initialize an element.
+
         PARAMETERS
         ----------
         data : :class:`dict` or ``None``, default: ``None``

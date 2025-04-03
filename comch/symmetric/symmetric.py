@@ -153,7 +153,7 @@ class SymmetricGroupElement(tuple):
             The multiplicative inverse of *self*.
 
         EXAMPLES
-        -------
+        --------
         >>> pi = SymmetricGroupElement((2,3,1))
         >>> print(pi.inverse())
         (3,1,2)
@@ -246,7 +246,7 @@ class SymmetricGroup:
             The permutations of arity `n`.
 
         EXAMPLES
-        -------
+        --------
         >>> print(tuple(SymmetricGroup.all(3)))
         ((1, 2, 3), (1, 3, 2), (2, 1, 3), (2, 3, 1), (3, 1, 2), (3, 2, 1))
 
@@ -269,7 +269,7 @@ class SymmetricGroup:
             All :math:`(i,j)`-shuffles.
 
         EXAMPLES
-        -------
+        --------
         >>> print(tuple(SymmetricGroup.shuffles(1, 2)))
         ((1, 2, 3), (2, 1, 3), (3, 1, 2))
 

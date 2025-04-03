@@ -1,29 +1,31 @@
 """
-# a method in the class Cube
-def necklace(self):
-    ones = [idx for idx, i in enumerate(self) if i == 1]
-    twos = [idx for idx, i in enumerate(self) if i == 2]
-    aux = [0]
-    answer = []
-    for idx in range(len(self) + 2):
-        if idx in twos:
-            aux.append(idx + 1)
-        if idx in ones:
-            aux.append(idx + 1)
-            answer.append(Simplex(aux))
-            aux = [idx + 1]
-    if aux:
-        aux.append(len(self) + 1)
-        answer.append(Simplex(aux))
-    return Necklace(answer)
+a method in the class Cube::
 
-# from CubicalElement
-def necklical_element(self):
-    answer = NecklicalElement(torsion=self.torsion)
-    for k, v in self.items():
-        new_k = tuple(cube.necklace() for cube in k)
-        answer += answer.create({new_k: v})
-    return answer
+    def necklace(self):
+        ones = [idx for idx, i in enumerate(self) if i == 1]
+        twos = [idx for idx, i in enumerate(self) if i == 2]
+        aux = [0]
+        answer = []
+        for idx in range(len(self) + 2):
+            if idx in twos:
+                aux.append(idx + 1)
+            if idx in ones:
+                aux.append(idx + 1)
+                answer.append(Simplex(aux))
+                aux = [idx + 1]
+        if aux:
+            aux.append(len(self) + 1)
+            answer.append(Simplex(aux))
+        return Necklace(answer)
+
+from CubicalElement::
+
+    def necklical_element(self):
+        answer = NecklicalElement(torsion=self.torsion)
+        for k, v in self.items():
+            new_k = tuple(cube.necklace() for cube in k)
+            answer += answer.create({new_k: v})
+        return answer
 """
 from ..free_module import FreeModuleElement
 from ..simplicial import Simplex, SimplicialElement
@@ -34,10 +36,10 @@ class Necklace(tuple):
     """Tuple of simplices."""
 
     def __init__(self, simplices):
-        answer = tuple(Simplex(spx) for spx in simplices)
+        self.answer = tuple(Simplex(spx) for spx in simplices)
 
     def one_reduced(self):
-        return Necklace(filter(lambda spx: spx.dimension != 1, self))
+        return Necklace(filter(lambda spx: spx.dimension != 1, self.answer))
 
 
 class NecklicalElement(FreeModuleElement):

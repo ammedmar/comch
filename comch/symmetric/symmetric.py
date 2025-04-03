@@ -19,7 +19,7 @@ class SymmetricGroupElement(tuple):
 
         PARAMETERS
         ----------
-        interable : :class:'iterable'
+        iterable : :class:'iterable'
             Used to create a :class:`tuple` representing a permutation of
             (1,...,r) for some r.
 
@@ -54,7 +54,7 @@ class SymmetricGroupElement(tuple):
 
         """
         if set(self) != set(range(1, len(self) + 1)):
-            raise TypeError(f'defined for permutations of (1,...,r) ' +
+            raise TypeError('defined for permutations of (1,...,r) ' +
                             f'only not {self}')
         cycles = self.to_cycles()
         return (-1) ** sum(len(cycle) - 1 for cycle in cycles)
@@ -280,7 +280,7 @@ class SymmetricGroup:
             admissible &= all([x < y for x, y in pairwise(p[i:])])
             if admissible:
                 yield SymmetricGroupElement(p)
-                
+
 
 class SymmetricRingElement(FreeModuleElement):
     r"""Element in the group ring of finite symmetric groups.
@@ -420,7 +420,7 @@ class SymmetricRingElement(FreeModuleElement):
         return answer
 
     def compose(self, other, position):
-        """Linear operadic compositions: *self* :math:`\circ_{position}` *other*.
+        r"""Linear operadic compositions: *self* :math:`\circ_{position}` *other*.
 
         The operadic composition is defined by extending linearly the
         operadic composition of symmetric group elements.
@@ -493,7 +493,7 @@ class SymmetricRing:
         r"""The element :math:`\rho`.
 
         Defined as the preferred generator of the cyclic subgroup of order
-        :math:`r` in :math:`\mathrm S_r`. Explicitely,
+        :math:`r` in :math:`\mathrm S_r`. Explicitly,
 
         .. math::
             \rho(i) =

@@ -47,7 +47,7 @@ class BarrattEcclesElement(FreeModuleElement):
     """
 
     def __init__(self, data=None, torsion=None):
-        """Initializes *self*.
+        r"""Initializes *self*.
 
         PARAMETERS
         ----------
@@ -500,7 +500,6 @@ class BarrattEcclesElement(FreeModuleElement):
 
         return answer
 
-
     def preferred_rep(self):
         """Preferred representative of *self*.
 
@@ -557,7 +556,7 @@ class BarrattEccles:
         ----------
         [KMM]: Kaufmann, R. M., & Medina-Mardones, A. M. (2020). Chain level
         Steenrod operations. arXiv preprint arXiv:2010.02571.
-        
+
         SEE ALSO
         --------
         :meth:`comch.surjection.Surjection.may_steenrod_structure`.

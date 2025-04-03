@@ -19,7 +19,7 @@ class Cube(tuple):
 
         PARAMETERS
         ----------
-        interable : :class:'iterable'
+        iterable : :class:'iterable'
             Used to create a :class:`tuple` of :class:`int` with values
             0, 1 or 2.
 
@@ -32,7 +32,7 @@ class Cube(tuple):
         tuple.__init__(iterable)
 
     def __str__(self):
-        return super.__str__(self).replace(', ', ',')
+        return super().__str__(self).replace(', ', ',')
 
     @property
     def dimension(self):
@@ -161,12 +161,12 @@ class CubicalElement(FreeModuleElement):
     """
 
     def __init__(self, data=None, torsion=None):
-        """Initializes *self*.
+        r"""Initializes *self*.
 
         PARAMETERS
         ----------
         data : :class:`int` or ``None``, default: ``None``
-            Dictionary representing a linear cobination of basis elements.
+            Dictionary representing a linear combination of basis elements.
             Items in the dictionary correspond to `basis element: coefficient`
             pairs. Each basis element must create a :class:`tuple` of
             :class:`comch.cubical.Cube` and `coefficient` must be an
@@ -424,7 +424,7 @@ class CubicalElement(FreeModuleElement):
                 return 1
 
         if self.degree is None:
-            raise TypeError(f'only for homogeneous elements')
+            raise TypeError('only for homogeneous elements')
         if self.arity < coord:
             raise TypeError(f'arity = {self.arity} < coord = {coord}')
 
@@ -522,7 +522,7 @@ class CubicalElement(FreeModuleElement):
             return self
 
         if self.degree is None:
-            raise TypeError(f'only for homogeneous elements')
+            raise TypeError('only for homogeneous elements')
 
         answer = self.zero()
         for k, v in self.items():

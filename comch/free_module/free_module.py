@@ -28,7 +28,7 @@ class FreeModuleElement(Counter):
     initialization."""
 
     def __init__(self, data=None, torsion=None):
-        """Initializes *self*.
+        r"""Initializes *self*.
 
         PARAMETERS
         ----------
@@ -102,7 +102,7 @@ class FreeModuleElement(Counter):
         return answer
 
     def __sub__(self, other):
-        """Diference: *self* - *other*.
+        """Difference: *self* - *other*.
 
         PARAMETERS
         ----------
@@ -176,7 +176,7 @@ class FreeModuleElement(Counter):
         if not isinstance(c, int):
             raise TypeError(f'Act only by int not by type {type(c)}')
         if self.torsion == 0:
-            raise TypeError(f'Division defined for positive torsion only')
+            raise TypeError('Division defined for positive torsion only')
 
         inv = pow(c, -1, self.torsion)
         scaled = {k: inv * v for k, v in self.items()}

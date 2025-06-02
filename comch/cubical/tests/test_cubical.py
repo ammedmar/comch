@@ -49,5 +49,6 @@ class TestBarrattEcclesElement(unittest.TestCase):
             chain_map &= (d_cs_c == cs_d_c)  # in place 'and'
         print(chain_map)
 
+
 if __name__ == '__main__':
     unittest.main()

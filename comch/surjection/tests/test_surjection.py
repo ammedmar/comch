@@ -119,9 +119,9 @@ class TestSurjection(unittest.TestCase):
 
         t = SymmetricRing.transposition_element(arity)
         x = Surjection.may_steenrod_structure(arity, 3,
-                                               convention='McClure-Smith').boundary()
+                                              convention='McClure-Smith').boundary()
         y = t * Surjection.may_steenrod_structure(arity, 2,
-                                                   convention='McClure-Smith')
+                                                  convention='McClure-Smith')
         self.assertEqual(x, y)
 
 

@@ -29,7 +29,7 @@ class Simplex(tuple):
         tuple.__init__(iterable)
 
     def __str__(self):
-        return super().__str__(self).replace(', ', ',')
+        return super().__str__().replace(', ', ',')
 
     @property
     def dimension(self):
@@ -105,7 +105,8 @@ class Simplex(tuple):
 
         """
 
-        def d_i(i, j): return j + 1 if j >= i else j
+        def d_i(i, j):
+            return j + 1 if j >= i else j
 
         return tuple(d_i(i, j) for j in self)
 
@@ -127,7 +128,8 @@ class Simplex(tuple):
 
         """
 
-        def s_i(i, j): return j - 1 if j > i else j
+        def s_i(i, j):
+            return j - 1 if j > i else j
 
         return tuple(s_i(i, j) for j in self)
 
@@ -564,6 +566,6 @@ class Simplicial:
         ['((0,),)', '((1,),)', '((0,1),)']
 
         """
-        for m in range(1, n+2):
-            for b in combinations(range(n+1), m):
+        for m in range(1, n + 2):
+            for b in combinations(range(n + 1), m):
                 yield SimplicialElement({(b,): 1}, torsion=torsion)

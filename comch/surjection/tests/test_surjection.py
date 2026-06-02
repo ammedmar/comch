@@ -73,6 +73,12 @@ class TestSurjectionElement(unittest.TestCase):
         sdy = s(y.boundary())
         self.assertEqual(d_sy - ((-1) ** s.degree) * sdy, ds_y)
 
+        y = Cubical.standard_element(3, 2)
+        ds_y = s.boundary()(y, 2)
+        d_sy = s(y, 2).boundary()
+        sdy = s(y.boundary(), 2)
+        self.assertEqual(d_sy - ((-1) ** s.degree) * sdy, ds_y)
+
     def test_compose_bf(self):
         i = 3
         x = SurjectionElement({(3, 2, 1, 2, 1, 3): 1},

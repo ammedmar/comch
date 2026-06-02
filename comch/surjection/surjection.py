@@ -368,25 +368,64 @@ class SurjectionElement(FreeModuleElement):
         return answer
 
     def __call__(self, other, coord=1):
-        """The action: *self*(*other*).
+        r"""The action ``self(other)``.
 
         The action of *self* on the tensor factor specified by *coord* on an
         element in the tensor product of normalized chains of a standard simplex
         or of a standard cube.
 
+        If *self* is a surjection :math:`u : \{1,\dots,r+d\} \to
+        \{1,\dots,r\}`, the selected tensor factor is first expanded with the
+        :math:`(r+d-1)`-fold iterated diagonal. For a simplex this is the
+        Alexander-Whitney diagonal. For a cube this is the Serre diagonal.
+        The resulting :math:`r+d` tensor factors are then grouped according to
+        the fibers of :math:`u`. The entries in the fiber :math:`u^{-1}(i)` are
+        joined to produce the :math:`i`-th output tensor factor.
+
+        More explicitly, in the cubical case a summand
+
+        .. math::
+
+           c_1 \otimes \cdots \otimes c_{r+d}
+
+        in the iterated Serre diagonal is sent to
+
+        .. math::
+
+           \mathop{\ast}_{u(j)=1} c_j \otimes \cdots \otimes
+           \mathop{\ast}_{u(j)=r} c_j,
+
+        where :math:`\ast` is the cubical join
+        :meth:`comch.cubical.CubicalElement.join`. The implementation includes
+        the Koszul sign produced by reordering homogeneous tensor factors, the
+        signs in the cubical joins, and the sign needed when the operation is
+        applied to a tensor factor other than the first one.
+
+        The parameter *coord* counts tensor factors starting from 1:
+        ``coord=1`` acts on the first tensor factor, ``coord=2`` on the
+        second, and so on. The other tensor factors are left in place.
+
         PARAMETERS
         ----------
-        other : :class:`comch.simplicial.SimplicialElement` or\
-        :class:`comch.cubical.CubicalElement`.
-            The element to which apply *self* to
+        other : :class:`comch.simplicial.SimplicialElement` or :class:`comch.cubical.CubicalElement`.
+            The element to which apply *self* to.
         coord : :class:`int`, default 1.
             The tensor factor of *other* to apply *self* to.
 
         RETURNS
         _______
-        :class:`comch.simplicial.SimplicialElement` or\
-        :class:`comch.cubical.CubicalElement`
+        :class:`comch.simplicial.SimplicialElement` or :class:`comch.cubical.CubicalElement`
             The action of *self* on *other* at *coord*.
+
+        EXAMPLES
+        --------
+        >>> s = SurjectionElement({(1,2,1): 1})
+        >>> x = Cubical.standard_element(2)
+        >>> print(s(x))
+        - ((2,2),(1,2)) + ((2,1),(2,2)) + ((0,2),(2,2)) - ((2,2),(2,0))
+        >>> y = Cubical.standard_element(2, 2)
+        >>> print(s(y, 2))
+        - ((2,2),(2,2),(1,2)) + ((2,2),(2,1),(2,2)) + ((2,2),(0,2),(2,2)) - ((2,2),(2,2),(2,0))
         """
 
         def check_input(self, other, coord=1):
@@ -467,30 +506,58 @@ class SurjectionElement(FreeModuleElement):
                     answer += answer.create({new_k: sign * v1 * v2})
             return answer
 
-        def cubical(self, other):
+        def cubical(self, other, coord):
             """Action on cubical Eilenberg-Zilber elements."""
+
+            def cubical_sign(k1, k2, groups):
+                weights = [cube.dimension % 2 for cube in k2]
+                if self.arity <= 2:
+                    sign_exp = sum((len(group) - 1) * weights[group[0]]
+                                   for group in groups)
+                    sign_exp += sum(
+                        (len(left) - 1) * (len(right) - 1)
+                        for i, left in enumerate(groups)
+                        for right in groups[i + 1:]
+                        if left[0] > right[0])
+                else:
+                    sign_exp = sum((len(group) - 1 - idx) * weights[i]
+                                   for group in groups
+                                   for idx, i in enumerate(group))
+                    sign_exp += sum(len(group) - 1 for group in groups)
+                return (-1) ** (sign_exp % 2)
+
             answer = other.zero()
-            pre_join = other.iterated_diagonal(self.arity + self.degree - 1)
+            pre_join = other.iterated_diagonal(
+                self.arity + self.degree - 1, coord)
             for (k1, v1), (k2, v2) in product(self.items(), pre_join.items()):
+                i, j = coord - 1, coord + len(k1) - 1
+                left, k2, right = k2[:i], k2[i:j], k2[j:]
                 to_dist = []
+                groups = []
                 zero_summand = False
                 for i in range(1, max(k1) + 1):
-                    key_to_join = tuple(cube for idx, cube in enumerate(k2)
-                                        if k1[idx] == i)
+                    group = [idx for idx, value in enumerate(k1)
+                             if value == i]
+                    key_to_join = tuple(k2[idx] for idx in group)
                     joined = other.create({key_to_join: 1}).join()
                     if not joined:
                         zero_summand = True
                         break
+                    groups.append(group)
                     to_dist.append(joined)
                 if not zero_summand:
                     if self.torsion == 2:
                         sign = 1
                     else:
                         sign = compute_sign(k1, k2)
+                        sign *= cubical_sign(k1, k2, groups)
+                        deg_left = sum(cube.dimension for cube in left) % 2
+                        sign *= (-1) ** (deg_left * self.degree)
                     items_to_dist = [summand.items() for summand in to_dist]
                     for pairs in product(*items_to_dist):
                         new_k = reduce(lambda x, y: x + y, (pair[0] for pair in pairs))
                         new_v = reduce(lambda x, y: x * y, (pair[1] for pair in pairs))
+                        new_k = left + tuple(new_k) + right
                         to_add = answer.create({tuple(new_k): sign * new_v * v1 * v2})
                         answer += to_add
             return answer
@@ -498,14 +565,14 @@ class SurjectionElement(FreeModuleElement):
         if not self or not other:
             return other.zero()
 
-        check_input(self, other, coord=1)
+        check_input(self, other, coord)
 
         if isinstance(other, SimplicialElement):
             if self.convention != 'McClure-Smith':
                 raise NotImplementedError
             return simplicial(self, other, coord)
         elif isinstance(other, CubicalElement):
-            return cubical(self, other)
+            return cubical(self, other, coord)
         else:
             raise NotImplementedError
 

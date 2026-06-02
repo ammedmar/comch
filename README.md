@@ -19,8 +19,8 @@ This package is written in Python 3 and has no dependencies. It can be installed
 
 ## References
 
-[McS]: J. McClure, and J. Smith. "Multivariable cochain operations and little n-cubes." Journal of the American Mathematical Society 16.3 (2003): 681-704.
+[McS]: J. McClure, and J. Smith. "Multivariable cochain operations and little n-cubes." Journal of the American Mathematical Society 16.3 (2003): 681-704. [DOI](https://doi.org/10.1090/S0894-0347-03-00419-3)
 
-[BF]: C. Berger, and B. Fresse. "Combinatorial operad actions on cochains." Mathematical Proceedings of the Cambridge Philosophical Society. Vol. 137. No. 1. Cambridge University Press, 2004.
+[BF]: C. Berger, and B. Fresse. "Combinatorial operad actions on cochains." Mathematical Proceedings of the Cambridge Philosophical Society. Vol. 137. No. 1. Cambridge University Press, 2004. [DOI](https://doi.org/10.1017/S0305004103007138)
 
-[KMM]: Kaufmann, R. M., & Medina-Mardones, A. M. (2020). "Cochain level May-Steenrod operations." Forum Mathematicum. Vol. 33. No. 6. De Gruyter, 2021.
+[KMM]: Kaufmann, R. M., & Medina-Mardones, A. M. (2020). "Cochain level May-Steenrod operations." Forum Mathematicum. Vol. 33. No. 6. De Gruyter, 2021. [DOI](https://doi.org/10.1515/forum-2020-0296)

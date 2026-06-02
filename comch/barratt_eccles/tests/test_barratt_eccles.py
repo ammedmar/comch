@@ -45,7 +45,7 @@ class TestBarrattEcclesElement(unittest.TestCase):
     def test_table_reduction(self):
         # chain map
         b = BarrattEcclesElement({((1, 2, 3, 4), (1, 4, 3, 2)): 1,
-                                   ((1, 2, 4, 3), (3, 4, 2, 1)): 2})
+                                  ((1, 2, 4, 3), (3, 4, 2, 1)): 2})
         dtr_b = b.table_reduction().boundary()
         trd_b = b.boundary().table_reduction()
         self.assertEqual(dtr_b, trd_b)

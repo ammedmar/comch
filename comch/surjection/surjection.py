@@ -611,7 +611,7 @@ class SurjectionElement(FreeModuleElement):
                 elif self.convention == 'Berger-Fresse':
                     sign = bf_sign(positions, k1, p, k2)
                 elif self.convention == 'McClure-Smith':
-                    sign = ms_sign()
+                    sign = ms_sign(positions, k1, p, k2)  # not implemented
                 answer += answer.create({tuple(new_k): v1 * v2 * sign})
         return answer
 

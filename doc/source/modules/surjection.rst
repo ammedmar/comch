@@ -6,8 +6,8 @@
    .. autosummary::
       :template: class.rst
 
-      comch.surjection.SurjectionElement
-      comch.surjection.Surjection
+      SurjectionElement
+      Surjection
 
    .. autoclass::
       comch.surjection.SurjectionElement

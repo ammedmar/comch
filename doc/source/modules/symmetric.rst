@@ -6,9 +6,9 @@
    .. autosummary::
       :template: class.rst
 
-      comch.symmetric.SymmetricGroupElement
-      comch.symmetric.SymmetricRingElement
-      comch.symmetric.SymmetricRing
+      SymmetricGroupElement
+      SymmetricRingElement
+      SymmetricRing
 
    .. autoclass::
       comch.symmetric.SymmetricGroupElement

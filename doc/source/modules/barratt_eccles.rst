@@ -6,8 +6,8 @@
    .. autosummary::
       :template: class.rst
 
-      comch.barratt_eccles.BarrattEcclesElement
-      comch.barratt_eccles.BarrattEccles
+      BarrattEcclesElement
+      BarrattEccles
 
    .. autoclass::
       comch.barratt_eccles.BarrattEcclesElement

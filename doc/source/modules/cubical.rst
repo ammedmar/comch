@@ -6,9 +6,9 @@
    .. autosummary::
       :template: class.rst
 
-      comch.cubical.Cube
-      comch.cubical.CubicalElement
-      comch.cubical.Cubical
+      Cube
+      CubicalElement
+      Cubical
 
    .. autoclass::
       comch.cubical.Cube

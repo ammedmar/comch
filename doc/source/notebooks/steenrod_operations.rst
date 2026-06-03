@@ -15,4 +15,4 @@ Contents
 
 A fully interactive cloud-based version of this notebook can be found `here`_.
 
-.. _here: https://mybinder.org/v2/gh/ammedmar/comch/master?filepath=notebooks%2Fsteenrod_operations.ipynb
+.. _here: https://mybinder.org/v2/gh/ammedmar/comch/master?urlpath=lab/tree/notebooks/steenrod_operations.ipynb

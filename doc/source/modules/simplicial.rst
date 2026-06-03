@@ -6,9 +6,9 @@
    .. autosummary::
       :template: class.rst
 
-      comch.simplicial.Simplex
-      comch.simplicial.SimplicialElement
-      comch.simplicial.Simplicial
+      Simplex
+      SimplicialElement
+      Simplicial
 
    .. autoclass::
       comch.simplicial.Simplex

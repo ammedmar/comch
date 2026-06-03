@@ -6,7 +6,7 @@
    .. autosummary::
       :template: class.rst
 
-      comch.free_module.FreeModuleElement
+      FreeModuleElement
 
    .. autoclass::
       comch.free_module.FreeModuleElement

@@ -21,9 +21,13 @@ These are respectively due to McClure-Smith and Berger-Fresse and are known as t
 Installation
 ------------
 
-This package is written in Python 3 and has no dependencies. It can be installed from a terminal simply entering:
+This package is written in pure Python and has no runtime dependencies. It can be installed from a terminal simply entering:
 
 :code:`python3 -m pip install comch`
+
+To run notebooks locally, install ComCH with the notebook extra:
+
+:code:`python3 -m pip install "comch[notebooks]"`
 
 
 .. toctree::

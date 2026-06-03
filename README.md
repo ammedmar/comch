@@ -13,7 +13,7 @@ Following the pioneering work of Steenrod, Cartan, Adem, Stasheff, Boardman-Vogt
 
 ## Installation
 
-This package is written in Python 3 and has no dependencies. It can be installed from a terminal entering:
+This package is written in pure Python and has no runtime dependencies. It can be installed from a terminal entering:
 
 `python3 -m pip install comch`
 
@@ -26,9 +26,7 @@ python -m ipykernel install --user --name comch --display-name "Python (comch)"
 jupyter lab
 ```
 
-Then open the example notebooks from the documentation or repository and select
-the `Python (comch)` kernel in Jupyter. The notebooks can also be run directly
-in Binder using the badge at the top of this page.
+Then open the example notebooks from the documentation or repository and select the `Python (comch)` kernel in Jupyter. The notebooks can also be run directly in Binder using the badge at the top of this page.
 
 For development, install the development extra:
 

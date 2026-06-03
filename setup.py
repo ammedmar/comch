@@ -16,7 +16,7 @@ docs_requirements = [
 
 setuptools.setup(
     name="comch",
-    version="0.1.4",
+    version="0.1.5",
     author="Anibal M. Medina-Mardones",
     author_email="ammedmar@gmail.com",
     description="A specialized computer algebra system for the study of commutativity up to coherent homotopies",

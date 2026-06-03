@@ -231,6 +231,8 @@ class SymmetricGroupElement(tuple):
 
 
 class SymmetricGroup:
+    """Produces symmetric group elements of interest."""
+
     @staticmethod
     def all(n):
         """All permutations of arity (length) `n`.

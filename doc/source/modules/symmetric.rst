@@ -7,11 +7,15 @@
       :template: class.rst
 
       SymmetricGroupElement
+      SymmetricGroup
       SymmetricRingElement
       SymmetricRing
 
    .. autoclass::
       comch.symmetric.SymmetricGroupElement
+
+   .. autoclass::
+      comch.symmetric.SymmetricGroup
 
    .. autoclass::
       comch.symmetric.SymmetricRingElement

@@ -104,7 +104,6 @@ jobs:
           import comch.barratt_eccles
           import comch.cubical
           import comch.free_module
-          import comch.necklical
           import comch.simplicial
           import comch.surjection
           import comch.symmetric

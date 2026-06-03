@@ -6,7 +6,7 @@ from ..symmetric import SymmetricRingElement, SymmetricRing
 from ..surjection import SurjectionElement
 from ..utils import partitions, pairwise
 from itertools import product, combinations
-from math import floor, factorial
+from math import factorial
 
 
 class BarrattEcclesElement(FreeModuleElement):
@@ -647,9 +647,9 @@ class BarrattEccles:
         else:
             b = int(bockstein)
             # Serre convention: v(2j)=(-1)^j & v(2j+1)=v(2j)*m! w/ m=(p-1)/2
-            coeff = (-1) ** (floor(q / 2) + s)
-            if q / 2 - floor(q / 2):
-                coeff *= factorial((p - 1) / 2)
+            coeff = (-1) ** (q // 2 + s)
+            if q % 2:
+                coeff *= factorial((p - 1) // 2)
             # degree of the element: (2s-q)(p-1)-b
             d = (2 * s - q) * (p - 1) - b
             if d < 0:

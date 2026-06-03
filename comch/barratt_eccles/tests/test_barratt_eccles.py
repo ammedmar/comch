@@ -79,6 +79,14 @@ class TestBarrattEccles(unittest.TestCase):
         y = n * BarrattEccles.may_steenrod_structure(5, 5, torsion=7)
         self.assertEqual(x, y)
 
+    def test_steenrod_operation_odd_prime(self):
+        x = BarrattEccles.steenrod_operation(3, 2, 3)
+        y = BarrattEcclesElement({
+            ((1, 2, 3), (2, 3, 1), (3, 1, 2)): 2,
+            ((1, 2, 3), (3, 1, 2), (1, 2, 3)): 2,
+        })
+        self.assertEqual(x, y)
+
 
 if __name__ == '__main__':
     unittest.main()

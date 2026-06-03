@@ -9,7 +9,7 @@ from ..utils import pairwise
 from itertools import combinations, product, combinations_with_replacement
 from operator import itemgetter
 from functools import reduce
-from math import floor, factorial
+from math import factorial
 
 
 class SurjectionElement(FreeModuleElement):
@@ -981,9 +981,9 @@ class Surjection:
         else:
             b = int(bockstein)
             # Serre convention: v(2j)=(-1)^j & v(2j+1)=v(2j)*m! w/ m=(p-1)/2
-            coeff = (-1) ** (floor(q / 2) + s)
-            if q / 2 - floor(q / 2):
-                coeff *= factorial((p - 1) / 2)
+            coeff = (-1) ** (q // 2 + s)
+            if q % 2:
+                coeff *= factorial((p - 1) // 2)
             # degree of the element: (2s-q)(p-1)-b
             d = (2 * s - q) * (p - 1) - b
             if d < 0:

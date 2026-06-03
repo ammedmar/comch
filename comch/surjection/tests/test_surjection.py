@@ -130,6 +130,15 @@ class TestSurjection(unittest.TestCase):
                                                   convention='McClure-Smith')
         self.assertEqual(x, y)
 
+    def test_steenrod_operation_odd_prime(self):
+        x = Surjection.steenrod_operation(3, 2, 3)
+        y = SurjectionElement({
+            (1, 2, 3, 1, 2): 2,
+            (1, 3, 1, 2, 3): 2,
+            (1, 2, 3, 2, 3): 2,
+        })
+        self.assertEqual(x, y)
+
 
 if __name__ == '__main__':
     unittest.main()

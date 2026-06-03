@@ -13,6 +13,24 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     # url="https://github.com/ammedmar/comch",
     packages=setuptools.find_packages(),
+    extras_require={
+        "docs": [
+            "sphinx",
+            "sphinx-rtd-theme",
+        ],
+        "notebooks": [
+            "ipykernel",
+            "jupyterlab",
+            "nbformat",
+        ],
+        "dev": [
+            "ipykernel",
+            "jupyterlab",
+            "nbformat",
+            "sphinx",
+            "sphinx-rtd-theme",
+        ],
+    },
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",

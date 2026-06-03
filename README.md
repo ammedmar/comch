@@ -17,6 +17,25 @@ This package is written in Python 3 and has no dependencies. It can be installed
 
 `python3 -m pip install comch`
 
+To run notebooks locally, you need Jupyter and a Python kernel. These can be
+installed with the notebook extra:
+
+```bash
+python -m pip install "comch[notebooks]"
+python -m ipykernel install --user --name comch --display-name "Python (comch)"
+jupyter lab
+```
+
+Then open the example notebooks from the documentation or repository and select
+the `Python (comch)` kernel in Jupyter. The notebooks can also be run directly
+in Binder using the badge at the top of this page.
+
+For development, install the development extra:
+
+```bash
+python -m pip install -e ".[dev]"
+```
+
 ## References
 
 [McS]: J. McClure, and J. Smith. "Multivariable cochain operations and little n-cubes." Journal of the American Mathematical Society 16.3 (2003): 681-704. [DOI](https://doi.org/10.1090/S0894-0347-03-00419-3)

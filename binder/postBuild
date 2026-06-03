@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -eux
+
+python -m pip install -e ".[notebooks]"

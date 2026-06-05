@@ -1,3 +1,8 @@
+Jupyter notebooks
+=================
+
+Guided examples illustrating ComCH's main constructions and workflows.
+
 .. toctree::
    :maxdepth: 0
 

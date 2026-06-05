@@ -1,5 +1,5 @@
 import unittest
-from comch.surjection import SurjectionElement, Surjection
+from comch.surjection import SurjectionElement
 from comch.symmetric import SymmetricRing
 from comch.simplicial import SimplicialElement, Simplicial
 from comch.cubical import Cubical
@@ -106,39 +106,6 @@ class TestSurjectionElement(unittest.TestCase):
         sz = z.suspension()
         xz = x.compose(z, 2)
         self.assertEqual(xz.suspension(), sx.compose(sz, 1))
-
-
-class TestSurjection(unittest.TestCase):
-
-    def test_may_steenrod_structure(self):
-        arity = 6
-        t = SymmetricRing.transposition_element(arity)
-        x = Surjection.may_steenrod_structure(arity, 3).boundary()
-        y = t * Surjection.may_steenrod_structure(arity, 2)
-        self.assertEqual(x, y)
-
-        arity = 5
-        n = SymmetricRing.norm_element(arity, torsion=7)
-        x = Surjection.may_steenrod_structure(arity, 4, torsion=7).boundary()
-        y = n * Surjection.may_steenrod_structure(arity, 3, torsion=7)
-        self.assertEqual(x, y)
-
-        t = SymmetricRing.transposition_element(arity)
-        x = Surjection.may_steenrod_structure(arity, 3,
-                                              convention='McClure-Smith').boundary()
-        y = t * Surjection.may_steenrod_structure(arity, 2,
-                                                  convention='McClure-Smith')
-        self.assertEqual(x, y)
-
-    def test_steenrod_operation_odd_prime(self):
-        x = Surjection.steenrod_operation(3, 2, 3)
-        y = SurjectionElement({
-            (1, 2, 3, 1, 2): 2,
-            (1, 3, 1, 2, 3): 2,
-            (1, 2, 3, 2, 3): 2,
-        })
-        self.assertEqual(x, y)
-
 
 if __name__ == '__main__':
     unittest.main()

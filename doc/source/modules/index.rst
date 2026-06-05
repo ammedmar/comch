@@ -5,5 +5,6 @@
    symmetric
    surjection
    barratt_eccles
+   steenrod
    simplicial
    cubical

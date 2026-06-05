@@ -92,5 +92,7 @@ autodoc_default_options = {
     'member-order': 'bysource',
     'special-members': True,
     'undoc-members': True,
-    'exclude-members': '__weakref__, __dict__, __module__, __hash__, __str__'
+    'exclude-members': '__weakref__, __dict__, __module__, __hash__, __str__, '
+                       '__annotate_func__, __annotations_cache__, '
+                       '__firstlineno__, __static_attributes__'
 }

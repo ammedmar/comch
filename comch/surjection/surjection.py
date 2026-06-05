@@ -9,7 +9,6 @@ from ..utils import pairwise
 from itertools import combinations, product, combinations_with_replacement
 from operator import itemgetter
 from functools import reduce
-from math import factorial
 
 
 class SurjectionElement(FreeModuleElement):
@@ -813,78 +812,18 @@ class Surjection:
         Steenrod operations. arXiv preprint arXiv:2010.02571.
         """
 
-        def i(surj, iterate=1):
-            """Inclusion of Surj(r) into Surj(r+1)
+        import warnings
+        from ..steenrod import Steenrod
 
-            Defined by appending 1 at the start of basis elements and
-            raising the value of all other entries by 1."""
-
-            if iterate == 1:
-                answer = surj.zero()
-                for k, v in surj.items():
-                    answer += answer.create(
-                        {(1,) + tuple(j + 1 for j in k): v})
-                return answer
-            if iterate > 1:
-                return i(i(surj, iterate=iterate - 1))
-
-        def p(surj, iterate=1):
-            """Projection of Surj(r) to Surj(r-1)
-
-            Defined by removing 1 from a basis element with only one
-            occurrences of value 1 and subtracting 1 from all other entries.
-
-            """
-            if iterate == 1:
-                answer = surj.zero()
-                for k, v in surj.items():
-                    if k.count(1) == 1:
-                        idx = k.index(1)
-                        new_k = (tuple(j - 1 for j in k[:idx]) +
-                                 tuple(j - 1 for j in k[idx + 1:]))
-                        answer += answer.create({new_k: v})
-                return answer
-            if iterate > 1:
-                return p(p(surj, iterate=iterate - 1))
-
-        def s(surj):
-            """Chain homotopy from the identity to the composition pi.
-            Explicitly, id - ip = ds + sd."""
-            answer = surj.zero()
-            for k, v in surj.items():
-                answer += answer.create({(1,) + tuple(j for j in k): v})
-            return answer
-
-        def h(surj):
-            """Chain homotopy from the identity to i...i p..p.
-            In Surj(r), realizing its contractibility to Surj(1)."""
-            answer = s(surj)
-            for r in range(1, arity - 1):
-                answer += i(s(p(surj, r)), r)
-            return answer
-
-        operators = {
-            0: SymmetricRing.norm_element(arity),
-            1: SymmetricRing.transposition_element(arity)
-        }
-
-        def psi(arity, degree, convention=convention):
-            """Recursive definition of steenrod product over the integers."""
-            if degree == 0:
-                return SurjectionElement({tuple(range(1, arity + 1)): 1},
-                                         convention=convention)
-            else:
-                previous = psi(arity, degree - 1, convention=convention)
-                acted_on = operators[degree % 2] * previous
-                answer = h(acted_on)
-                return answer
-
-        if convention is None:
-            convention = SurjectionElement.default_convention
-        integral_answer = psi(arity, degree, convention=convention)
-        if torsion:
-            integral_answer.set_torsion(torsion)
-        return integral_answer
+        warnings.warn(
+            "Surjection.may_steenrod_structure is deprecated; "
+            "use Steenrod.may_structure(..., model='surjection') instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return Steenrod.may_structure(
+            arity, degree, model='surjection', torsion=torsion,
+            convention=convention)
 
     @staticmethod
     def steenrod_operation(p, s, q, bockstein=False,
@@ -965,32 +904,18 @@ class Surjection:
 
         """
 
-        # input check
-        if not all(isinstance(i, int) for i in {p, s, q}):
-            raise TypeError('initialize with three int p,s,n')
-        if not isinstance(bockstein, bool):
-            raise TypeError('bockstein must be a boolean')
-        if p == 2 and bockstein:
-            raise TypeError('bP only defined for odd primes')
+        import warnings
+        from ..steenrod import Steenrod
 
-        if p == 2:
-            coeff = 1
-            d = s - q
-            if d < 0:
-                return SurjectionElement(torsion=2)
-        else:
-            b = int(bockstein)
-            # Serre convention: v(2j)=(-1)^j & v(2j+1)=v(2j)*m! w/ m=(p-1)/2
-            coeff = (-1) ** (q // 2 + s)
-            if q % 2:
-                coeff *= factorial((p - 1) // 2)
-            # degree of the element: (2s-q)(p-1)-b
-            d = (2 * s - q) * (p - 1) - b
-            if d < 0:
-                return SurjectionElement(torsion=p)
-
-        return int(coeff) * Surjection.may_steenrod_structure(
-            p, d, torsion=p, convention=convention)
+        warnings.warn(
+            "Surjection.steenrod_operation is deprecated; "
+            "use Steenrod.operation(..., model='surjection') instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return Steenrod.operation(
+            p, s, q, bockstein=bockstein, model='surjection',
+            convention=convention)
 
     @staticmethod
     def steenrod_chain(p, s, q, bockstein=False, shape='simplex'):
@@ -1029,27 +954,17 @@ class Surjection:
 
         """
 
-        def filter_homogeneous(element):
-            homogeneous = {}
-            for k, v in element.items():
-                if len(set(elmt.dimension for elmt in k)) == 1:
-                    homogeneous[k] = v
-            return element.create(homogeneous)
+        import warnings
+        from ..steenrod import Steenrod
 
-        surj = Surjection.steenrod_operation(p, s, q, bockstein=bockstein)
-        b = int(bockstein)
-
-        if p == 2:
-            d = q + s
-        else:
-            d = q + 2 * s * (p - 1) - b
-
-        if shape == 'simplex':
-            element = Simplicial.standard_element(-d, torsion=p)
-        elif shape == 'cube':
-            element = Cubical.standard_element(-d, torsion=p)
-
-        return filter_homogeneous(surj(element))
+        warnings.warn(
+            "Surjection.steenrod_chain is deprecated; "
+            "use Steenrod.chain(...) instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return Steenrod.chain(
+            p, s, q, bockstein=bockstein, shape=shape)
 
     @staticmethod
     def basis(arity, degree, complexity=None):

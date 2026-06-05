@@ -7,10 +7,6 @@
       :template: class.rst
 
       BarrattEcclesElement
-      BarrattEccles
 
    .. autoclass::
       comch.barratt_eccles.BarrattEcclesElement
-
-   .. autoclass::
-      comch.barratt_eccles.BarrattEccles

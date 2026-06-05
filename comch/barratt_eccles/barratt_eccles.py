@@ -6,7 +6,6 @@ from ..symmetric import SymmetricRingElement, SymmetricRing
 from ..surjection import SurjectionElement
 from ..utils import partitions, pairwise
 from itertools import product, combinations
-from math import factorial
 
 
 class BarrattEcclesElement(FreeModuleElement):
@@ -562,28 +561,17 @@ class BarrattEccles:
         :meth:`comch.surjection.Surjection.may_steenrod_structure`.
 
         """
-        operators = {
-            0: SymmetricRing.norm_element(arity),
-            1: SymmetricRing.transposition_element(arity)
-        }
+        import warnings
+        from ..steenrod import Steenrod
 
-        def psi(arity, degree):
-            """Recursive definition of W --> E over the integers."""
-
-            if degree == 0:
-                return BarrattEcclesElement(
-                    {(tuple(range(1, arity + 1)),): 1})
-            else:
-                previous = psi(arity, degree - 1)
-                acted_on = operators[degree % 2] * previous
-                identity = tuple(range(1, arity + 1))
-                new_data = {(identity,) + k: v for k, v in acted_on.items()}
-                return BarrattEcclesElement(new_data)
-
-        integral_answer = psi(arity, degree)
-        if torsion:
-            integral_answer.set_torsion(torsion)
-        return integral_answer
+        warnings.warn(
+            "BarrattEccles.may_steenrod_structure is deprecated; "
+            "use Steenrod.may_structure(..., model='barratt_eccles') instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return Steenrod.may_structure(
+            arity, degree, model='barratt_eccles', torsion=torsion)
 
     @staticmethod
     def steenrod_operation(p, s, q, bockstein=False):
@@ -631,29 +619,14 @@ class BarrattEccles:
 
         """
 
-        # input check
-        if not all(isinstance(i, int) for i in {p, s, q}):
-            raise TypeError('initialize with three int p,s,n')
-        if not isinstance(bockstein, bool):
-            raise TypeError('bockstein must be a boolean')
-        if p == 2 and bockstein:
-            raise TypeError('bP only defined for odd primes')
+        import warnings
+        from ..steenrod import Steenrod
 
-        if p == 2:
-            coeff = 1
-            d = s - q
-            if d < 0:
-                return BarrattEcclesElement(torsion=2)
-        else:
-            b = int(bockstein)
-            # Serre convention: v(2j)=(-1)^j & v(2j+1)=v(2j)*m! w/ m=(p-1)/2
-            coeff = (-1) ** (q // 2 + s)
-            if q % 2:
-                coeff *= factorial((p - 1) // 2)
-            # degree of the element: (2s-q)(p-1)-b
-            d = (2 * s - q) * (p - 1) - b
-            if d < 0:
-                return BarrattEcclesElement(torsion=p)
-
-        return int(coeff) * BarrattEccles.may_steenrod_structure(
-            p, d, torsion=p)
+        warnings.warn(
+            "BarrattEccles.steenrod_operation is deprecated; "
+            "use Steenrod.operation(..., model='barratt_eccles') instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return Steenrod.operation(
+            p, s, q, bockstein=bockstein, model='barratt_eccles')

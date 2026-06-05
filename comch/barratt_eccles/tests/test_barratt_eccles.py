@@ -1,5 +1,5 @@
 import unittest
-from comch.barratt_eccles import BarrattEcclesElement, BarrattEccles
+from comch.barratt_eccles import BarrattEcclesElement
 from comch.symmetric import SymmetricRing, SymmetricRingElement
 
 
@@ -65,28 +65,6 @@ class TestBarrattEcclesElement(unittest.TestCase):
 
     def test_alexander_whitney(self):
         pass
-
-
-class TestBarrattEccles(unittest.TestCase):
-    def test_may_steenrod_structure(self):
-        t = SymmetricRing.transposition_element(6)
-        x = BarrattEccles.may_steenrod_structure(6, 3).boundary()
-        y = t * BarrattEccles.may_steenrod_structure(6, 2)
-        self.assertEqual(x, y)
-
-        n = SymmetricRing.norm_element(5, torsion=7)
-        x = BarrattEccles.may_steenrod_structure(5, 6, torsion=7).boundary()
-        y = n * BarrattEccles.may_steenrod_structure(5, 5, torsion=7)
-        self.assertEqual(x, y)
-
-    def test_steenrod_operation_odd_prime(self):
-        x = BarrattEccles.steenrod_operation(3, 2, 3)
-        y = BarrattEcclesElement({
-            ((1, 2, 3), (2, 3, 1), (3, 1, 2)): 2,
-            ((1, 2, 3), (3, 1, 2), (1, 2, 3)): 2,
-        })
-        self.assertEqual(x, y)
-
 
 if __name__ == '__main__':
     unittest.main()

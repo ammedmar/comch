@@ -7,10 +7,6 @@
       :template: class.rst
 
       SurjectionElement
-      Surjection
 
    .. autoclass::
       comch.surjection.SurjectionElement
-
-   .. autoclass::
-      comch.surjection.Surjection

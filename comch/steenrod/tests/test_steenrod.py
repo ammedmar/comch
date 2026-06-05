@@ -64,6 +64,21 @@ class TestSteenrod(unittest.TestCase):
         self.assertEqual(x, y)
 
     def test_inputs(self):
+        for model in ('surjection', 'barratt_eccles'):
+            self.assertEqual(
+                Steenrod.may_structure(2, 1, model=model, torsion=0).torsion,
+                0,
+            )
+            self.assertFalse(
+                Steenrod.may_structure(2, 1, model=model, torsion=1)
+            )
+            self.assertEqual(
+                Steenrod.may_structure(2, 1, model=model, torsion=-5),
+                Steenrod.may_structure(2, 1, model=model, torsion=5),
+            )
+            with self.assertRaises(TypeError):
+                Steenrod.may_structure(2, 1, model=model, torsion=False)
+
         with self.assertRaises(ValueError):
             Steenrod.operation(2, 0, 0, model='not-a-model')
         with self.assertRaises(ValueError):

@@ -206,7 +206,9 @@ class SimplicialElement(FreeModuleElement):
     ATTRIBUTES
     ----------
     torsion : :class:`int`
-        The non-neg int :math:`n` of the ring :math:`\mathbb Z/n \mathbb Z`.
+        The integer :math:`n` of the ring :math:`\mathbb Z/n \mathbb Z`;
+        :math:`n = 0` means :math:`\mathbb Z`, and negative values are
+        normalized to their absolute value.
     dimension : :class:`int` non-negative
         NOT SURE IF NEEDED.
 
@@ -225,8 +227,10 @@ class SimplicialElement(FreeModuleElement):
             :class:`int`.
         dimension : :class:`int`
             NOT SURE IF NEEDED.
-        torsion : :class:`int`
-            The non-neg int :math:`n` of the ring :math:`\mathbb Z/n \mathbb Z`.
+        torsion : :class:`int` or ``None``, default ``None``
+            The integer :math:`n` of the ring :math:`\mathbb Z/n \mathbb Z`;
+            :math:`n = 0` means :math:`\mathbb Z`, and negative values are
+            normalized to their absolute value.
 
         EXAMPLE
         -------
@@ -537,8 +541,10 @@ class Simplicial:
             The dimension of the standard simplex considered.
         times : :class:`int`
             The number of tensor copies.
-        torsion : :class:`int`
-            The non-neg int :math:`n` of the ring :math:`\mathbb Z/n \mathbb Z`.
+        torsion : :class:`int` or ``None``, default ``None``
+            The integer :math:`n` of the ring :math:`\mathbb Z/n \mathbb Z`;
+            :math:`n = 0` means :math:`\mathbb Z`, and negative values are
+            normalized to their absolute value.
 
         EXAMPLES
         --------
@@ -557,8 +563,10 @@ class Simplicial:
         ----------
         n : :class:`int`
             The dimension of the standard simplex considered.
-        torsion : :class:`int`
-            The non-neg int :math:`n` of the ring :math:`\mathbb Z/n \mathbb Z`.
+        torsion : :class:`int` or ``None``, default ``None``
+            The integer :math:`n` of the ring :math:`\mathbb Z/n \mathbb Z`;
+            :math:`n = 0` means :math:`\mathbb Z`, and negative values are
+            normalized to their absolute value.
 
         EXAMPLES
         --------

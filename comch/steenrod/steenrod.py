@@ -31,8 +31,10 @@ class Steenrod:
         model : :class:`str`, default ``'surjection'``
             Either ``'surjection'`` or ``'barratt_eccles'``.
         torsion : :class:`int` or ``None``, default ``None``
-            The non-negative integer :math:`n` defining
-            :math:`\mathbb Z/n \mathbb Z`.
+            The integer :math:`n` defining
+            :math:`\mathbb Z/n \mathbb Z`, with :math:`n = 0` representing
+            :math:`\mathbb Z`. Negative values are normalized to their
+            absolute value.
         convention : :class:`str` or ``None``, default ``None``
             The sign convention of the surjection operad. Only used for
             ``model='surjection'``.
@@ -232,7 +234,7 @@ class Steenrod:
         if convention is None:
             convention = SurjectionElement.default_convention
         integral_answer = psi(arity, degree, convention=convention)
-        if torsion:
+        if torsion is not None:
             integral_answer.set_torsion(torsion)
         return integral_answer
 
@@ -254,6 +256,6 @@ class Steenrod:
             return BarrattEcclesElement(new_data)
 
         integral_answer = psi(arity, degree)
-        if torsion:
+        if torsion is not None:
             integral_answer.set_torsion(torsion)
         return integral_answer

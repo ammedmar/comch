@@ -13,13 +13,16 @@ class FreeModuleElement(Counter):
 
     This class models elements in free :math:`\mathbb Z/n \mathbb Z`-modules
     with :math:`\mathbb Z/0 \mathbb Z = \mathbb Z`. The ring is specified via
-    the class attribute *torsion* corresponding to the non-negative integer
-    :math:`n`.
+    the class attribute *torsion* corresponding to an integer :math:`n`.
+    Negative values are normalized to their absolute value.
 
     ATTRIBUTES
     ----------
     torsion : :class:`int`
-        The non-neg int :math:`n` of the ring :math:`\mathbb Z/n \mathbb Z`.
+        The integer :math:`n` of the ring
+        :math:`\mathbb Z/n \mathbb Z`, with :math:`n = 0` representing
+        :math:`\mathbb Z`. Negative values are normalized to their absolute
+        value.
 
     """
 
@@ -35,8 +38,11 @@ class FreeModuleElement(Counter):
         data : ``dict``
             Dictionary representing a linear combination of basis elements.
             Items in the dict correspond to pairs (basis_element: coefficient).
-        torsion : :class:`int`
-            The non-neg int :math:`n` of the ring :math:`\mathbb Z/n \mathbb Z`.
+        torsion : :class:`int` or ``None``, default ``None``
+            The integer :math:`n` of the ring
+            :math:`\mathbb Z/n \mathbb Z`, with :math:`n = 0` representing
+            :math:`\mathbb Z`. Negative values are normalized to their absolute
+            value. If ``None``, uses :attr:`default_torsion`.
 
         EXAMPLE
         -------
@@ -48,9 +54,16 @@ class FreeModuleElement(Counter):
         """
         if torsion is None:
             torsion = type(self).default_torsion
-        self.torsion = torsion
+        self.torsion = self._normalize_torsion(torsion)
         super(FreeModuleElement, self).__init__(data)
         self.preferred_rep()
+
+    @staticmethod
+    def _normalize_torsion(torsion):
+        """Validate and normalize a torsion value."""
+        if not isinstance(torsion, int) or isinstance(torsion, bool):
+            raise TypeError('torsion must be an integer')
+        return abs(torsion)
 
     def __hash__(self):
         return hash(frozenset(self))
@@ -246,8 +259,8 @@ class FreeModuleElement(Counter):
         r"""The preferred representative of *self*.
 
         Consisting of pairs `basis_element: coefficient` with `coefficient`
-        different from 0 and in the set :math:`\{1, \dots, r-1\}` if
-        :attr:`torsion` is an :class:`int` denoted :math:`r`.
+        different from 0 and in the set :math:`\{1, \dots, r-1\}` when
+        :attr:`torsion` is a positive integer :math:`r`.
 
         EXAMPLE
         -------
@@ -266,12 +279,14 @@ class FreeModuleElement(Counter):
             del self[key]
 
     def set_torsion(self, torsion):
-        """Sets the torsion of *self*.
+        r"""Sets the torsion of *self*.
 
         PARAMETERS
         ----------
         torsion : :class:`int`
-            The new `torsion` of *self*
+            The new integer `torsion` of *self*. The value ``0`` represents
+            coefficients in :math:`\mathbb Z`; negative values are normalized
+            to their absolute value.
 
         EXAMPLE
         -------
@@ -279,7 +294,7 @@ class FreeModuleElement(Counter):
         FreeModuleElement({'a': 1})
 
         """
-        setattr(self, 'torsion', torsion)
+        setattr(self, 'torsion', self._normalize_torsion(torsion))
         self.preferred_rep()
         return self
 

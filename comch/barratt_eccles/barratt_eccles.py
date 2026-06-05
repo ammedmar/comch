@@ -6,6 +6,7 @@ from ..symmetric import SymmetricRingElement, SymmetricRing
 from ..surjection import SurjectionElement
 from ..utils import partitions, pairwise
 from itertools import product, combinations
+from math import factorial
 
 
 class BarrattEcclesElement(FreeModuleElement):
@@ -531,8 +532,8 @@ class BarrattEccles:
     """Produces Barratt-Eccles elements of interest."""
 
     @staticmethod
-    def may_steenrod_structure(arity, degree, torsion=None):
-        r"""Representative of the requested Steenrod product.
+    def may_steenrod_map(arity, degree, torsion=None):
+        r"""Image of the map from the minimal resolution of the cyclic group.
 
         Returns the image under the May-Steenrod structure constructed in
         [KMM] of the preferred basis element, of the given degree, of the
@@ -557,47 +558,56 @@ class BarrattEccles:
 
         REFERENCES
         ----------
-        [KMM]: Kaufmann, R. M., & Medina-Mardones, A. M. (2020). Chain level
-        Steenrod operations. arXiv preprint arXiv:2010.02571.
+        [KMM]: R. M. Kaufmann and A. M. Medina-Mardones. "Cochain level
+        May-Steenrod operations." Forum Mathematicum 33 (2021), no. 6,
+        1507--1526. https://doi.org/10.1515/forum-2020-0296
 
         SEE ALSO
         --------
-        :meth:`comch.surjection.Surjection.may_steenrod_structure`.
+        :class:`comch.steenrod.Steenrod`
 
         """
-        import warnings
-        from ..steenrod import Steenrod
+        operators = {
+            0: SymmetricRing.norm_element(arity),
+            1: SymmetricRing.transposition_element(arity)
+        }
 
-        warnings.warn(
-            "BarrattEccles.may_steenrod_structure is deprecated; "
-            "use Steenrod.may_structure(..., model='barratt_eccles') instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return Steenrod.may_structure(
-            arity, degree, model='barratt_eccles', torsion=torsion)
+        def psi(arity, degree):
+            if degree == 0:
+                return BarrattEcclesElement(
+                    {(tuple(range(1, arity + 1)),): 1})
+            previous = psi(arity, degree - 1)
+            acted_on = operators[degree % 2] * previous
+            identity = tuple(range(1, arity + 1))
+            new_data = {(identity,) + k: v for k, v in acted_on.items()}
+            return BarrattEcclesElement(new_data)
+
+        integral_answer = psi(arity, degree)
+        if torsion is not None:
+            integral_answer.set_torsion(torsion)
+        return integral_answer
 
     @staticmethod
-    def steenrod_operation(p, s, q, bockstein=False):
+    def steenrod_operation_representative(p, s, q, bockstein=False):
         r"""Chain level representative of :math:`P_s` or :math:`\beta P_s`.
 
         Where
 
         .. math::
-            P_s : H_\bullet(A; \mathbb F_2)
+            P_s : H_q(A; \mathbb F_2)
             \to
-            H_{\bullet + s}(A; \mathbb F_2)
+            H_{q + s}(A; \mathbb F_2)
 
         and, for :math:`p > 2`,
 
         .. math::
-           P_s : H_\bullet(A; \mathbb F_p)
+           P_s : H_q(A; \mathbb F_p)
            \to
-           H_{\bullet + 2s(p-1)}(A; \mathbb F_p)
+           H_{q + 2s(p-1)}(A; \mathbb F_p)
            \qquad
-           \beta P_s : H_\bullet(A; \mathbb F_p)
+           \beta P_s : H_q(A; \mathbb F_p)
            \to
-           H_{\bullet+2s(p-1)-1}(A; \mathbb F_p)
+           H_{q+2s(p-1)-1}(A; \mathbb F_p)
 
         are the Steenrod operations.
 
@@ -617,20 +627,37 @@ class BarrattEccles:
         :class:`comch.barratt_eccles.BarrattEcclesElement`
             The Barratt-Eccles element representative.
 
+        REFERENCES
+        ----------
+        [KMM]: R. M. Kaufmann and A. M. Medina-Mardones. "Cochain level
+        May-Steenrod operations." Forum Mathematicum 33 (2021), no. 6,
+        1507--1526. https://doi.org/10.1515/forum-2020-0296
+
         SEE ALSO
         --------
-        :meth:`comch.surjection.Surjection.steenrod_operation`
+        :class:`comch.steenrod.Steenrod`
 
         """
+        if not all(isinstance(i, int) for i in {p, s, q}):
+            raise TypeError('initialize with three int p,s,n')
+        if not isinstance(bockstein, bool):
+            raise TypeError('bockstein must be a boolean')
+        if p == 2 and bockstein:
+            raise TypeError('bP only defined for odd primes')
 
-        import warnings
-        from ..steenrod import Steenrod
+        if p == 2:
+            coeff = 1
+            degree = s - q
+            if degree < 0:
+                return BarrattEcclesElement(torsion=2)
+        else:
+            b = int(bockstein)
+            coeff = (-1) ** (q // 2 + s)
+            if q % 2:
+                coeff *= factorial((p - 1) // 2)
+            degree = (2 * s - q) * (p - 1) - b
+            if degree < 0:
+                return BarrattEcclesElement(torsion=p)
 
-        warnings.warn(
-            "BarrattEccles.steenrod_operation is deprecated; "
-            "use Steenrod.operation(..., model='barratt_eccles') instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return Steenrod.operation(
-            p, s, q, bockstein=bockstein, model='barratt_eccles')
+        element = BarrattEccles.may_steenrod_map(p, degree, torsion=p)
+        return int(coeff) * element

@@ -1,5 +1,5 @@
 import unittest
-from comch.barratt_eccles import BarrattEcclesElement
+from comch.barratt_eccles import BarrattEccles, BarrattEcclesElement
 from comch.symmetric import SymmetricRing, SymmetricRingElement
 
 
@@ -65,6 +65,50 @@ class TestBarrattEcclesElement(unittest.TestCase):
 
     def test_alexander_whitney(self):
         pass
+
+
+class TestBarrattEccles(unittest.TestCase):
+    def test_may_steenrod_map(self):
+        t = SymmetricRing.transposition_element(6)
+        x = BarrattEccles.may_steenrod_map(6, 3).boundary()
+        y = t * BarrattEccles.may_steenrod_map(6, 2)
+        self.assertEqual(x, y)
+
+        n = SymmetricRing.norm_element(5, torsion=7)
+        x = BarrattEccles.may_steenrod_map(5, 6, torsion=7).boundary()
+        y = n * BarrattEccles.may_steenrod_map(5, 5, torsion=7)
+        self.assertEqual(x, y)
+
+        self.assertEqual(BarrattEccles.may_steenrod_map(2, 1, torsion=0).torsion,
+                         0)
+        self.assertFalse(BarrattEccles.may_steenrod_map(2, 1, torsion=1))
+        self.assertEqual(BarrattEccles.may_steenrod_map(2, 1, torsion=-5),
+                         BarrattEccles.may_steenrod_map(2, 1, torsion=5))
+        with self.assertRaises(TypeError):
+            BarrattEccles.may_steenrod_map(2, 1, torsion=False)
+
+    def test_steenrod_operation_representative(self):
+        x = BarrattEccles.steenrod_operation_representative(3, 2, 3)
+        y = BarrattEcclesElement({
+            ((1, 2, 3), (2, 3, 1), (3, 1, 2)): 2,
+            ((1, 2, 3), (3, 1, 2), (1, 2, 3)): 2,
+        }, torsion=3)
+        self.assertEqual(x, y)
+
+        self.assertEqual(
+            BarrattEccles.steenrod_operation_representative(2, 0, 1),
+            BarrattEcclesElement(torsion=2),
+        )
+        with self.assertRaises(TypeError):
+            BarrattEccles.steenrod_operation_representative(
+                2, 0, 0, bockstein=True)
+        with self.assertRaises(TypeError):
+            BarrattEccles.steenrod_operation_representative(
+                2, 0, 0, bockstein=1)
+        with self.assertRaises(TypeError):
+            BarrattEccles.steenrod_operation_representative(
+                2, 0, 0, convention='McClure-Smith')
+
 
 if __name__ == '__main__':
     unittest.main()

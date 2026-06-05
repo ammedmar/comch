@@ -40,4 +40,4 @@ python -m pip install -e ".[dev]"
 
 [BF]: C. Berger, and B. Fresse. "Combinatorial operad actions on cochains." Mathematical Proceedings of the Cambridge Philosophical Society. Vol. 137. No. 1. Cambridge University Press, 2004. [DOI](https://doi.org/10.1017/S0305004103007138)
 
-[KMM]: Kaufmann, R. M., & Medina-Mardones, A. M. (2020). "Cochain level May-Steenrod operations." Forum Mathematicum. Vol. 33. No. 6. De Gruyter, 2021. [DOI](https://doi.org/10.1515/forum-2020-0296)
+[KMM]: R. M. Kaufmann and A. M. Medina-Mardones. "Cochain level May-Steenrod operations." Forum Mathematicum 33 (2021), no. 6, 1507-1526. [DOI](https://doi.org/10.1515/forum-2020-0296)

@@ -1,5 +1,5 @@
 import unittest
-from comch.surjection import SurjectionElement
+from comch.surjection import Surjection, SurjectionElement
 from comch.symmetric import SymmetricRing
 from comch.simplicial import SimplicialElement, Simplicial
 from comch.cubical import Cubical
@@ -106,6 +106,61 @@ class TestSurjectionElement(unittest.TestCase):
         sz = z.suspension()
         xz = x.compose(z, 2)
         self.assertEqual(xz.suspension(), sx.compose(sz, 1))
+
+
+class TestSurjection(unittest.TestCase):
+    def test_may_steenrod_map(self):
+        arity = 6
+        t = SymmetricRing.transposition_element(arity)
+        x = Surjection.may_steenrod_map(arity, 3).boundary()
+        y = t * Surjection.may_steenrod_map(arity, 2)
+        self.assertEqual(x, y)
+
+        arity = 5
+        n = SymmetricRing.norm_element(arity, torsion=7)
+        x = Surjection.may_steenrod_map(arity, 4, torsion=7).boundary()
+        y = n * Surjection.may_steenrod_map(arity, 3, torsion=7)
+        self.assertEqual(x, y)
+
+        t = SymmetricRing.transposition_element(arity)
+        x = Surjection.may_steenrod_map(
+            arity, 3, convention='McClure-Smith').boundary()
+        y = t * Surjection.may_steenrod_map(
+            arity, 2, convention='McClure-Smith')
+        self.assertEqual(x, y)
+
+        self.assertEqual(Surjection.may_steenrod_map(2, 1, torsion=0).torsion,
+                         0)
+        self.assertFalse(Surjection.may_steenrod_map(2, 1, torsion=1))
+        self.assertEqual(Surjection.may_steenrod_map(2, 1, torsion=-5),
+                         Surjection.may_steenrod_map(2, 1, torsion=5))
+        with self.assertRaises(TypeError):
+            Surjection.may_steenrod_map(2, 1, torsion=False)
+
+    def test_steenrod_operation_representative(self):
+        x = Surjection.steenrod_operation_representative(3, 2, 3)
+        y = SurjectionElement({
+            (1, 2, 3, 1, 2): 2,
+            (1, 3, 1, 2, 3): 2,
+            (1, 2, 3, 2, 3): 2,
+        }, torsion=3, convention='McClure-Smith')
+        self.assertEqual(x, y)
+
+        x = Surjection.steenrod_operation_representative(
+            2, 3, 2, convention='Berger-Fresse')
+        self.assertEqual(x.convention, 'Berger-Fresse')
+
+        self.assertEqual(
+            Surjection.steenrod_operation_representative(2, 0, 1),
+            SurjectionElement(torsion=2, convention='McClure-Smith'),
+        )
+        with self.assertRaises(TypeError):
+            Surjection.steenrod_operation_representative(2, 0, 0,
+                                                         bockstein=True)
+        with self.assertRaises(TypeError):
+            Surjection.steenrod_operation_representative(2, 0, 0,
+                                                         bockstein=1)
+
 
 if __name__ == '__main__':
     unittest.main()

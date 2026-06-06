@@ -2,8 +2,10 @@
 Cartan coboundaries
 ====================
 
-In this notebook we present an effective construction of Cartan coboundaries
-using the Barratt-Eccles operad.
+In this notebook we present the even-prime construction of Cartan
+coboundaries using the Barratt-Eccles and surjection operads, and evaluate the
+resulting chain representatives on simplicial and cubical universal basis
+elements.
 
 Contents
 --------
@@ -11,8 +13,9 @@ Contents
 1. Introduction
 2. The Barratt-Eccles Cartan homotopy
 3. Table reduction and simplicial chains
-4. Examples
-5. References
+4. Action on simplices and cubes
+5. Examples
+6. References
 
 A fully interactive cloud-based version of this notebook can be found `here`_.
 

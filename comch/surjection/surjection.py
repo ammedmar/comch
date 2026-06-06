@@ -1067,11 +1067,11 @@ class Surjection:
 
         warnings.warn(
             "Surjection.steenrod_chain is deprecated; "
-            "use Steenrod.chain(...) instead.",
+            "use Steenrod.chain_operations(...) instead.",
             DeprecationWarning,
             stacklevel=2,
         )
-        return Steenrod.chain(
+        return Steenrod.chain_operations(
             p, s, q, bockstein=bockstein, shape=shape)
 
     @staticmethod

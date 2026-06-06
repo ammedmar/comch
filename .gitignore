@@ -1,5 +1,6 @@
 # notebooks
 .ipynb_checkpoints
+notebooks/.jupyter/
 
 # Compiled python modules.
 *.pyc
@@ -12,6 +13,7 @@ __pycache__/
 
 # External
 .DS_Store
+**/.DS_Store
 
 # Pickle
 *.pkl

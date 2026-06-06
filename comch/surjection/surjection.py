@@ -879,11 +879,10 @@ class Surjection:
 
     @staticmethod
     def steenrod_operation_representative(p, s, q, bockstein=False, convention=None):
-        r"""Chain level representative of :math:`P_s` or :math:`\beta P_s`.
+        r"""Representative of :math:`P_s` or :math:`\beta P_s`.
 
         Let :math:`A` be an arbitrary algebra over the surjection operad
-        :math:`\mathcal X`, with structure map
-        :math:`\mathcal X \to \mathrm{End}_A`. For a prime :math:`p`, an
+        :math:`\mathcal X`. For a prime :math:`p`, an
         integer :math:`s`, and a mod-:math:`p` cocycle :math:`a` of degree
         :math:`q`, this method constructs a surjection element whose action on
         :math:`a^{\otimes p}` is a cocycle representing
@@ -952,6 +951,79 @@ class Surjection:
         element = Surjection.may_steenrod_map(
             p, degree, torsion=p, convention=convention)
         return int(coeff) * element
+
+    @staticmethod
+    def cartan_homotopy(i, convention=None):
+        r"""Representative of a Cartan :math:`i`-coboundary.
+
+        Let :math:`A` be an algebra over the surjection operad
+        :math:`\mathcal X`. For non-negative :math:`i` and mod-:math:`2`
+        cocycles :math:`\alpha,\beta \in A`, this method constructs an arity-4
+        surjection element whose action on
+
+        .. math::
+            \alpha \otimes \alpha \otimes \beta \otimes \beta
+
+        defines a Cartan :math:`i`-coboundary
+        :math:`\zeta_i(\alpha \otimes \beta)`. It satisfies
+
+        .. math::
+            \begin{aligned}
+            \delta\zeta_i(\alpha \otimes \beta)
+            ={}&
+            (\alpha \smile_0 \beta)
+            \smile_i
+            (\alpha \smile_0 \beta) \\
+            &+
+            \sum_{j+k=i}
+            (\alpha \smile_j \alpha)
+            \smile_0
+            (\beta \smile_k \beta).
+            \end{aligned}
+
+        The returned element is obtained by applying the table reduction
+        morphism to :meth:`comch.barratt_eccles.BarrattEccles.cartan_homotopy`.
+        Since it is defined over :math:`\mathbb F_2`, its coefficients agree
+        in the Berger-Fresse and McClure-Smith sign conventions.
+
+        PARAMETERS
+        ----------
+        i : :class:`int`
+            A non-negative degree.
+        convention : :class:`string` or ``None``, default ``None``
+            The sign convention used. If ``None``,
+            :attr:`comch.surjection.SurjectionElement.default_convention`
+            is used.
+
+        RETURNS
+        _______
+        :class:`comch.surjection.SurjectionElement`
+            The arity-4, degree-:math:`i+1` Cartan homotopy element over
+            :math:`\mathbb F_2`.
+
+        REFERENCES
+        ----------
+        [Med20]: A. M. Medina-Mardones. "An effective proof of the Cartan
+        formula: the even prime." Journal of Pure and Applied Algebra 224
+        (2020), no. 12, 106444.
+        https://doi.org/10.1016/j.jpaa.2020.106444
+
+        EXAMPLE
+        -------
+        >>> print(Surjection.cartan_homotopy(0))
+        (1,3,2,3,4)
+
+        """
+        from ..barratt_eccles import BarrattEccles
+
+        if convention is None:
+            convention = SurjectionElement.default_convention
+        if convention not in {'Berger-Fresse', 'McClure-Smith'}:
+            raise ValueError('invalid convention')
+
+        answer = BarrattEccles.cartan_homotopy(i).table_reduction()
+        answer.convention = convention
+        return answer
 
     @staticmethod
     def steenrod_chain(p, s, q, bockstein=False, shape='simplex'):

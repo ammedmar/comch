@@ -1,4 +1,5 @@
 import unittest
+from comch.barratt_eccles import BarrattEccles
 from comch.surjection import Surjection, SurjectionElement
 from comch.symmetric import SymmetricRing
 from comch.simplicial import SimplicialElement, Simplicial
@@ -160,6 +161,29 @@ class TestSurjection(unittest.TestCase):
         with self.assertRaises(TypeError):
             Surjection.steenrod_operation_representative(2, 0, 0,
                                                          bockstein=1)
+
+    def test_cartan_homotopy(self):
+        expected_0 = SurjectionElement({
+            (1, 3, 2, 3, 4): 1,
+        }, torsion=2, convention='Berger-Fresse')
+        self.assertEqual(Surjection.cartan_homotopy(0), expected_0)
+
+        for convention in ('Berger-Fresse', 'McClure-Smith'):
+            for i in range(4):
+                answer = Surjection.cartan_homotopy(i, convention=convention)
+                expected = BarrattEccles.cartan_homotopy(i).table_reduction()
+                expected.convention = convention
+                self.assertEqual(answer, expected)
+                self.assertEqual(answer.convention, convention)
+
+        with self.assertRaises(TypeError):
+            Surjection.cartan_homotopy(1.0)
+        with self.assertRaises(TypeError):
+            Surjection.cartan_homotopy(True)
+        with self.assertRaises(ValueError):
+            Surjection.cartan_homotopy(-1)
+        with self.assertRaises(ValueError):
+            Surjection.cartan_homotopy(0, convention='unknown')
 
 
 if __name__ == '__main__':

@@ -589,27 +589,15 @@ class BarrattEccles:
 
     @staticmethod
     def steenrod_operation_representative(p, s, q, bockstein=False):
-        r"""Chain level representative of :math:`P_s` or :math:`\beta P_s`.
+        r"""Representative of :math:`P_s` or :math:`\beta P_s`.
 
-        Where
-
-        .. math::
-            P_s : H_q(A; \mathbb F_2)
-            \to
-            H_{q + s}(A; \mathbb F_2)
-
-        and, for :math:`p > 2`,
-
-        .. math::
-           P_s : H_q(A; \mathbb F_p)
-           \to
-           H_{q + 2s(p-1)}(A; \mathbb F_p)
-           \qquad
-           \beta P_s : H_q(A; \mathbb F_p)
-           \to
-           H_{q+2s(p-1)-1}(A; \mathbb F_p)
-
-        are the Steenrod operations.
+        Let :math:`A` be an arbitrary algebra over the Barratt-Eccles operad
+        :math:`\mathcal X`. For a prime :math:`p`, an
+        integer :math:`s`, and a mod-:math:`p` cocycle :math:`a` of degree
+        :math:`q`, this method constructs a Barratt-Eccles element whose action on
+        :math:`a^{\otimes p}` is a cocycle representing
+        :math:`P_s[a]`. When :math:`p` is odd and ``bockstein=True``, it
+        instead constructs a representative of :math:`\beta P_s[a]`.
 
         PARAMETERS
         ----------
@@ -661,3 +649,145 @@ class BarrattEccles:
 
         element = BarrattEccles.may_steenrod_map(p, degree, torsion=p)
         return int(coeff) * element
+
+    @staticmethod
+    def cartan_homotopy(i):
+        r"""Representative of a Cartan :math:`i`-coboundary.
+
+        Let :math:`A` be an algebra over the Barratt-Eccles operad
+        :math:`\mathcal E`. For non-negative :math:`i` and mod-:math:`2`
+        cocycles :math:`\alpha,\beta \in A`, this method constructs an arity-4
+        Barratt-Eccles element whose action on
+
+        .. math::
+            \alpha \otimes \alpha \otimes \beta \otimes \beta
+
+        defines a Cartan :math:`i`-coboundary
+        :math:`\zeta_i(\alpha \otimes \beta)`. It satisfies
+
+        .. math::
+            \begin{aligned}
+            \delta\zeta_i(\alpha \otimes \beta)
+            ={}&
+            (\alpha \smile_0 \beta)
+            \smile_i
+            (\alpha \smile_0 \beta) \\
+            &+
+            \sum_{j+k=i}
+            (\alpha \smile_j \alpha)
+            \smile_0
+            (\beta \smile_k \beta).
+            \end{aligned}
+
+        Consequently, :math:`\zeta_i` gives an explicit cochain-level witness
+        of the Cartan formula for Steenrod squares.
+
+        More precisely, let
+
+        .. math::
+            \widetilde{x}_i =
+            (e,(12),e,\ldots,(12)^i) \in \mathcal E(2).
+
+        This method returns the normalized Barratt-Eccles element
+
+        .. math::
+            (H_1 + H_2)(\widetilde{x}_i) \in \mathcal E(4),
+
+        where :math:`H_1` and :math:`H_2` are the degree-one maps constructed
+        in [Med20]. Its action defines the cochain above by
+
+        .. math::
+            \zeta_i(\alpha \otimes \beta) =
+            (H_1 + H_2)(\widetilde{x}_i)
+            (\alpha \otimes \alpha \otimes \beta \otimes \beta).
+
+        PARAMETERS
+        ----------
+        i : :class:`int`
+            A non-negative degree.
+
+        RETURNS
+        _______
+        :class:`comch.barratt_eccles.BarrattEcclesElement`
+            The arity-4, degree-:math:`i+1` Cartan homotopy element over
+            :math:`\mathbb F_2`.
+
+        REFERENCES
+        ----------
+        [Med20]: A. M. Medina-Mardones. "An effective proof of the Cartan
+        formula: the even prime." Journal of Pure and Applied Algebra 224
+        (2020), no. 12, 106444.
+        https://doi.org/10.1016/j.jpaa.2020.106444
+
+        EXAMPLE
+        -------
+        >>> print(BarrattEccles.cartan_homotopy(0))
+        ((1,3,2,4),(1,2,3,4))
+
+        """
+        if not isinstance(i, int) or isinstance(i, bool):
+            raise TypeError('i must be an integer')
+        if i < 0:
+            raise ValueError('i must be non-negative')
+
+        identity = (1, 2, 3, 4)
+        transposition = (2, 1)
+        x = tuple((1, 2) if j % 2 == 0 else transposition
+                  for j in range(i + 1))
+
+        first_map = {
+            (1, 2): (1, 3, 2, 4),
+            transposition: (2, 4, 1, 3),
+        }
+        second_map = {
+            (1, 2): identity,
+            transposition: (2, 1, 4, 3),
+        }
+        first_values = tuple(first_map[permutation] for permutation in x)
+        second_values = tuple(second_map[permutation] for permutation in x)
+
+        # H1 is the prism homotopy between the conjugate inclusions f and g.
+        answer = BarrattEcclesElement(torsion=2)
+        for j in range(i + 1):
+            simplex = first_values[:j + 1] + second_values[j:]
+            answer += answer.create({simplex: 1})
+
+        # H2 applies the closed Shih homotopy formula before composition.
+        composition = {
+            ((1, 2), (1, 2)): identity,
+            ((1, 2), transposition): (1, 2, 4, 3),
+            (transposition, (1, 2)): (2, 1, 3, 4),
+            (transposition, transposition): (2, 1, 4, 3),
+        }
+
+        def face(simplex, position):
+            return simplex[:position] + simplex[position + 1:]
+
+        def degeneracy(simplex, position):
+            return simplex[:position + 1] + simplex[position:]
+
+        for p in range(i):
+            for q in range(i - p):
+                m = i - p - q
+                for v_indices in combinations(range(p + q + 1), p):
+                    w_indices = tuple(j for j in range(p + q + 1)
+                                      if j not in v_indices)
+
+                    first = x
+                    for j in reversed(range(i - p + 1, i + 1)):
+                        first = face(first, j)
+                    first = degeneracy(first, m - 1)
+                    for j in v_indices:
+                        first = degeneracy(first, j + m)
+
+                    second = x
+                    for j in reversed(range(i - p - q, i - p)):
+                        second = face(second, j)
+                    for j in w_indices:
+                        second = degeneracy(second, j + m)
+
+                    simplex = tuple(composition[pair]
+                                    for pair in zip(first, second))
+                    answer += answer.create({simplex: 1})
+
+        return answer

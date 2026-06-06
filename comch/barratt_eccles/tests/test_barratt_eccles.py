@@ -68,6 +68,69 @@ class TestBarrattEcclesElement(unittest.TestCase):
 
 
 class TestBarrattEccles(unittest.TestCase):
+    def test_cartan_homotopy(self):
+        identity = (1, 2, 3, 4)
+        transposition_23 = (1, 3, 2, 4)
+        transposition_34 = (1, 2, 4, 3)
+        double_transposition = (2, 1, 4, 3)
+        conjugated_transposition = (2, 4, 1, 3)
+
+        expected_0 = BarrattEcclesElement({
+            (transposition_23, identity): 1,
+        }, torsion=2)
+        self.assertEqual(BarrattEccles.cartan_homotopy(0), expected_0)
+
+        expected_1 = BarrattEcclesElement({
+            (transposition_23, identity, double_transposition): 1,
+            (transposition_23, conjugated_transposition,
+             double_transposition): 1,
+            (identity, transposition_34, double_transposition): 1,
+        }, torsion=2)
+        self.assertEqual(BarrattEccles.cartan_homotopy(1), expected_1)
+
+        expected_table_reduction_2 = {
+            (1, 3, 2, 3, 4, 3, 4),
+            (1, 2, 4, 1, 4, 3, 4),
+            (1, 2, 1, 3, 2, 3, 4),
+            (1, 3, 2, 3, 2, 3, 4),
+        }
+        self.assertEqual(
+            set(BarrattEccles.cartan_homotopy(2).table_reduction()),
+            expected_table_reduction_2,
+        )
+
+        with self.assertRaises(TypeError):
+            BarrattEccles.cartan_homotopy(1.0)
+        with self.assertRaises(TypeError):
+            BarrattEccles.cartan_homotopy(True)
+        with self.assertRaises(ValueError):
+            BarrattEccles.cartan_homotopy(-1)
+
+    def test_cartan_homotopy_boundary(self):
+        x_0 = BarrattEcclesElement({((1, 2),): 1}, torsion=2)
+        transposition_23 = SymmetricRingElement(
+            {(1, 3, 2, 4): 1}, torsion=2)
+        double_transposition_plus_identity = SymmetricRingElement({
+            (2, 1, 4, 3): 1,
+            (1, 2, 3, 4): 1,
+        }, torsion=2)
+
+        for i in range(5):
+            x_i = BarrattEccles.may_steenrod_map(2, i, torsion=2)
+            first = transposition_23 * x_i.compose(x_0, 1).compose(x_0, 3)
+
+            second = BarrattEcclesElement(torsion=2)
+            for (left, right), coefficient in x_i.diagonal().items():
+                left = BarrattEcclesElement({left: 1}, torsion=2)
+                right = BarrattEcclesElement({right: 1}, torsion=2)
+                second += coefficient * x_0.compose(left, 1).compose(right, 3)
+
+            boundary = BarrattEccles.cartan_homotopy(i).boundary()
+            if i > 0:
+                boundary += double_transposition_plus_identity * (
+                    BarrattEccles.cartan_homotopy(i - 1))
+            self.assertEqual(boundary, first + second)
+
     def test_may_steenrod_map(self):
         t = SymmetricRing.transposition_element(6)
         x = BarrattEccles.may_steenrod_map(6, 3).boundary()

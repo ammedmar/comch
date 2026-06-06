@@ -11,3 +11,4 @@ Guided examples illustrating ComCH's main constructions and workflows.
    barratt_eccles
    table_reduction
    steenrod_operations
+   cartan_coboundaries

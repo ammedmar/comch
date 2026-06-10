@@ -70,12 +70,41 @@ class TestSteenrod(unittest.TestCase):
         self.assertEqual(rhs, 1)
         self.assertEqual(lhs, rhs)
 
+    def test_adem_coboundaries(self):
+        x = Steenrod.adem_coboundaries(2, 1, 4)
+        y = SimplicialElement({
+            ((0, 1, 3), (1, 2, 3), (0, 3, 4), (0, 1, 3)): 1,
+            ((0, 1, 3), (1, 2, 3), (0, 1, 4), (1, 3, 4)): 1,
+            ((0, 2, 4), (2, 3, 4), (0, 1, 4), (1, 2, 4)): 1,
+            ((0, 2, 4), (2, 3, 4), (0, 2, 4), (0, 1, 2)): 1,
+            ((0, 1, 4), (0, 1, 4), (1, 2, 3), (1, 3, 4)): 1,
+            ((0, 1, 4), (0, 1, 4), (2, 3, 4), (1, 2, 4)): 1,
+            ((0, 1, 4), (0, 1, 4), (1, 3, 4), (1, 2, 3)): 1,
+            ((0, 1, 4), (0, 1, 4), (1, 2, 4), (2, 3, 4)): 1,
+            ((0, 3, 4), (0, 3, 4), (0, 2, 3), (0, 1, 2)): 1,
+            ((0, 3, 4), (0, 3, 4), (0, 1, 3), (1, 2, 3)): 1,
+            ((0, 3, 4), (0, 2, 3), (2, 3, 4), (0, 1, 2)): 1,
+            ((0, 2, 3), (0, 1, 2), (0, 3, 4), (0, 2, 3)): 1,
+            ((0, 3, 4), (1, 2, 3), (0, 1, 4), (1, 3, 4)): 1,
+        }, torsion=2)
+        self.assertEqual(x, y)
+
+        self.assertEqual(Steenrod.adem_coboundaries(1, 0, 3),
+                         SimplicialElement(torsion=2))
+
+        z = Steenrod.adem_coboundaries(1, 0, 1, shape='cube')
+        self.assertIsInstance(z, CubicalElement)
+        self.assertEqual(len(z), 0)
+
     def test_inputs(self):
         with self.assertRaises(ValueError):
             Steenrod.chain_operations(2, -1, -2, shape='not-a-shape')
 
         with self.assertRaises(ValueError):
             Steenrod.cartan_coboundaries(0, 3, shape='not-a-shape')
+
+        with self.assertRaises(ValueError):
+            Steenrod.adem_coboundaries(1, 0, 3, shape='not-a-shape')
 
 
 if __name__ == '__main__':

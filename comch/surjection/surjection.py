@@ -1054,6 +1054,62 @@ class Surjection:
         return answer
 
     @staticmethod
+    def adem_homotopy(q, p, convention=None):
+        r"""Representative of an Adem coboundary at the even prime.
+
+        Let :math:`A` be an algebra over the surjection operad
+        :math:`\mathcal X`. For integers :math:`q > p \geq 0`, this method
+        constructs an arity-4 surjection element whose action on
+
+        .. math::
+            \alpha \otimes \alpha \otimes \alpha \otimes \alpha
+
+        defines the cochain-level coboundary witnessing the mod-2 Adem
+        relation associated to :math:`\mathrm{Sq}^q\mathrm{Sq}^p`.
+
+        The returned element is obtained by applying the table reduction
+        morphism to :meth:`comch.barratt_eccles.BarrattEccles.adem_homotopy`.
+        Since it is defined over :math:`\mathbb F_2`, its coefficients agree
+        in the Berger-Fresse and McClure-Smith sign conventions.
+
+        PARAMETERS
+        ----------
+        q, p : :class:`int`
+            Non-negative integers with ``q > p``.
+        convention : :class:`string` or ``None``, default ``None``
+            The sign convention used. If ``None``,
+            :attr:`comch.surjection.SurjectionElement.default_convention`
+            is used.
+
+        RETURNS
+        _______
+        :class:`comch.surjection.SurjectionElement`
+            The arity-4, degree-:math:`p+q+1` Adem homotopy element over
+            :math:`\mathbb F_2`.
+
+        REFERENCES
+        ----------
+        [BMM]: G. Brumfiel, A. Medina-Mardones, and J. Morgan. "A cochain
+        level proof of Adem relations in the mod 2 Steenrod algebra."
+
+        EXAMPLE
+        -------
+        >>> print(Surjection.adem_homotopy(1, 0))
+        (1,2,3,2,4,2) + (1,3,4,1,4,2)
+
+        """
+        from ..barratt_eccles import BarrattEccles
+
+        if convention is None:
+            convention = SurjectionElement.default_convention
+        if convention not in {'Berger-Fresse', 'McClure-Smith'}:
+            raise ValueError('invalid convention')
+
+        answer = BarrattEccles.adem_homotopy(q, p).table_reduction()
+        answer.convention = convention
+        return answer
+
+    @staticmethod
     def steenrod_chain(p, s, q, bockstein=False, shape='simplex'):
         """Chain representative of a Steenrod operation.
 

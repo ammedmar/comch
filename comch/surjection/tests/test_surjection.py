@@ -329,5 +329,33 @@ class TestSurjection(unittest.TestCase):
         with self.assertRaises(ValueError):
             Surjection.cartan_homotopy(0, convention='unknown')
 
+    def test_adem_homotopy(self):
+        expected = SurjectionElement({
+            (1, 2, 3, 2, 4, 2): 1,
+            (1, 3, 4, 1, 4, 2): 1,
+        }, torsion=2, convention='Berger-Fresse')
+        self.assertEqual(Surjection.adem_homotopy(1, 0), expected)
+
+        for convention in ('Berger-Fresse', 'McClure-Smith'):
+            for q, p in ((1, 0), (2, 1)):
+                answer = Surjection.adem_homotopy(
+                    q, p, convention=convention)
+                expected = BarrattEccles.adem_homotopy(q, p).table_reduction()
+                expected.convention = convention
+                self.assertEqual(answer, expected)
+                self.assertEqual(answer.convention, convention)
+
+        with self.assertRaises(TypeError):
+            Surjection.adem_homotopy(1.0, 0)
+        with self.assertRaises(TypeError):
+            Surjection.adem_homotopy(True, 0)
+        with self.assertRaises(ValueError):
+            Surjection.adem_homotopy(0, 0)
+        with self.assertRaises(ValueError):
+            Surjection.adem_homotopy(1, -1)
+        with self.assertRaises(ValueError):
+            Surjection.adem_homotopy(1, 0, convention='unknown')
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -8,7 +8,7 @@ class Steenrod:
     r"""Chain-level representatives related to Steenrod operations.
 
     This namespace collects convenience methods for evaluating universal
-    chain representatives of Steenrod operations and their Cartan
+    chain representatives of Steenrod operations and their Cartan and Adem
     coboundaries on standard simplices and cubes.
 
     """
@@ -206,6 +206,64 @@ class Steenrod:
             raise ValueError("shape must be 'simplex' or 'cube'")
 
         return Steenrod._filter_bihomogeneous(answer)
+
+    @staticmethod
+    def adem_coboundaries(q, p, n, shape='simplex', convention=None):
+        r"""Chain representatives of Adem coboundaries at the even prime.
+
+        The mod-2 Adem relations are equivalent to the existence of natural
+        cochains whose coboundaries identify a composite
+        :math:`\mathrm{Sq}^q\mathrm{Sq}^p` with the corresponding Adem sum.
+        For integers :math:`q > p \geq 0`, this method returns the value on
+        the top :math:`n`-simplex or :math:`n`-cube of the chain map
+        :math:`a_{q,p} \colon C \to C^{\otimes 4}` obtained from the Adem
+        homotopy in the Barratt-Eccles operad followed by table reduction to
+        the surjection operad. It is characterized by
+
+        .. math::
+
+           \eta_{q,p}(\alpha)(c) =
+           (\alpha \otimes \alpha \otimes \alpha \otimes \alpha)
+           a_{q,p}(c).
+
+        Since :math:`\alpha` can be assumed homogeneous, the output is
+        filtered to the summands where all four tensor factors have equal
+        degree.
+
+        PARAMETERS
+        ----------
+        q, p : :class:`int`
+            Non-negative integers with ``q > p``.
+        n : :class:`int`
+            The degree of the universal basis element.
+        shape : :class:`str`, default ``'simplex'``
+            Either ``'simplex'`` or ``'cube'``.
+        convention : :class:`str` or ``None``, default ``None``
+            The sign convention of the surjection operad. If ``None``, the
+            McClure-Smith convention is used.
+
+        RETURNS
+        -------
+        :class:`comch.simplicial.SimplicialElement` or
+        :class:`comch.cubical.CubicalElement`
+            The tensor product element representing the Adem
+            :math:`(q,p)`-coboundary on the selected universal basis element.
+
+        """
+
+        if convention is None:
+            convention = 'McClure-Smith'
+
+        surj = Surjection.adem_homotopy(q, p, convention=convention)
+
+        if shape == 'simplex':
+            element = Simplicial.standard_element(n, torsion=2)
+        elif shape == 'cube':
+            element = Cubical.standard_element(n, torsion=2)
+        else:
+            raise ValueError("shape must be 'simplex' or 'cube'")
+
+        return Steenrod._filter_homogeneous(surj(element))
 
     @staticmethod
     def _filter_homogeneous(element):

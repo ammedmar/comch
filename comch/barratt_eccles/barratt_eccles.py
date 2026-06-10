@@ -8,7 +8,7 @@ from ..simplicial import SimplicialElement
 from ..cubical import CubicalElement
 from ..utils import partitions, pairwise
 from itertools import product, combinations
-from math import factorial
+from math import comb, factorial
 
 
 class BarrattEcclesElement(FreeModuleElement):
@@ -855,3 +855,211 @@ class BarrattEccles:
 
         return answer
 
+    @staticmethod
+    def adem_homotopy(q, p):
+        r"""Representative of an Adem coboundary at the even prime.
+
+        This method implements the chain-level homotopy underlying the
+        cochain proof of the mod-2 Adem relations in [BMM]. For integers
+        :math:`q > p \geq 0`, it returns the Barratt-Eccles element
+
+        .. math::
+
+           J_\Psi(\widetilde{x}_q \times \widetilde{x}_p)
+           + J_\Psi(\widetilde{x}_p \times \widetilde{x}_q)
+           + J_{(23)}(\widetilde{x}_q \times \widetilde{x}_p)
+           \in \mathcal E(4),
+
+        where :math:`\Psi = EZ \circ \Phi \circ AW` is the map of Section 3.4
+        of [BMM] and :math:`J_{(23)}` is the homotopy associated to the inner
+        automorphism by the transposition :math:`(23)`.
+
+        PARAMETERS
+        ----------
+        q, p : :class:`int`
+            Non-negative integers with ``q > p``.
+
+        RETURNS
+        _______
+        :class:`comch.barratt_eccles.BarrattEcclesElement`
+            The arity-4, degree-:math:`p+q+1` Adem homotopy element over
+            :math:`\mathbb F_2`.
+
+        REFERENCES
+        ----------
+        [BMM]: G. Brumfiel, A. Medina-Mardones, and J. Morgan. "A cochain
+        level proof of Adem relations in the mod 2 Steenrod algebra."
+
+        """
+
+        def check_input(q, p):
+            if not all(isinstance(i, int) for i in (q, p)) or \
+                    any(isinstance(i, bool) for i in (q, p)):
+                raise TypeError('q and p must be integers')
+            if p < 0 or q < 0:
+                raise ValueError('q and p must be non-negative')
+            if q <= p:
+                raise ValueError('q must be greater than p')
+
+        def x(degree, action=0):
+            transposition = (2, 1)
+            key = tuple((1, 2) if (action + i) % 2 == 0 else transposition
+                        for i in range(degree + 1))
+            return BarrattEcclesElement({key: 1}, torsion=2)
+
+        def action(simplex):
+            if len(simplex) == 0:
+                raise ValueError('simplex must be non-empty')
+            identity, transposition = (1, 2), (2, 1)
+            if simplex[0] == identity:
+                start = 0
+            elif simplex[0] == transposition:
+                start = 1
+            else:
+                raise ValueError('defined for arity-2 simplices')
+            for i, permutation in enumerate(simplex):
+                expected = identity if (start + i) % 2 == 0 else transposition
+                if permutation != expected:
+                    raise ValueError('simplex is not alternating')
+            return start
+
+        def t_aw(left, right):
+            answer = FreeModuleElement(torsion=2)
+            for (left_key, left_coeff), (right_key, right_coeff) in product(
+                    left.items(), right.items()):
+                left_action = action(left_key)
+                right_action = action(right_key)
+                left_degree = len(left_key) - 1
+                right_degree = len(right_key) - 1
+                total_degree = left_degree + right_degree
+                for epsilon in (0, 1):
+                    for middle_degree in range(total_degree + 1):
+                        final_degree = total_degree - middle_degree
+                        if epsilon == 0:
+                            coeff = comb(middle_degree + 1, left_degree + 1)
+                        else:
+                            coeff = comb(middle_degree, left_degree + 1)
+                        coeff *= comb(final_degree, left_degree)
+                        if coeff % 2 == 0:
+                            continue
+                        first = x(middle_degree, right_action)
+                        second = x(final_degree, right_action + epsilon)
+                        if left_action % 2:
+                            first, second = second, first
+                        answer += answer.create({
+                            (next(iter(first)), next(iter(second))):
+                            left_coeff * right_coeff
+                        })
+            return answer
+
+        def phi(left, right):
+            answer = FreeModuleElement(torsion=2)
+            for (front, back), diagonal_coeff in left.diagonal().items():
+                front = BarrattEcclesElement({front: 1}, torsion=2)
+                back = BarrattEcclesElement({back: 1}, torsion=2)
+                for (middle, final), coeff in t_aw(back, right).items():
+                    answer += answer.create({
+                        (next(iter(front)), middle, final):
+                        diagonal_coeff * coeff
+                    })
+            return answer
+
+        def compose_triple(outer, left, right):
+            return outer.compose(left, 1).compose(right, 3)
+
+        def operadic_phi(left, right):
+            answer = BarrattEcclesElement(torsion=2)
+            for (outer, middle, final), coeff in phi(left, right).items():
+                outer = BarrattEcclesElement({outer: 1}, torsion=2)
+                middle = BarrattEcclesElement({middle: 1}, torsion=2)
+                final = BarrattEcclesElement({final: 1}, torsion=2)
+                answer += coeff * compose_triple(outer, middle, final)
+            return answer
+
+        def ez_paths(rows, cols):
+            if (rows, cols) == (0, 0):
+                return [((0, 0),)]
+            answer = []
+            if rows > 0:
+                for path in ez_paths(rows - 1, cols):
+                    answer.append(path + ((rows, cols),))
+            if cols > 0:
+                for path in ez_paths(rows, cols - 1):
+                    answer.append(path + ((rows, cols),))
+            return answer
+
+        def pair_product(first_degree, second_degree):
+            first = next(iter(x(first_degree)))
+            second = next(iter(x(second_degree)))
+            answer = []
+            for path in ez_paths(first_degree, second_degree):
+                answer.append(tuple((first[i], second[j]) for i, j in path))
+            return answer
+
+        def pair_to_sigma4(pair):
+            outer_action = 0 if pair[0] == (1, 2) else 1
+            middle_action = 0 if pair[1] == (1, 2) else 1
+            # The inclusion V_4 -> D_8 used in the paper sends the second
+            # generator to bc, hence the second and third D_8 coordinates
+            # agree.
+            outer = x(0, outer_action)
+            middle = x(0, middle_action)
+            final = x(0, middle_action)
+            return next(iter(compose_triple(outer, middle, final)))[0]
+
+        def aw_pair_simplex(simplex):
+            answer = FreeModuleElement(torsion=2)
+            for i in range(len(simplex)):
+                left_key = tuple(pair[0] for pair in simplex[:i + 1])
+                right_key = tuple(pair[1] for pair in simplex[i:])
+                left = BarrattEcclesElement({left_key: 1}, torsion=2)
+                right = BarrattEcclesElement({right_key: 1}, torsion=2)
+                left.preferred_rep()
+                right.preferred_rep()
+                if left and right:
+                    answer += answer.create({
+                        (next(iter(left)), next(iter(right))): 1
+                    })
+            return answer
+
+        def psi_pair_simplex(simplex):
+            answer = BarrattEcclesElement(torsion=2)
+            for (left, right), coeff in aw_pair_simplex(simplex).items():
+                left = BarrattEcclesElement({left: 1}, torsion=2)
+                right = BarrattEcclesElement({right: 1}, torsion=2)
+                answer += coeff * operadic_phi(left, right)
+            return answer
+
+        def join(prefix, element):
+            answer = BarrattEcclesElement(torsion=2)
+            for key, coeff in element.items():
+                answer += answer.create({prefix + key: coeff})
+            answer.preferred_rep()
+            return answer
+
+        def j_psi(first_degree, second_degree):
+            answer = BarrattEcclesElement(torsion=2)
+            for simplex in pair_product(first_degree, second_degree):
+                for i in range(len(simplex)):
+                    prefix = tuple(pair_to_sigma4(pair)
+                                   for pair in simplex[:i + 1])
+                    answer += join(prefix, psi_pair_simplex(simplex[i:]))
+            return answer
+
+        def j_transposition_23(first_degree, second_degree):
+            transposition = SymmetricGroupElement((1, 3, 2, 4))
+            answer = BarrattEcclesElement(torsion=2)
+            for simplex in pair_product(first_degree, second_degree):
+                simplex = tuple(pair_to_sigma4(pair) for pair in simplex)
+                for i in range(len(simplex)):
+                    moved = tuple(tuple(SymmetricGroupElement(sigma) *
+                                        transposition)
+                                  for sigma in simplex[i:])
+                    answer += answer.create({simplex[:i + 1] + moved: 1})
+            answer.preferred_rep()
+            return answer
+
+        check_input(q, p)
+        answer = j_psi(q, p) + j_psi(p, q) + j_transposition_23(q, p)
+        answer.preferred_rep()
+        return answer

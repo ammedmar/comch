@@ -12,3 +12,4 @@ Guided examples illustrating ComCH's main constructions and workflows.
    table_reduction
    steenrod_operations
    cartan_coboundaries
+   adem_coboundaries

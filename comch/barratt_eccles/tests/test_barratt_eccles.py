@@ -172,6 +172,49 @@ class TestBarrattEccles(unittest.TestCase):
                     BarrattEccles.cartan_homotopy(i - 1))
             self.assertEqual(boundary, first + second)
 
+    def test_adem_homotopy(self):
+        identity = (1, 2, 3, 4)
+        transposition_23 = (1, 3, 2, 4)
+        transposition_34 = (1, 2, 4, 3)
+        double_transposition = (2, 1, 4, 3)
+        d8_rotation = (3, 4, 1, 2)
+        transposition_13_24_34 = (3, 1, 4, 2)
+
+        expected = BarrattEcclesElement({
+            (identity, transposition_34, double_transposition): 1,
+            (identity, transposition_23, transposition_13_24_34): 1,
+            (identity, d8_rotation, transposition_13_24_34): 1,
+        }, torsion=2)
+        self.assertEqual(BarrattEccles.adem_homotopy(1, 0), expected)
+
+        expected_table_reduction = {
+            (1, 2, 3, 2, 4, 2),
+            (1, 3, 4, 1, 4, 2),
+        }
+        self.assertEqual(
+            set(BarrattEccles.adem_homotopy(1, 0).table_reduction()),
+            expected_table_reduction,
+        )
+
+        for q, p in ((1, 0), (2, 1)):
+            homotopy = BarrattEccles.adem_homotopy(q, p)
+            self.assertEqual(homotopy.arity, 4)
+            self.assertEqual(homotopy.degree, p + q + 1)
+            self.assertEqual(homotopy.boundary().boundary(), homotopy.zero())
+            self.assertEqual(
+                homotopy.table_reduction().boundary(),
+                homotopy.boundary().table_reduction(),
+            )
+
+        with self.assertRaises(TypeError):
+            BarrattEccles.adem_homotopy(1.0, 0)
+        with self.assertRaises(TypeError):
+            BarrattEccles.adem_homotopy(True, 0)
+        with self.assertRaises(ValueError):
+            BarrattEccles.adem_homotopy(0, 0)
+        with self.assertRaises(ValueError):
+            BarrattEccles.adem_homotopy(1, -1)
+
     def test_may_steenrod_map(self):
         t = SymmetricRing.transposition_element(6)
         x = BarrattEccles.may_steenrod_map(6, 3).boundary()

@@ -1,5 +1,7 @@
 import unittest
 from comch.barratt_eccles import BarrattEccles, BarrattEcclesElement
+from comch.cubical import Cubical
+from comch.simplicial import Simplicial, SimplicialElement
 from comch.symmetric import SymmetricRing, SymmetricRingElement
 
 
@@ -65,6 +67,45 @@ class TestBarrattEcclesElement(unittest.TestCase):
 
     def test_alexander_whitney(self):
         pass
+
+    def test_table_reduction_filtration(self):
+        # TR preserves the little-cubes filtration ([BF] Section 1.6): an
+        # element of complexity n - 1 lies in F_n E and its table reduction
+        # lies in F_n X, formed by surjections of complexity at most n. The
+        # anchor examples are those of [BF]: ((1,2),(2,1),(1,2)) in F_3 E
+        # and its table reduction (1,2,1,2) in F_3 X.
+        b = BarrattEcclesElement({((1, 2), (2, 1), (1, 2)): 1})
+        self.assertEqual(b.complexity, 2)
+        self.assertEqual(b.table_reduction().complexity, 3)
+
+        keys = [((1, 2, 3), (2, 1, 3), (3, 1, 2), (3, 2, 1)),
+                ((2, 3, 1), (3, 1, 2)),
+                ((1, 2, 3, 4), (1, 4, 3, 2), (1, 2, 4, 3))]
+        for key in keys:
+            b = BarrattEcclesElement({key: 1})
+            tr = b.table_reduction()
+            if tr:
+                self.assertLessEqual(tr.complexity, b.complexity + 1)
+
+    def test_call_simplicial_chain_map(self):
+        x = BarrattEcclesElement({((1, 2, 3), (1, 3, 2), (2, 3, 1)): 1})
+        c = Simplicial.standard_element(3)
+        dx_c = x.boundary()(c)
+        d_xc = x(c).boundary()
+        x_dc = x(c.boundary())
+        self.assertEqual(d_xc - ((-1) ** x.degree) * x_dc, dx_c)
+
+    def test_call_simplicial_factors_through_table_reduction(self):
+        x = BarrattEcclesElement({((1, 2), (2, 1), (1, 2)): 1})
+        c = SimplicialElement({((0, 1, 2), (3, 4, 5)): 1})
+        for coord in (1, 2):
+            self.assertEqual(x(c, coord),
+                             x.table_reduction()(c, coord))
+
+    def test_call_cubical_not_implemented(self):
+        x = BarrattEcclesElement({((1, 2), (2, 1)): 1})
+        with self.assertRaises(NotImplementedError):
+            x(Cubical.standard_element(2))
 
 
 class TestBarrattEccles(unittest.TestCase):

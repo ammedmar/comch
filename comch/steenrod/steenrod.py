@@ -1,3 +1,4 @@
+from ..barratt_eccles import BarrattEccles
 from ..cubical import Cubical
 from ..simplicial import Simplicial
 from ..surjection import Surjection
@@ -149,14 +150,19 @@ class Steenrod:
 
         Such a cochain is called a Cartan :math:`i`-coboundary. This method
         returns the value on the top :math:`n`-simplex or :math:`n`-cube of the
-        chain map :math:`z_i \colon C \to C^{\otimes 4}` obtained from the
-        Cartan homotopy in the Barratt-Eccles operad followed by table
-        reduction to the surjection operad. It is characterized by
+        chain map :math:`z_i \colon C \to C^{\otimes 4}` obtained by acting
+        with the Cartan homotopy in the Barratt-Eccles operad. It is
+        characterized by
 
         .. math::
 
            \zeta_i(\alpha \otimes \beta)(c) =
            (\alpha \otimes \alpha \otimes \beta \otimes \beta)z_i(c).
+
+        On simplicial chains the action factors through the table reduction
+        morphism to the surjection operad. On cubical chains a direct action
+        of the Barratt-Eccles operad is used; its construction is
+        forthcoming.
 
         Since :math:`\alpha` and :math:`\beta` can be assumed homogeneous, the
         output is filtered to the summands where the first two tensor factors
@@ -172,8 +178,9 @@ class Steenrod:
         shape : :class:`str`, default ``'simplex'``
             Either ``'simplex'`` or ``'cube'``.
         convention : :class:`str` or ``None``, default ``None``
-            The sign convention of the surjection operad. If ``None``, the
-            McClure-Smith convention is used.
+            The sign convention of the surjection operad, used when *shape*
+            is ``'simplex'``. If ``None``, the McClure-Smith convention is
+            used.
 
         RETURNS
         -------
@@ -187,16 +194,18 @@ class Steenrod:
         if convention is None:
             convention = 'McClure-Smith'
 
-        surj = Surjection.cartan_homotopy(i, convention=convention)
-
         if shape == 'simplex':
+            surj = Surjection.cartan_homotopy(i, convention=convention)
             element = Simplicial.standard_element(n, torsion=2)
+            answer = surj(element)
         elif shape == 'cube':
+            homotopy = BarrattEccles.cartan_homotopy(i)
             element = Cubical.standard_element(n, torsion=2)
+            answer = homotopy(element)
         else:
             raise ValueError("shape must be 'simplex' or 'cube'")
 
-        return Steenrod._filter_bihomogeneous(surj(element))
+        return Steenrod._filter_bihomogeneous(answer)
 
     @staticmethod
     def _filter_homogeneous(element):

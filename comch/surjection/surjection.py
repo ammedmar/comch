@@ -981,16 +981,17 @@ class Surjection:
         return int(coeff) * element
 
     @staticmethod
-    def cartan_homotopy(i, convention=None):
+    def cartan_homotopy(i, convention=None, arity=2):
         r"""Representative of a Cartan :math:`i`-coboundary.
 
         Let :math:`A` be an algebra over the surjection operad
-        :math:`\mathcal X`. For non-negative :math:`i` and mod-:math:`2`
-        cocycles :math:`\alpha,\beta \in A`, this method constructs an arity-4
-        surjection element whose action on
+        :math:`\mathcal X`. For non-negative :math:`i`, an integer
+        :math:`r \geq 2`, and mod-:math:`r` cocycles
+        :math:`\alpha,\beta \in A`, this method constructs an arity-
+        :math:`2r` surjection element whose action on
 
         .. math::
-            \alpha \otimes \alpha \otimes \beta \otimes \beta
+            \alpha^{\otimes r} \otimes \beta^{\otimes r}
 
         defines a Cartan :math:`i`-coboundary
         :math:`\zeta_i(\alpha \otimes \beta)`. It satisfies
@@ -1011,9 +1012,6 @@ class Surjection:
 
         The returned element is obtained by applying the table reduction
         morphism to :meth:`comch.barratt_eccles.BarrattEccles.cartan_homotopy`.
-        Since it is defined over :math:`\mathbb F_2`, its coefficients agree
-        in the Berger-Fresse and McClure-Smith sign conventions.
-
         PARAMETERS
         ----------
         i : :class:`int`
@@ -1022,12 +1020,14 @@ class Surjection:
             The sign convention used. If ``None``,
             :attr:`comch.surjection.SurjectionElement.default_convention`
             is used.
+        arity : :class:`int`, default ``2``
+            The arity :math:`r` of the cyclic resolution.
 
         RETURNS
         _______
         :class:`comch.surjection.SurjectionElement`
-            The arity-4, degree-:math:`i+1` Cartan homotopy element over
-            :math:`\mathbb F_2`.
+            The arity-:math:`2r`, degree-:math:`i+1` Cartan homotopy element
+            over :math:`\mathbb Z/r`.
 
         REFERENCES
         ----------
@@ -1048,8 +1048,13 @@ class Surjection:
             convention = SurjectionElement.default_convention
         if convention not in {'Berger-Fresse', 'McClure-Smith'}:
             raise ValueError('invalid convention')
+        if arity != 2 and convention != 'Berger-Fresse':
+            raise NotImplementedError(
+                'odd Cartan homotopies currently use the '
+                'Berger-Fresse convention')
 
-        answer = BarrattEccles.cartan_homotopy(i).table_reduction()
+        answer = BarrattEccles.cartan_homotopy(
+            i, arity=arity).table_reduction()
         answer.convention = convention
         return answer
 

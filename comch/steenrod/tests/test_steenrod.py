@@ -22,6 +22,13 @@ class TestSteenrod(unittest.TestCase):
         }, torsion=2)
         self.assertEqual(x, y)
 
+        odd = Steenrod.cartan_coboundaries(0, 2, arity=3)
+        expected_odd = SimplicialElement({
+            ((0, 1), (1, 2), (1, 2), (2,), (2,), (2,)): 1,
+            ((0,), (0,), (0,), (0, 1), (0, 1), (1, 2)): 2,
+        }, torsion=3)
+        self.assertEqual(odd, expected_odd)
+
         # the Barratt-Eccles action on cubical chains is not yet implemented
         with self.assertRaises(NotImplementedError):
             Steenrod.cartan_coboundaries(0, 3, shape='cube')

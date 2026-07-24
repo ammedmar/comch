@@ -133,8 +133,9 @@ class Steenrod:
         return Steenrod._filter_homogeneous(surj(element))
 
     @staticmethod
-    def cartan_coboundaries(i, n, shape='simplex', convention=None):
-        r"""Chain representatives of Cartan coboundaries at the even prime.
+    def cartan_coboundaries(
+            i, n, shape='simplex', convention=None, arity=2):
+        r"""Chain representatives of Cartan coboundaries.
 
         The Cartan formula for Steenrod squares is equivalent to the existence
         of natural cochains :math:`\zeta_i(\alpha \otimes \beta)` satisfying
@@ -181,6 +182,9 @@ class Steenrod:
             The sign convention of the surjection operad, used when *shape*
             is ``'simplex'``. If ``None``, the McClure-Smith convention is
             used.
+        arity : :class:`int`, default ``2``
+            The arity of the cyclic resolution. Use an odd prime to obtain
+            the corresponding odd-prime Cartan coboundary.
 
         RETURNS
         -------
@@ -192,20 +196,22 @@ class Steenrod:
         """
 
         if convention is None:
-            convention = 'McClure-Smith'
+            convention = (
+                'McClure-Smith' if arity == 2 else 'Berger-Fresse')
 
         if shape == 'simplex':
-            surj = Surjection.cartan_homotopy(i, convention=convention)
-            element = Simplicial.standard_element(n, torsion=2)
+            surj = Surjection.cartan_homotopy(
+                i, convention=convention, arity=arity)
+            element = Simplicial.standard_element(n, torsion=arity)
             answer = surj(element)
         elif shape == 'cube':
-            homotopy = BarrattEccles.cartan_homotopy(i)
-            element = Cubical.standard_element(n, torsion=2)
+            homotopy = BarrattEccles.cartan_homotopy(i, arity=arity)
+            element = Cubical.standard_element(n, torsion=arity)
             answer = homotopy(element)
         else:
             raise ValueError("shape must be 'simplex' or 'cube'")
 
-        return Steenrod._filter_bihomogeneous(answer)
+        return Steenrod._filter_bihomogeneous(answer, arity=arity)
 
     @staticmethod
     def adem_coboundaries(q, p, n, shape='simplex', convention=None):
@@ -284,10 +290,13 @@ class Steenrod:
         return element.create(homogeneous)
 
     @staticmethod
-    def _filter_bihomogeneous(element):
+    def _filter_bihomogeneous(element, arity=2):
         homogeneous = {}
         for k, v in element.items():
-            if k[0].dimension == k[1].dimension and \
-                    k[2].dimension == k[3].dimension:
+            if len(k) != 2 * arity:
+                continue
+            left_dimensions = {elmt.dimension for elmt in k[:arity]}
+            right_dimensions = {elmt.dimension for elmt in k[arity:]}
+            if len(left_dimensions) == len(right_dimensions) == 1:
                 homogeneous[k] = v
         return element.create(homogeneous)

@@ -4,7 +4,8 @@ from math import comb
 from comch.barratt_eccles import BarrattEccles, BarrattEcclesElement
 from comch.cubical import Cubical
 from comch.simplicial import Simplicial, SimplicialElement
-from comch.symmetric import SymmetricRing, SymmetricRingElement
+from comch.symmetric import (
+    SymmetricGroupElement, SymmetricRing, SymmetricRingElement)
 
 
 class TestBarrattEcclesElement(unittest.TestCase):
@@ -148,6 +149,109 @@ class TestBarrattEccles(unittest.TestCase):
             BarrattEccles.cartan_homotopy(True)
         with self.assertRaises(ValueError):
             BarrattEccles.cartan_homotopy(-1)
+        with self.assertRaises(TypeError):
+            BarrattEccles.cartan_homotopy(0, arity=True)
+        with self.assertRaises(ValueError):
+            BarrattEccles.cartan_homotopy(0, arity=1)
+
+        odd = BarrattEccles.cartan_homotopy(2, arity=3)
+        self.assertEqual(odd.torsion, 3)
+        self.assertEqual(odd.arity, 6)
+        self.assertEqual(odd.degree, 3)
+        self.assertEqual(len(odd), 16)
+        self.assertEqual(len(odd.table_reduction()), 30)
+
+    def test_odd_cartan_relator_identity(self):
+        arity = 3
+        rotation = SymmetricGroupElement((2, 3, 1))
+        block_rotation = SymmetricGroupElement((2, 3, 1, 5, 6, 4))
+        tau = SymmetricGroupElement((1, 3, 5, 2, 4, 6))
+        product = BarrattEccles.may_steenrod_map(
+            2, 0, torsion=arity)
+
+        def right_action(element, permutation, exponent=1):
+            return element.create({
+                tuple(value * (permutation ** exponent)
+                      for value in simplex): coefficient
+                for simplex, coefficient in element.items()
+            })
+
+        def interleaved_product(element):
+            answer = element
+            for position in range(1, 2 * arity, 2):
+                answer = answer.compose(product, position)
+            return answer
+
+        def reordered_product(degree):
+            source = BarrattEccles.may_steenrod_map(
+                arity, degree, torsion=arity)
+            answer = BarrattEcclesElement(torsion=arity)
+            for simplex, coefficient in source.items():
+                image = []
+                for permutation in simplex:
+                    vertex = interleaved_product(BarrattEcclesElement({
+                        (permutation,): 1}, torsion=arity))
+                    image.append(next(iter(vertex))[0] * tau)
+                answer += answer.create({tuple(image): coefficient})
+            return answer
+
+        def cyclic_diagonal_product(degree):
+            half_degree = degree // 2
+            terms = []
+            if degree % 2 == 0:
+                terms.extend(
+                    (2 * j, 2 * (half_degree - j), 0, 0)
+                    for j in range(half_degree + 1)
+                )
+                terms.extend(
+                    (2 * j + 1, 2 * (half_degree - 1 - j) + 1,
+                     left_action, right_action_power)
+                    for j in range(half_degree)
+                    for left_action in range(arity)
+                    for right_action_power in range(
+                        left_action + 1, arity)
+                )
+            else:
+                for j in range(half_degree + 1):
+                    terms.extend((
+                        (2 * j, 2 * (half_degree - j) + 1, 0, 0),
+                        (2 * j + 1, 2 * (half_degree - j), 0, 1),
+                    ))
+
+            answer = BarrattEcclesElement(torsion=arity)
+            for left_degree, right_degree, left_power, right_power in terms:
+                left = right_action(
+                    BarrattEccles.may_steenrod_map(
+                        arity, left_degree, torsion=arity),
+                    rotation, left_power)
+                right = right_action(
+                    BarrattEccles.may_steenrod_map(
+                        arity, right_degree, torsion=arity),
+                    rotation, right_power)
+                answer += product.compose(left, 1).compose(
+                    right, arity + 1)
+            return answer
+
+        for degree in range(4):
+            homotopy = BarrattEccles.cartan_homotopy(
+                degree, arity=arity)
+            left_hand_side = homotopy.boundary()
+            if degree:
+                previous = BarrattEccles.cartan_homotopy(
+                    degree - 1, arity=arity)
+                if degree % 2:
+                    left_hand_side += (
+                        right_action(previous, block_rotation) - previous)
+                else:
+                    for exponent in range(arity):
+                        left_hand_side += right_action(
+                            previous, block_rotation, exponent)
+
+            right_hand_side = (
+                cyclic_diagonal_product(degree)
+                - reordered_product(degree)
+            )
+            self.assertEqual(left_hand_side, right_hand_side)
 
     def test_cartan_homotopy_boundary(self):
         x_0 = BarrattEcclesElement({((1, 2),): 1}, torsion=2)

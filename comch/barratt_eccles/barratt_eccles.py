@@ -857,7 +857,7 @@ class BarrattEccles:
 
     @staticmethod
     def adem_homotopy(q, p):
-        r"""Representative of an Adem coboundary at the even prime.
+        r"""Homotopy component of an Adem coboundary at the even prime.
 
         This method implements the chain-level homotopy underlying the
         cochain proof of the mod-2 Adem relations in [BMM]. For integers
@@ -1061,5 +1061,95 @@ class BarrattEccles:
 
         check_input(q, p)
         answer = j_psi(q, p) + j_psi(p, q) + j_transposition_23(q, p)
+        answer.preferred_rep()
+        return answer
+
+    @staticmethod
+    def adem_coboundary(q, p):
+        r"""Complete cochain-level Adem coboundary at the even prime.
+
+        For integers :math:`q > p \geq 0`, this method returns
+
+        .. math::
+
+           A_{q,p} =
+           \widetilde A_{q,p} + \widehat{NS}_{q,p}
+           + \widehat{NS}_{p,q} \in \mathcal E(4),
+
+        where :math:`\widetilde A_{q,p}` is
+        :meth:`adem_homotopy` and
+
+        .. math::
+
+           \widehat{NS}_{q,p} =
+           \sum_{\substack{0<a\leq\ell\\a\equiv\ell\pmod{\mathbb Z}}}
+           \binom{p-\ell-a}{p-2\ell}
+           \binom{p-\ell+a}{p-2\ell}
+           \widetilde x_{q-p+2\ell+1}
+           \circ
+           (\widetilde x_{p-\ell-a},
+            \widetilde x_{p-\ell+a}).
+
+        All coefficients are reduced modulo 2. The action of this complete
+        element on :math:`\alpha^{\otimes 4}`, rather than the action of
+        :meth:`adem_homotopy` alone, is the cochain whose coboundary is the
+        symmetric Adem sum in [BMM, Theorem 0.2.5].
+
+        PARAMETERS
+        ----------
+        q, p : :class:`int`
+            Non-negative integers with ``q > p``.
+
+        RETURNS
+        _______
+        :class:`comch.barratt_eccles.BarrattEcclesElement`
+            The arity-4, degree-:math:`p+q+1` complete Adem coboundary
+            element over :math:`\mathbb F_2`.
+
+        REFERENCES
+        ----------
+        [BMM]: G. Brumfiel, A. Medina-Mardones, and J. Morgan. "A cochain
+        level proof of Adem relations in the mod 2 Steenrod algebra."
+
+        """
+
+        def non_symmetric_correction(outer_index, inner_index):
+            answer = BarrattEcclesElement(torsion=2)
+
+            # twice_l and twice_a encode the half-integers ell and a.
+            # The binomial lower index forces twice_l <= inner_index.
+            for twice_l in range(1, inner_index + 1):
+                first_twice_a = 1 if twice_l % 2 else 2
+                for twice_a in range(first_twice_a, twice_l + 1, 2):
+                    lower = inner_index - twice_l
+                    left_degree = (
+                        2 * inner_index - twice_l - twice_a) // 2
+                    right_degree = (
+                        2 * inner_index - twice_l + twice_a) // 2
+                    coefficient = (
+                        comb(left_degree, lower)
+                        * comb(right_degree, lower)
+                    ) % 2
+                    if coefficient == 0:
+                        continue
+
+                    outer_degree = (
+                        outer_index - inner_index + twice_l + 1)
+                    if outer_degree < 0:
+                        continue
+
+                    outer = BarrattEccles.may_steenrod_map(
+                        2, outer_degree, torsion=2)
+                    left = BarrattEccles.may_steenrod_map(
+                        2, left_degree, torsion=2)
+                    right = BarrattEccles.may_steenrod_map(
+                        2, right_degree, torsion=2)
+                    answer += outer.compose(left, 1).compose(right, 3)
+
+            return answer
+
+        answer = BarrattEccles.adem_homotopy(q, p)
+        answer += non_symmetric_correction(q, p)
+        answer += non_symmetric_correction(p, q)
         answer.preferred_rep()
         return answer

@@ -1,4 +1,6 @@
 import unittest
+from math import comb
+
 from comch.barratt_eccles import BarrattEccles, BarrattEcclesElement
 from comch.cubical import Cubical
 from comch.simplicial import Simplicial, SimplicialElement
@@ -214,6 +216,55 @@ class TestBarrattEccles(unittest.TestCase):
             BarrattEccles.adem_homotopy(0, 0)
         with self.assertRaises(ValueError):
             BarrattEccles.adem_homotopy(1, -1)
+
+    def test_adem_coboundary(self):
+        def theta(degree):
+            return BarrattEccles.may_steenrod_map(
+                2, degree, torsion=2)
+
+        def symmetric_adem_term(outer_index, inner_index):
+            answer = BarrattEcclesElement(torsion=2)
+            for ell in range(inner_index // 2 + 1):
+                coefficient = comb(
+                    inner_index - ell, inner_index - 2 * ell) % 2
+                outer_degree = outer_index - inner_index + 2 * ell
+                if coefficient == 0 or outer_degree < 0:
+                    continue
+                inner = theta(inner_index - ell)
+                answer += theta(outer_degree).compose(
+                    inner, 1).compose(inner, 3)
+            return answer
+
+        homotopy = BarrattEccles.adem_homotopy(1, 0)
+        theta_0 = theta(0)
+        theta_1 = theta(1)
+        correction = theta_1.compose(theta_0, 1).compose(theta_1, 3)
+        self.assertEqual(
+            BarrattEccles.adem_coboundary(1, 0),
+            homotopy + correction,
+        )
+
+        for q, p in ((1, 0), (2, 1), (3, 1)):
+            coboundary = BarrattEccles.adem_coboundary(q, p)
+            self.assertEqual(coboundary.arity, 4)
+            self.assertEqual(coboundary.degree, p + q + 1)
+            self.assertEqual(
+                coboundary.table_reduction().boundary(),
+                coboundary.boundary().table_reduction(),
+            )
+            residual = coboundary.boundary()
+            residual += symmetric_adem_term(q, p)
+            residual += symmetric_adem_term(p, q)
+            self.assertFalse(residual.orbit(), msg=(q, p))
+
+        with self.assertRaises(TypeError):
+            BarrattEccles.adem_coboundary(1.0, 0)
+        with self.assertRaises(TypeError):
+            BarrattEccles.adem_coboundary(True, 0)
+        with self.assertRaises(ValueError):
+            BarrattEccles.adem_coboundary(0, 0)
+        with self.assertRaises(ValueError):
+            BarrattEccles.adem_coboundary(1, -1)
 
     def test_may_steenrod_map(self):
         t = SymmetricRing.transposition_element(6)

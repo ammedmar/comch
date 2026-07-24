@@ -1,4 +1,6 @@
 import unittest
+from math import comb
+
 from comch.barratt_eccles import BarrattEccles
 from comch.surjection import Surjection, SurjectionElement
 from comch.symmetric import SymmetricRing, SymmetricRingElement
@@ -355,6 +357,69 @@ class TestSurjection(unittest.TestCase):
             Surjection.adem_homotopy(1, -1)
         with self.assertRaises(ValueError):
             Surjection.adem_homotopy(1, 0, convention='unknown')
+
+    def test_adem_coboundary(self):
+        expected = SurjectionElement({
+            (1, 2, 3, 2, 4, 2): 1,
+            (1, 3, 4, 1, 4, 2): 1,
+            (1, 3, 4, 3, 1, 2): 1,
+            (1, 2, 3, 4, 3, 2): 1,
+        }, torsion=2, convention='Berger-Fresse')
+        self.assertEqual(Surjection.adem_coboundary(1, 0), expected)
+
+        for convention in ('Berger-Fresse', 'McClure-Smith'):
+            for q, p in ((1, 0), (2, 1)):
+                answer = Surjection.adem_coboundary(
+                    q, p, convention=convention)
+                expected = BarrattEccles.adem_coboundary(
+                    q, p).table_reduction()
+                expected.convention = convention
+                self.assertEqual(answer, expected)
+                self.assertEqual(answer.convention, convention)
+
+        with self.assertRaises(TypeError):
+            Surjection.adem_coboundary(1.0, 0)
+        with self.assertRaises(TypeError):
+            Surjection.adem_coboundary(True, 0)
+        with self.assertRaises(ValueError):
+            Surjection.adem_coboundary(0, 0)
+        with self.assertRaises(ValueError):
+            Surjection.adem_coboundary(1, -1)
+        with self.assertRaises(ValueError):
+            Surjection.adem_coboundary(1, 0, convention='unknown')
+
+    def test_adem_coboundary_identity(self):
+        r"""The complete element has the boundary asserted in [BMM].
+
+        The equality is in coinvariants because evaluation on
+        alpha^{otimes 4} is invariant under the Sigma_4 action.
+        """
+
+        def theta(degree):
+            return Surjection.may_steenrod_map(
+                2, degree, torsion=2, convention='Berger-Fresse')
+
+        def symmetric_adem_term(outer_index, inner_index):
+            answer = SurjectionElement(
+                torsion=2, convention='Berger-Fresse')
+            for ell in range(inner_index // 2 + 1):
+                coefficient = comb(
+                    inner_index - ell, inner_index - 2 * ell) % 2
+                outer_degree = outer_index - inner_index + 2 * ell
+                if coefficient == 0 or outer_degree < 0:
+                    continue
+                inner = theta(inner_index - ell)
+                answer += theta(outer_degree).compose(
+                    inner, 1).compose(inner, 3)
+            return answer
+
+        for q, p in ((1, 0), (2, 1), (3, 1)):
+            coboundary = Surjection.adem_coboundary(
+                q, p, convention='Berger-Fresse')
+            residual = coboundary.boundary()
+            residual += symmetric_adem_term(q, p)
+            residual += symmetric_adem_term(p, q)
+            self.assertFalse(residual.orbit(), msg=(q, p))
 
 
 if __name__ == '__main__':

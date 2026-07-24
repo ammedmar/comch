@@ -1055,17 +1055,14 @@ class Surjection:
 
     @staticmethod
     def adem_homotopy(q, p, convention=None):
-        r"""Representative of an Adem coboundary at the even prime.
+        r"""Homotopy component of an Adem coboundary at the even prime.
 
         Let :math:`A` be an algebra over the surjection operad
         :math:`\mathcal X`. For integers :math:`q > p \geq 0`, this method
-        constructs an arity-4 surjection element whose action on
-
-        .. math::
-            \alpha \otimes \alpha \otimes \alpha \otimes \alpha
-
-        defines the cochain-level coboundary witnessing the mod-2 Adem
-        relation associated to :math:`\mathrm{Sq}^q\mathrm{Sq}^p`.
+        constructs the table reduction of the Barratt-Eccles homotopy
+        component. Its action alone is not the complete cochain-level Adem
+        coboundary: the two non-symmetric correction terms are included by
+        :meth:`adem_coboundary`.
 
         The returned element is obtained by applying the table reduction
         morphism to :meth:`comch.barratt_eccles.BarrattEccles.adem_homotopy`.
@@ -1106,6 +1103,55 @@ class Surjection:
             raise ValueError('invalid convention')
 
         answer = BarrattEccles.adem_homotopy(q, p).table_reduction()
+        answer.convention = convention
+        return answer
+
+    @staticmethod
+    def adem_coboundary(q, p, convention=None):
+        r"""Complete cochain-level Adem coboundary at the even prime.
+
+        For integers :math:`q > p \geq 0`, this method applies table
+        reduction to
+        :meth:`comch.barratt_eccles.BarrattEccles.adem_coboundary`.
+        Consequently, its action on
+        :math:`\alpha^{\otimes 4}` is the full cochain whose coboundary is
+        the symmetric Adem sum of [BMM, Theorem 0.2.5]. It includes both the
+        Adem homotopy and the two non-symmetric correction terms.
+
+        PARAMETERS
+        ----------
+        q, p : :class:`int`
+            Non-negative integers with ``q > p``.
+        convention : :class:`string` or ``None``, default ``None``
+            The sign convention used. If ``None``,
+            :attr:`comch.surjection.SurjectionElement.default_convention`
+            is used.
+
+        RETURNS
+        _______
+        :class:`comch.surjection.SurjectionElement`
+            The arity-4, degree-:math:`p+q+1` complete Adem coboundary
+            element over :math:`\mathbb F_2`.
+
+        REFERENCES
+        ----------
+        [BMM]: G. Brumfiel, A. Medina-Mardones, and J. Morgan. "A cochain
+        level proof of Adem relations in the mod 2 Steenrod algebra."
+
+        EXAMPLE
+        -------
+        >>> print(Surjection.adem_coboundary(1, 0))
+        (1,2,3,2,4,2) + (1,3,4,1,4,2) + (1,3,4,3,1,2) + (1,2,3,4,3,2)
+
+        """
+        from ..barratt_eccles import BarrattEccles
+
+        if convention is None:
+            convention = SurjectionElement.default_convention
+        if convention not in {'Berger-Fresse', 'McClure-Smith'}:
+            raise ValueError('invalid convention')
+
+        answer = BarrattEccles.adem_coboundary(q, p).table_reduction()
         answer.convention = convention
         return answer
 

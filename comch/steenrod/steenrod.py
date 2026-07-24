@@ -211,20 +211,26 @@ class Steenrod:
     def adem_coboundaries(q, p, n, shape='simplex', convention=None):
         r"""Chain representatives of Adem coboundaries at the even prime.
 
-        The mod-2 Adem relations are equivalent to the existence of natural
-        cochains whose coboundaries identify a composite
-        :math:`\mathrm{Sq}^q\mathrm{Sq}^p` with the corresponding Adem sum.
         For integers :math:`q > p \geq 0`, this method returns the value on
-        the top :math:`n`-simplex or :math:`n`-cube of the chain map
-        :math:`a_{q,p} \colon C \to C^{\otimes 4}` obtained from the Adem
-        homotopy in the Barratt-Eccles operad followed by table reduction to
-        the surjection operad. It is characterized by
+        the top :math:`n`-simplex of the chain map
+        :math:`a_{q,p} \colon C \to C^{\otimes 4}` obtained by acting with
+        the complete Adem coboundary. It includes both the Adem homotopy and
+        the two non-symmetric corrections of [BMM, Theorem 0.2.5], and is
+        characterized by
 
         .. math::
 
-           \eta_{q,p}(\alpha)(c) =
+           A_{q,p}(\alpha)(c) =
            (\alpha \otimes \alpha \otimes \alpha \otimes \alpha)
            a_{q,p}(c).
+
+        The parameters :math:`q,p` index the universal classes used in the
+        chain-level construction; they are not, in general, the exponents
+        of a single composite :math:`\mathrm{Sq}^q\mathrm{Sq}^p`.
+
+        On simplicial chains the action factors through table reduction to
+        the surjection operad. The Barratt-Eccles action on cubical chains
+        is not yet implemented.
 
         Since :math:`\alpha` can be assumed homogeneous, the output is
         filtered to the summands where all four tensor factors have equal
@@ -237,10 +243,12 @@ class Steenrod:
         n : :class:`int`
             The degree of the universal basis element.
         shape : :class:`str`, default ``'simplex'``
-            Either ``'simplex'`` or ``'cube'``.
+            Either ``'simplex'`` or ``'cube'``. The latter currently raises
+            :class:`NotImplementedError`.
         convention : :class:`str` or ``None``, default ``None``
-            The sign convention of the surjection operad. If ``None``, the
-            McClure-Smith convention is used.
+            The sign convention of the surjection operad, used when *shape*
+            is ``'simplex'``. If ``None``, the McClure-Smith convention is
+            used.
 
         RETURNS
         -------
@@ -254,16 +262,18 @@ class Steenrod:
         if convention is None:
             convention = 'McClure-Smith'
 
-        surj = Surjection.adem_homotopy(q, p, convention=convention)
-
         if shape == 'simplex':
+            surj = Surjection.adem_coboundary(q, p, convention=convention)
             element = Simplicial.standard_element(n, torsion=2)
+            answer = surj(element)
         elif shape == 'cube':
+            coboundary = BarrattEccles.adem_coboundary(q, p)
             element = Cubical.standard_element(n, torsion=2)
+            answer = coboundary(element)
         else:
             raise ValueError("shape must be 'simplex' or 'cube'")
 
-        return Steenrod._filter_homogeneous(surj(element))
+        return Steenrod._filter_homogeneous(answer)
 
     @staticmethod
     def _filter_homogeneous(element):

@@ -714,69 +714,44 @@ class BarrattEccles:
         return int(coeff) * element
 
     @staticmethod
-    def cartan_homotopy(i):
+    def cartan_homotopy(i, arity=2):
         r"""Representative of a Cartan :math:`i`-coboundary.
 
-        Let :math:`A` be an algebra over the Barratt-Eccles operad
-        :math:`\mathcal E`. For non-negative :math:`i` and mod-:math:`2`
-        cocycles :math:`\alpha,\beta \in A`, this method constructs an arity-4
-        Barratt-Eccles element whose action on
+        For an integer :math:`r \geq 2`, this method evaluates the effective
+        Cartan relator
 
         .. math::
-            \alpha \otimes \alpha \otimes \beta \otimes \beta
 
-        defines a Cartan :math:`i`-coboundary
-        :math:`\zeta_i(\alpha \otimes \beta)`. It satisfies
+           H = K_1\iota + K_2\iota
+           + \circ_{\mathcal E}(e \otimes K_3)
 
-        .. math::
-            \begin{aligned}
-            \delta\zeta_i(\alpha \otimes \beta)
-            ={}&
-            (\alpha \smile_0 \beta)
-            \smile_i
-            (\alpha \smile_0 \beta) \\
-            &+
-            \sum_{j+k=i}
-            (\alpha \smile_j \alpha)
-            \smile_0
-            (\beta \smile_k \beta).
-            \end{aligned}
+        of [MM] on the preferred generator :math:`e_i` of the minimal cyclic
+        resolution. The result lies in
+        :math:`\mathcal E(2r)_{i+1}` over :math:`\mathbb Z/r`.
 
-        Consequently, :math:`\zeta_i` gives an explicit cochain-level witness
-        of the Cartan formula for Steenrod squares.
-
-        More precisely, let
-
-        .. math::
-            \widetilde{x}_i =
-            (e,(12),e,\ldots,(12)^i) \in \mathcal E(2).
-
-        This method returns the normalized Barratt-Eccles element
-
-        .. math::
-            (H_1 + H_2)(\widetilde{x}_i) \in \mathcal E(4),
-
-        where :math:`H_1` and :math:`H_2` are the degree-one maps constructed
-        in [Med20]. Its action defines the cochain above by
-
-        .. math::
-            \zeta_i(\alpha \otimes \beta) =
-            (H_1 + H_2)(\widetilde{x}_i)
-            (\alpha \otimes \alpha \otimes \beta \otimes \beta).
+        For ``arity=2`` the :math:`K_3` term vanishes and this agrees with the
+        even-prime construction of [Med20]. For odd prime arity, its action on
+        :math:`a^{\otimes r}\otimes b^{\otimes r}` gives the natural
+        cochain-level Cartan coboundary for the cup-:math:`(r,i)` products.
 
         PARAMETERS
         ----------
         i : :class:`int`
             A non-negative degree.
+        arity : :class:`int`, default ``2``
+            The arity :math:`r` of the cyclic resolution.
 
         RETURNS
         _______
         :class:`comch.barratt_eccles.BarrattEcclesElement`
-            The arity-4, degree-:math:`i+1` Cartan homotopy element over
-            :math:`\mathbb F_2`.
+            The arity-:math:`2r`, degree-:math:`i+1` Cartan homotopy element
+            over :math:`\mathbb Z/r`.
 
         REFERENCES
         ----------
+        [MM]: A. M. Medina-Mardones. "An effective proof of the Cartan
+        formula: odd primes."
+
         [Med20]: A. M. Medina-Mardones. "An effective proof of the Cartan
         formula: the even prime." Journal of Pure and Applied Algebra 224
         (2020), no. 12, 106444.
@@ -790,38 +765,56 @@ class BarrattEccles:
         """
         if not isinstance(i, int) or isinstance(i, bool):
             raise TypeError('i must be an integer')
+        if not isinstance(arity, int) or isinstance(arity, bool):
+            raise TypeError('arity must be an integer')
         if i < 0:
             raise ValueError('i must be non-negative')
+        if arity < 2:
+            raise ValueError('arity must be at least 2')
 
-        identity = (1, 2, 3, 4)
-        transposition = (2, 1)
-        x = tuple((1, 2) if j % 2 == 0 else transposition
-                  for j in range(i + 1))
+        torsion = arity
+        identity_2 = BarrattEccles.may_steenrod_map(
+            2, 0, torsion=torsion)
+        source = BarrattEccles.may_steenrod_map(
+            arity, i, torsion=torsion)
+        tau = SymmetricGroupElement(
+            tuple(range(1, 2 * arity, 2))
+            + tuple(range(2, 2 * arity + 1, 2))
+        )
+        tau_action = SymmetricRingElement({tau: 1}, torsion=torsion)
+        def compose_products(element):
+            answer = element
+            for position in range(1, 2 * arity, 2):
+                answer = answer.compose(identity_2, position)
+            return answer
 
-        first_map = {
-            (1, 2): (1, 3, 2, 4),
-            transposition: (2, 4, 1, 3),
-        }
-        second_map = {
-            (1, 2): identity,
-            transposition: (2, 1, 4, 3),
-        }
-        first_values = tuple(first_map[permutation] for permutation in x)
-        second_values = tuple(second_map[permutation] for permutation in x)
+        def split_blocks(left, right):
+            return SymmetricGroupElement(
+                tuple(left) + tuple(arity + value for value in right))
 
-        # H1 is the prism homotopy between the conjugate inclusions f and g.
-        answer = BarrattEcclesElement(torsion=2)
-        for j in range(i + 1):
-            simplex = first_values[:j + 1] + second_values[j:]
-            answer += answer.create({simplex: 1})
-
-        # H2 applies the closed Shih homotopy formula before composition.
-        composition = {
-            ((1, 2), (1, 2)): identity,
-            ((1, 2), transposition): (1, 2, 4, 3),
-            (transposition, (1, 2)): (2, 1, 3, 4),
-            (transposition, transposition): (2, 1, 4, 3),
-        }
+        # K1 is the prism homotopy between the reordered product map and
+        # the split diagonal inclusion.
+        answer = BarrattEcclesElement(torsion=torsion)
+        for simplex, coefficient in source.items():
+            first_values = []
+            for permutation in simplex:
+                product_value = compose_products(BarrattEcclesElement(
+                    {(permutation,): 1}, torsion=torsion))
+                if arity == 2:
+                    first_value = next(iter(tau_action * product_value))[0]
+                else:
+                    first_value = next(iter(product_value))[0] * tau
+                first_values.append(first_value)
+            first_values = tuple(first_values)
+            second_values = tuple(
+                split_blocks(permutation, permutation)
+                for permutation in simplex
+            )
+            for j in range(len(simplex)):
+                prism = first_values[:j + 1] + second_values[j:]
+                answer += answer.create({
+                    prism: coefficient * (-1) ** j
+                })
 
         def face(simplex, position):
             return simplex[:position] + simplex[position + 1:]
@@ -829,30 +822,158 @@ class BarrattEccles:
         def degeneracy(simplex, position):
             return simplex[:position + 1] + simplex[position:]
 
-        for p in range(i):
-            for q in range(i - p):
-                m = i - p - q
-                for v_indices in combinations(range(p + q + 1), p):
-                    w_indices = tuple(j for j in range(p + q + 1)
-                                      if j not in v_indices)
+        def shuffle_sign(indices):
+            inversions = sum(
+                indices[left] > indices[right]
+                for left in range(len(indices))
+                for right in range(left + 1, len(indices))
+            )
+            return (-1) ** inversions
 
-                    first = x
-                    for j in reversed(range(i - p + 1, i + 1)):
-                        first = face(first, j)
-                    first = degeneracy(first, m - 1)
-                    for j in v_indices:
-                        first = degeneracy(first, j + m)
+        # K2 is the Rubio-Morace closed formula for the Shih homotopy,
+        # followed by the split-block composition.
+        for simplex, coefficient in source.items():
+            degree = len(simplex) - 1
+            for p in range(degree):
+                for q in range(degree - p):
+                    m = degree - p - q
+                    for v_indices in combinations(range(p + q + 1), p):
+                        w_indices = tuple(
+                            j for j in range(p + q + 1)
+                            if j not in v_indices
+                        )
 
-                    second = x
-                    for j in reversed(range(i - p - q, i - p)):
-                        second = face(second, j)
-                    for j in w_indices:
-                        second = degeneracy(second, j + m)
+                        first = simplex
+                        for j in reversed(
+                                range(degree - p + 1, degree + 1)):
+                            first = face(first, j)
+                        first = degeneracy(first, m - 1)
+                        for j in v_indices:
+                            first = degeneracy(first, j + m)
 
-                    simplex = tuple(composition[pair]
-                                    for pair in zip(first, second))
-                    answer += answer.create({simplex: 1})
+                        second = simplex
+                        for j in reversed(
+                                range(degree - p - q, degree - p)):
+                            second = face(second, j)
+                        for j in w_indices:
+                            second = degeneracy(second, j + m)
 
+                        sign = (-1) ** (m + 1)
+                        sign *= shuffle_sign(w_indices + v_indices)
+                        shih_simplex = tuple(
+                            split_blocks(left, right)
+                            for left, right in zip(first, second)
+                        )
+                        answer += answer.create({
+                            shih_simplex: coefficient * sign
+                        })
+
+        answer += BarrattEccles.cartan_coproduct_correction(
+            i, arity=arity)
+
+        answer.preferred_rep()
+        return answer
+
+    @staticmethod
+    def cartan_coproduct_correction(i, arity=2):
+        r"""Coproduct correction in the effective Cartan relator.
+
+        This is the composite
+
+        .. math::
+
+           \circ_{\mathcal E}(e \otimes K_3(e_i))
+           \in \mathcal E(2r)_{i+1}
+
+        from the odd-prime Cartan construction of [CMM]. It corrects the
+        failure of the May--Steenrod map to preserve the Alexander--Whitney
+        coproduct strictly. It is zero for ``arity=2`` and for ``i < 2``.
+
+        PARAMETERS
+        ----------
+        i : :class:`int`
+            A non-negative degree.
+        arity : :class:`int`, default ``2``
+            The arity :math:`r` of the cyclic resolution.
+
+        RETURNS
+        _______
+        :class:`comch.barratt_eccles.BarrattEcclesElement`
+            The composed :math:`K_3(e_i)` correction.
+
+        REFERENCES
+        ----------
+        [CMM]: F. Cantero-Morán and A. M. Medina-Mardones. "An effective
+        proof of the Cartan formula: odd primes." Homology, Homotopy and
+        Applications 27 (2025), no. 1, 207--234.
+        https://doi.org/10.4310/HHA.2025.v27.n1.a12
+
+        """
+        if not isinstance(i, int) or isinstance(i, bool):
+            raise TypeError('i must be an integer')
+        if not isinstance(arity, int) or isinstance(arity, bool):
+            raise TypeError('arity must be an integer')
+        if i < 0:
+            raise ValueError('i must be non-negative')
+        if arity < 2:
+            raise ValueError('arity must be at least 2')
+
+        answer = BarrattEcclesElement(torsion=arity)
+        if arity == 2 or i < 2:
+            return answer
+
+        identity_2 = BarrattEccles.may_steenrod_map(
+            2, 0, torsion=arity)
+        rotation = SymmetricGroupElement(
+            tuple(range(2, arity + 1)) + (1,))
+        powers = [rotation ** exponent for exponent in range(arity)]
+
+        half_degree = i // 2
+        for left_length in range(1, half_degree + 1):
+            right_length = half_degree + 1 - left_length
+            for left_indices in product(
+                    range(arity), repeat=left_length):
+                for right_indices in product(
+                        range(arity), repeat=right_length):
+                    alpha_indices = left_indices + (right_indices[0],)
+                    if i % 2:
+                        alpha_indices = tuple(
+                            (index - 1) % arity
+                            for index in alpha_indices)
+                    coefficient = sum(
+                        left < right
+                        for left, right in pairwise(alpha_indices)
+                    )
+                    if i % 2:
+                        coefficient *= -1
+                    if coefficient % arity == 0:
+                        continue
+
+                    left_powers = [0]
+                    if i % 2:
+                        left_powers.append(1)
+                    for index in left_indices:
+                        left_powers.extend(
+                            (index, (index + 1) % arity))
+
+                    right_powers = []
+                    for index in right_indices:
+                        right_powers.extend(
+                            (index, (index + 1) % arity))
+
+                    left = BarrattEcclesElement({
+                        tuple(powers[index] for index in left_powers): 1
+                    }, torsion=arity)
+                    right = BarrattEcclesElement({
+                        tuple(powers[index] for index in right_powers): 1
+                    }, torsion=arity)
+                    left.preferred_rep()
+                    right.preferred_rep()
+                    if left and right:
+                        answer += coefficient * identity_2.compose(
+                            left, 1).compose(right, arity + 1)
+
+        answer.preferred_rep()
         return answer
 
     @staticmethod

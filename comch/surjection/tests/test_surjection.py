@@ -331,6 +331,20 @@ class TestSurjection(unittest.TestCase):
         with self.assertRaises(ValueError):
             Surjection.cartan_homotopy(0, convention='unknown')
 
+        odd = Surjection.cartan_homotopy(
+            2, convention='Berger-Fresse', arity=3)
+        self.assertEqual(
+            odd,
+            BarrattEccles.cartan_homotopy(
+                2, arity=3).table_reduction(),
+        )
+        self.assertEqual(odd.torsion, 3)
+        self.assertEqual(odd.arity, 6)
+        self.assertEqual(odd.degree, 3)
+        with self.assertRaises(NotImplementedError):
+            Surjection.cartan_homotopy(
+                2, convention='McClure-Smith', arity=3)
+
     def test_adem_homotopy(self):
         expected = SurjectionElement({
             (1, 2, 3, 2, 4, 2): 1,

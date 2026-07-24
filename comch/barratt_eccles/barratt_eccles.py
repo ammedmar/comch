@@ -9,6 +9,7 @@ from ..cubical import CubicalElement
 from ..utils import partitions, pairwise
 from itertools import product, combinations
 from math import comb, factorial
+from warnings import warn
 
 
 class BarrattEcclesElement(FreeModuleElement):
@@ -527,16 +528,16 @@ class BarrattEcclesElement(FreeModuleElement):
 
         PARAMETERS
         ----------
-        other : :class:`comch.simplicial.SimplicialElement` or \
-:class:`comch.cubical.CubicalElement`
+        other : :class:`comch.simplicial.SimplicialElement` or
+            :class:`comch.cubical.CubicalElement`
             The element to which apply *self* to.
         coord : :class:`int`, default 1.
             The tensor factor of *other* to apply *self* to.
 
         RETURNS
         _______
-        :class:`comch.simplicial.SimplicialElement` or \
-:class:`comch.cubical.CubicalElement`
+        :class:`comch.simplicial.SimplicialElement` or
+        :class:`comch.cubical.CubicalElement`
             The action of *self* on *other* at *coord*.
 
         REFERENCES
@@ -651,6 +652,18 @@ class BarrattEccles:
         return integral_answer
 
     @staticmethod
+    def may_steenrod_structure(arity, degree, torsion=None):
+        """Deprecated alias for :meth:`may_steenrod_map`."""
+        warn(
+            'BarrattEccles.may_steenrod_structure is deprecated; '
+            'use BarrattEccles.may_steenrod_map instead',
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return BarrattEccles.may_steenrod_map(
+            arity, degree, torsion=torsion)
+
+    @staticmethod
     def steenrod_operation_representative(p, s, q, bockstein=False):
         r"""Representative of :math:`P_s` or :math:`\beta P_s`.
 
@@ -714,6 +727,18 @@ class BarrattEccles:
         return int(coeff) * element
 
     @staticmethod
+    def steenrod_operation(p, s, q, bockstein=False):
+        """Deprecated alias for :meth:`steenrod_operation_representative`."""
+        warn(
+            'BarrattEccles.steenrod_operation is deprecated; use '
+            'BarrattEccles.steenrod_operation_representative instead',
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return BarrattEccles.steenrod_operation_representative(
+            p, s, q, bockstein=bockstein)
+
+    @staticmethod
     def cartan_homotopy(i, arity=2):
         r"""Representative of a Cartan :math:`i`-coboundary.
 
@@ -725,7 +750,7 @@ class BarrattEccles:
            H = K_1\iota + K_2\iota
            + \circ_{\mathcal E}(e \otimes K_3)
 
-        of [MM] on the preferred generator :math:`e_i` of the minimal cyclic
+        of [CMM] on the preferred generator :math:`e_i` of the minimal cyclic
         resolution. The result lies in
         :math:`\mathcal E(2r)_{i+1}` over :math:`\mathbb Z/r`.
 
@@ -749,8 +774,10 @@ class BarrattEccles:
 
         REFERENCES
         ----------
-        [MM]: A. M. Medina-Mardones. "An effective proof of the Cartan
-        formula: odd primes."
+        [CMM]: F. Cantero-Morán and A. M. Medina-Mardones. "An effective
+        proof of the Cartan formula: odd primes." Homology, Homotopy and
+        Applications 27 (2025), no. 1, 207--234.
+        https://doi.org/10.4310/HHA.2025.v27.n1.a12
 
         [Med20]: A. M. Medina-Mardones. "An effective proof of the Cartan
         formula: the even prime." Journal of Pure and Applied Algebra 224

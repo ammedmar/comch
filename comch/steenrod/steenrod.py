@@ -8,8 +8,8 @@ class Steenrod:
     r"""Chain-level representatives related to Steenrod operations.
 
     This namespace collects convenience methods for evaluating universal
-    chain representatives of Steenrod operations and their Cartan and Adem
-    coboundaries on standard simplices and cubes.
+    chain representatives of Steenrod operations on standard simplices and
+    cubes, and Cartan and Adem coboundaries on standard simplices.
 
     """
 
@@ -137,8 +137,9 @@ class Steenrod:
             i, n, shape='simplex', convention=None, arity=2):
         r"""Chain representatives of Cartan coboundaries.
 
-        The Cartan formula for Steenrod squares is equivalent to the existence
-        of natural cochains :math:`\zeta_i(\alpha \otimes \beta)` satisfying
+        At the even prime, the Cartan formula for Steenrod squares is
+        equivalent to the existence of natural cochains
+        :math:`\zeta_i(\alpha \otimes \beta)` satisfying
 
         .. math::
 
@@ -149,10 +150,26 @@ class Steenrod:
            (\alpha \smallsmile_j \alpha) \smallsmile_0
            (\beta \smallsmile_k \beta).
 
-        Such a cochain is called a Cartan :math:`i`-coboundary. This method
-        returns the value on the top :math:`n`-simplex or :math:`n`-cube of the
-        chain map :math:`z_i \colon C \to C^{\otimes 4}` obtained by acting
-        with the Cartan homotopy in the Barratt-Eccles operad. It is
+        Such a cochain is called a Cartan :math:`i`-coboundary. At an odd
+        prime :math:`p`, the effective relators of [CMM] give the cochain
+        homotopies underlying
+
+        .. math::
+
+           P_s(xy) = \sum_{a+b=s}P_a(x)P_b(y)
+
+        and
+
+        .. math::
+
+           \beta P_s(xy) =
+           \sum_{a+b=s}
+           \left(\beta P_a(x)P_b(y)
+           + (-1)^{|x|}P_a(x)\beta P_b(y)\right).
+
+        This method returns the value on the top :math:`n`-simplex of the
+        chain map :math:`z_i \colon C \to C^{\otimes 2r}` obtained by acting
+        with the arity-:math:`r` Cartan homotopy. For ``arity=2`` it is
         characterized by
 
         .. math::
@@ -161,14 +178,13 @@ class Steenrod:
            (\alpha \otimes \alpha \otimes \beta \otimes \beta)z_i(c).
 
         On simplicial chains the action factors through the table reduction
-        morphism to the surjection operad. On cubical chains a direct action
-        of the Barratt-Eccles operad is used; its construction is
-        forthcoming.
+        morphism to the surjection operad. The Barratt-Eccles action on
+        cubical chains is not yet implemented.
 
         Since :math:`\alpha` and :math:`\beta` can be assumed homogeneous, the
-        output is filtered to the summands where the first two tensor factors
-        have equal degree and the last two tensor factors have equal
-        degree.
+        output is filtered to the summands where the first :math:`r` tensor
+        factors have equal degree and the last :math:`r` tensor factors have
+        equal degree.
 
         PARAMETERS
         ----------
@@ -177,7 +193,8 @@ class Steenrod:
         n : :class:`int`
             The degree of the universal basis element.
         shape : :class:`str`, default ``'simplex'``
-            Either ``'simplex'`` or ``'cube'``.
+            Either ``'simplex'`` or ``'cube'``. The latter currently raises
+            :class:`NotImplementedError`.
         convention : :class:`str` or ``None``, default ``None``
             The sign convention of the surjection operad, used when *shape*
             is ``'simplex'``. If ``None``, the McClure-Smith convention is
@@ -188,10 +205,21 @@ class Steenrod:
 
         RETURNS
         -------
-        :class:`comch.simplicial.SimplicialElement` or
-        :class:`comch.cubical.CubicalElement`
+        :class:`comch.simplicial.SimplicialElement`
             The tensor product element representing the Cartan
             :math:`i`-coboundary on the selected universal basis element.
+
+        REFERENCES
+        ----------
+        [Med20]: A. M. Medina-Mardones. "An effective proof of the Cartan
+        formula: the even prime." Journal of Pure and Applied Algebra 224
+        (2020), no. 12, 106444.
+        https://doi.org/10.1016/j.jpaa.2020.106444
+
+        [CMM]: F. Cantero-Morán and A. M. Medina-Mardones. "An effective
+        proof of the Cartan formula: odd primes." Homology, Homotopy and
+        Applications 27 (2025), no. 1, 207--234.
+        https://doi.org/10.4310/HHA.2025.v27.n1.a12
 
         """
 

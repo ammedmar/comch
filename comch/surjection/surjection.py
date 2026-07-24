@@ -10,6 +10,7 @@ from itertools import combinations, product, combinations_with_replacement
 from operator import itemgetter
 from functools import reduce
 from math import factorial
+from warnings import warn
 
 
 class SurjectionElement(FreeModuleElement):
@@ -906,6 +907,19 @@ class Surjection:
         return integral_answer
 
     @staticmethod
+    def may_steenrod_structure(
+            arity, degree, torsion=None, convention=None):
+        """Deprecated alias for :meth:`may_steenrod_map`."""
+        warn(
+            'Surjection.may_steenrod_structure is deprecated; '
+            'use Surjection.may_steenrod_map instead',
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return Surjection.may_steenrod_map(
+            arity, degree, torsion=torsion, convention=convention)
+
+    @staticmethod
     def steenrod_operation_representative(p, s, q, bockstein=False, convention=None):
         r"""Representative of :math:`P_s` or :math:`\beta P_s`.
 
@@ -981,6 +995,19 @@ class Surjection:
         return int(coeff) * element
 
     @staticmethod
+    def steenrod_operation(
+            p, s, q, bockstein=False, convention=None):
+        """Deprecated alias for :meth:`steenrod_operation_representative`."""
+        warn(
+            'Surjection.steenrod_operation is deprecated; use '
+            'Surjection.steenrod_operation_representative instead',
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return Surjection.steenrod_operation_representative(
+            p, s, q, bockstein=bockstein, convention=convention)
+
+    @staticmethod
     def cartan_homotopy(i, convention=None, arity=2):
         r"""Representative of a Cartan :math:`i`-coboundary.
 
@@ -991,12 +1018,14 @@ class Surjection:
         :math:`2r` surjection element whose action on
 
         .. math::
+
             \alpha^{\otimes r} \otimes \beta^{\otimes r}
 
-        defines a Cartan :math:`i`-coboundary
-        :math:`\zeta_i(\alpha \otimes \beta)`. It satisfies
+        defines a Cartan :math:`i`-coboundary. When ``arity=2`` this is the
+        cochain :math:`\zeta_i(\alpha \otimes \beta)` satisfying
 
         .. math::
+
             \begin{aligned}
             \delta\zeta_i(\alpha \otimes \beta)
             ={}&
@@ -1010,8 +1039,26 @@ class Surjection:
             (\beta \smile_k \beta).
             \end{aligned}
 
+        When ``arity`` is an odd prime, the construction is instead the
+        effective relator of [CMM] for the :math:`r`-ary cup products. After
+        passing to cohomology, these relators give the usual Cartan formulas
+
+        .. math::
+
+            P_s(xy) = \sum_{a+b=s} P_a(x)P_b(y)
+
+        and
+
+        .. math::
+
+            \beta P_s(xy) =
+            \sum_{a+b=s}
+            \left(\beta P_a(x)P_b(y)
+            + (-1)^{|x|}P_a(x)\beta P_b(y)\right).
+
         The returned element is obtained by applying the table reduction
         morphism to :meth:`comch.barratt_eccles.BarrattEccles.cartan_homotopy`.
+
         PARAMETERS
         ----------
         i : :class:`int`
@@ -1035,6 +1082,11 @@ class Surjection:
         formula: the even prime." Journal of Pure and Applied Algebra 224
         (2020), no. 12, 106444.
         https://doi.org/10.1016/j.jpaa.2020.106444
+
+        [CMM]: F. Cantero-Morán and A. M. Medina-Mardones. "An effective
+        proof of the Cartan formula: odd primes." Homology, Homotopy and
+        Applications 27 (2025), no. 1, 207--234.
+        https://doi.org/10.4310/HHA.2025.v27.n1.a12
 
         EXAMPLE
         -------

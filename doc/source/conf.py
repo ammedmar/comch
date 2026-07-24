@@ -15,6 +15,7 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('../..'))
 
+from comch import __version__
 
 # -- Project information -----------------------------------------------------
 
@@ -23,7 +24,7 @@ copyright = '2020, Anibal M. Medina-Mardones'
 author = 'Anibal M. Medina-Mardones'
 
 # The full version, including alpha/beta/rc tags
-# release = __version__
+release = __version__
 
 # -- General configuration ---------------------------------------------------
 

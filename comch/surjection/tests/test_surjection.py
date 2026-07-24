@@ -256,6 +256,25 @@ class TestSurjectionElement(unittest.TestCase):
 
 
 class TestSurjection(unittest.TestCase):
+    def test_deprecated_aliases(self):
+        with self.assertWarns(DeprecationWarning):
+            old_map = Surjection.may_steenrod_structure(
+                3, 2, torsion=3, convention='Berger-Fresse')
+        self.assertEqual(
+            old_map,
+            Surjection.may_steenrod_map(
+                3, 2, torsion=3, convention='Berger-Fresse'),
+        )
+
+        with self.assertWarns(DeprecationWarning):
+            old_operation = Surjection.steenrod_operation(
+                3, 2, 3, convention='Berger-Fresse')
+        self.assertEqual(
+            old_operation,
+            Surjection.steenrod_operation_representative(
+                3, 2, 3, convention='Berger-Fresse'),
+        )
+
     def test_may_steenrod_map(self):
         arity = 6
         t = SymmetricRing.transposition_element(arity)

@@ -28,7 +28,8 @@ ComCH focuses on chain complexes and implements two models of the
 :math:`E_\infty`-operad equipped with filtrations by :math:`E_n`-operads: the
 McClure-Smith surjection operad [McS]_ and the Berger-Fresse Barratt-Eccles
 operad [BF]_. It also provides effective constructions of cochain-level
-May-Steenrod operations [KMM]_.
+May-Steenrod operations [KMM]_, even-prime Adem coboundaries, and Cartan
+coboundaries at both even and odd primes [Med20]_, [CMM]_.
 
 
 Installation
@@ -53,8 +54,11 @@ Python kernel:
    python3 -m ipykernel install --user --name comch --display-name "Python (comch)"
    jupyter lab
 
-Open an example notebook and select the ``Python (comch)`` kernel. The
-notebooks can also be run directly in
+The notebook files are distributed in the
+`source repository <https://github.com/ammedmar/comch/tree/master/notebooks>`_,
+not in the installed Python package. From a repository checkout, open an
+example notebook and select the ``Python (comch)`` kernel. The notebooks can
+also be run directly in
 `Binder <https://mybinder.org/v2/gh/ammedmar/comch/master?urlpath=lab/tree/notebooks>`_.
 
 
@@ -104,3 +108,11 @@ References
 .. [KMM] R. M. Kaufmann and A. M. Medina-Mardones. "Cochain level
    May-Steenrod operations." *Forum Mathematicum* 33.6 (2021): 1507-1526.
    https://doi.org/10.1515/forum-2020-0296
+
+.. [Med20] A. M. Medina-Mardones. "An effective proof of the Cartan formula:
+   the even prime." *Journal of Pure and Applied Algebra* 224.12 (2020):
+   106444. https://doi.org/10.1016/j.jpaa.2020.106444
+
+.. [CMM] F. Cantero-Morán and A. M. Medina-Mardones. "An effective proof of
+   the Cartan formula: odd primes." *Homology, Homotopy and Applications* 27.1
+   (2025): 207-234. https://doi.org/10.4310/HHA.2025.v27.n1.a12

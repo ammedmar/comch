@@ -1,0 +1,5 @@
+include CHANGELOG.md
+recursive-include binder *
+recursive-include doc *.py *.rst
+recursive-include notebooks *.ipynb
+prune notebooks/.ipynb_checkpoints

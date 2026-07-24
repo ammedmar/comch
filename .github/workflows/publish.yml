@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       ref:
-        description: Git ref to publish, for example v0.1.5
+        description: Version tag to publish, for example v0.2.0
         required: true
-        default: v0.1.5
+        default: v0.2.0
   release:
     types:
       - published
@@ -41,13 +41,74 @@ jobs:
           python-version: "3.13"
 
       - name: Install build tools
-        run: python -m pip install --upgrade build twine
+        run: python -m pip install --upgrade build packaging twine
 
       - name: Build wheel and source distribution
         run: python -m build
 
       - name: Check distribution metadata
         run: python -m twine check dist/*
+
+      - name: Verify tag matches distribution version
+        run: |
+          python - "${{ steps.release-ref.outputs.ref }}" <<'PY'
+          import email
+          import sys
+          import tarfile
+          import zipfile
+          from pathlib import Path
+          from packaging.version import InvalidVersion, Version
+
+          tag = sys.argv[1]
+          if not tag.startswith("v"):
+              raise SystemExit(f"release ref must be a version tag beginning with 'v': {tag!r}")
+          try:
+              expected = Version(tag[1:])
+          except InvalidVersion as error:
+              raise SystemExit(f"invalid release tag: {tag!r}") from error
+
+          artifacts = sorted(Path("dist").iterdir())
+          wheel = next(path for path in artifacts if path.suffix == ".whl")
+          sdist = next(path for path in artifacts if path.name.endswith(".tar.gz"))
+
+          with zipfile.ZipFile(wheel) as archive:
+              metadata_path = next(
+                  name for name in archive.namelist()
+                  if name.endswith(".dist-info/METADATA")
+              )
+              wheel_metadata = email.message_from_bytes(
+                  archive.read(metadata_path)
+              )
+
+          with tarfile.open(sdist) as archive:
+              pkg_info = next(
+                  member for member in archive.getmembers()
+                  if member.name.count("/") == 1
+                  and member.name.endswith("/PKG-INFO")
+              )
+              sdist_metadata = email.message_from_binary_file(
+                  archive.extractfile(pkg_info)
+              )
+
+          versions = {
+              "wheel": Version(wheel_metadata["Version"]),
+              "sdist": Version(sdist_metadata["Version"]),
+          }
+          mismatches = {
+              artifact: version
+              for artifact, version in versions.items()
+              if version != expected
+          }
+          if mismatches:
+              details = ", ".join(
+                  f"{artifact}={version}"
+                  for artifact, version in mismatches.items()
+              )
+              raise SystemExit(
+                  f"tag {tag} declares {expected}, but {details}"
+              )
+          print(f"verified {tag}: wheel and sdist both declare {expected}")
+          PY
 
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1

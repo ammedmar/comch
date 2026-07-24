@@ -32,16 +32,31 @@ jobs:
       - name: Compile package
         run: python -m compileall -q comch
 
-      - name: Install notebook dependencies
-        run: python -m pip install ".[notebooks]"
+  notebooks:
+    name: Notebooks
+    runs-on: ubuntu-latest
 
-      - name: Validate notebooks
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install notebook dependencies
+        run: python -m pip install ".[notebooks]" nbclient
+
+      - name: Validate and execute notebooks
         run: |
           python - <<'PY'
           from pathlib import Path
           import nbformat
+          from nbclient import NotebookClient
 
           for path in sorted(Path("notebooks").glob("*.ipynb")):
+              print(f"executing {path}", flush=True)
               notebook = nbformat.read(path, as_version=4)
               nbformat.validate(notebook)
               for index, cell in enumerate(notebook.cells):
@@ -50,6 +65,12 @@ jobs:
                           f"{path}: cell {index} is {cell.cell_type!r} "
                           "but has an outputs field"
                       )
+              NotebookClient(
+                  notebook,
+                  timeout=600,
+                  kernel_name="python3",
+                  resources={"metadata": {"path": str(path.parent)}},
+              ).execute()
           PY
 
   docs:

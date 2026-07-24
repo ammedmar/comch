@@ -1,3 +1,5 @@
+from ._version import __version__
+
 from .free_module import FreeModuleElement
 
 from .symmetric import SymmetricGroupElement
@@ -22,6 +24,7 @@ from .cubical import Cubical
 from .steenrod import Steenrod
 
 __all__ = [
+    '__version__',
     'FreeModuleElement',
     'SymmetricGroupElement',
     'SymmetricGroup',

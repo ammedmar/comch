@@ -27,7 +27,8 @@ ComCH focuses on chain complexes and implements two models of the
 $E_\infty$-operad equipped with filtrations by $E_n$-operads: the
 McClure-Smith surjection operad [McS] and the Berger-Fresse Barratt-Eccles
 operad [BF]. It also provides effective constructions of cochain-level
-May-Steenrod operations [KMM].
+May-Steenrod operations [KMM], even-prime Adem coboundaries, and Cartan
+coboundaries at both even and odd primes [Med20], [CMM].
 
 ## Installation
 
@@ -48,8 +49,12 @@ python3 -m ipykernel install --user --name comch --display-name "Python (comch)"
 jupyter lab
 ```
 
-Open an example notebook and select the `Python (comch)` kernel. The notebooks
-can also be run directly in Binder using the badge at the top of this page.
+The notebook files live in the
+[`notebooks`](https://github.com/ammedmar/comch/tree/master/notebooks)
+directory of the source repository; they are not installed into
+`site-packages` by the notebook extra. From a repository checkout, open an
+example notebook and select the `Python (comch)` kernel. The notebooks can
+also be run directly in Binder using the badge at the top of this page.
 
 ## Development
 
@@ -66,3 +71,7 @@ python3 -m pip install -e ".[dev]"
 [BF]: C. Berger, and B. Fresse. "Combinatorial operad actions on cochains." Mathematical Proceedings of the Cambridge Philosophical Society. Vol. 137. No. 1. Cambridge University Press, 2004. [DOI](https://doi.org/10.1017/S0305004103007138)
 
 [KMM]: R. M. Kaufmann and A. M. Medina-Mardones. "Cochain level May-Steenrod operations." Forum Mathematicum 33 (2021), no. 6, 1507-1526. [DOI](https://doi.org/10.1515/forum-2020-0296)
+
+[Med20]: A. M. Medina-Mardones. "An effective proof of the Cartan formula: the even prime." Journal of Pure and Applied Algebra 224 (2020), no. 12, 106444. [DOI](https://doi.org/10.1016/j.jpaa.2020.106444)
+
+[CMM]: F. Cantero-Morán and A. M. Medina-Mardones. "An effective proof of the Cartan formula: odd primes." Homology, Homotopy and Applications 27 (2025), no. 1, 207-234. [DOI](https://doi.org/10.4310/HHA.2025.v27.n1.a12)

@@ -1,7 +1,11 @@
 import setuptools
+from pathlib import Path
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
+
+version_namespace = {}
+exec(Path("comch/_version.py").read_text(), version_namespace)
 
 notebook_requirements = [
     "ipykernel",
@@ -16,7 +20,7 @@ docs_requirements = [
 
 setuptools.setup(
     name="comch",
-    version="0.1.5",
+    version=version_namespace["__version__"],
     author="Anibal M. Medina-Mardones",
     author_email="ammedmar@gmail.com",
     description="A specialized computer algebra system for the study of commutativity up to coherent homotopies",
@@ -29,7 +33,7 @@ setuptools.setup(
         "Source": "https://github.com/ammedmar/comch",
         "Tracker": "https://github.com/ammedmar/comch/issues",
     },
-    packages=setuptools.find_packages(),
+    packages=setuptools.find_packages(exclude=["*.tests", "*.tests.*"]),
     install_requires=[],
     extras_require={
         "docs": docs_requirements,

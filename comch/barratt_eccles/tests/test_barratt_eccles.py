@@ -112,6 +112,21 @@ class TestBarrattEcclesElement(unittest.TestCase):
 
 
 class TestBarrattEccles(unittest.TestCase):
+    def test_deprecated_aliases(self):
+        with self.assertWarns(DeprecationWarning):
+            old_map = BarrattEccles.may_steenrod_structure(3, 2, torsion=3)
+        self.assertEqual(
+            old_map,
+            BarrattEccles.may_steenrod_map(3, 2, torsion=3),
+        )
+
+        with self.assertWarns(DeprecationWarning):
+            old_operation = BarrattEccles.steenrod_operation(3, 2, 3)
+        self.assertEqual(
+            old_operation,
+            BarrattEccles.steenrod_operation_representative(3, 2, 3),
+        )
+
     def test_cartan_homotopy(self):
         identity = (1, 2, 3, 4)
         transposition_23 = (1, 3, 2, 4)

@@ -14,3 +14,5 @@
 
    .. autoclass::
       comch.surjection.Surjection
+      :no-special-members:
+      :exclude-members: steenrod_chain

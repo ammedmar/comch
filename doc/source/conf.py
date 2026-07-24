@@ -13,7 +13,7 @@
 import sphinx_rtd_theme
 import os
 import sys
-sys.path.insert(0, os.path.abspath('..'))
+sys.path.insert(0, os.path.abspath('../..'))
 
 
 # -- Project information -----------------------------------------------------
@@ -92,5 +92,7 @@ autodoc_default_options = {
     'member-order': 'bysource',
     'special-members': True,
     'undoc-members': True,
-    'exclude-members': '__weakref__, __dict__, __module__, __hash__, __str__'
+    'exclude-members': '__weakref__, __dict__, __module__, __hash__, __str__, '
+                       '__annotate_func__, __annotations_cache__, '
+                       '__firstlineno__, __static_attributes__'
 }

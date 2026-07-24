@@ -19,6 +19,8 @@ from .cubical import Cube
 from .cubical import CubicalElement
 from .cubical import Cubical
 
+from .steenrod import Steenrod
+
 __all__ = [
     'FreeModuleElement',
     'SymmetricGroupElement',
@@ -34,5 +36,6 @@ __all__ = [
     'Simplicial',
     'Cube',
     'CubicalElement',
-    'Cubical'
+    'Cubical',
+    'Steenrod'
 ]

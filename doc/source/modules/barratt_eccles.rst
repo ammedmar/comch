@@ -14,3 +14,4 @@
 
    .. autoclass::
       comch.barratt_eccles.BarrattEccles
+      :no-special-members:

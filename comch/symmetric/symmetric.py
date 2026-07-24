@@ -307,12 +307,16 @@ class SymmetricRingElement(FreeModuleElement):
         pairs. Each basis_element must create a :class:`SymmetricGroupElement`
         and `coefficient` must be an :class:`int`.
     torsion : :class:`int`
-        The non-neg int :math:`n` of the ring :math:`\mathbb Z/n \mathbb Z`.
+        The integer :math:`n` of the ring :math:`\mathbb Z/n \mathbb Z`;
+        :math:`n = 0` means :math:`\mathbb Z`, and negative values are
+        normalized to their absolute value.
 
     ATTRIBUTES
     ----------
     torsion : :class:`int`
-        The non-neg int :math:`n` of the ring :math:`\mathbb Z/n \mathbb Z`.
+        The integer :math:`n` of the ring :math:`\mathbb Z/n \mathbb Z`;
+        :math:`n = 0` means :math:`\mathbb Z`, and negative values are
+        normalized to their absolute value.
 
     EXAMPLE
     -------
@@ -473,8 +477,10 @@ class SymmetricRing:
         ----------
         arity : :class:`int` positive
             The arity of :math:`\mathrm S_r`, i.e., :math:`r`
-        torsion : :class:`int` positive
-            The non-neg int :math:`n` of the ring :math:`\mathbb Z/n \mathbb Z`.
+        torsion : :class:`int` or ``None``, default ``None``
+            The integer :math:`n` of the ring :math:`\mathbb Z/n \mathbb Z`;
+            :math:`n = 0` means :math:`\mathbb Z`, and negative values are
+            normalized to their absolute value.
 
         RETURNS
         -------
@@ -508,8 +514,10 @@ class SymmetricRing:
         ----------
         arity : :class:`int` positive
             The arity of :math:`\mathrm S_r`, i.e., :math:`r`
-        torsion : :class:`int` positive
-            The non-neg int :math:`n` of the ring :math:`\mathbb Z/n \mathbb Z`.
+        torsion : :class:`int` or ``None``, default ``None``
+            The integer :math:`n` of the ring :math:`\mathbb Z/n \mathbb Z`;
+            :math:`n = 0` means :math:`\mathbb Z`, and negative values are
+            normalized to their absolute value.
 
         RETURNS
         -------
@@ -533,8 +541,10 @@ class SymmetricRing:
         ----------
         arity : :class:`int` positive
             The arity of :math:`\mathrm S_r`, i.e., :math:`r`
-        torsion : :class:`int` positive
-            The non-neg int :math:`n` of the ring :math:`\mathbb Z/n \mathbb Z`.
+        torsion : :class:`int` or ``None``, default ``None``
+            The integer :math:`n` of the ring :math:`\mathbb Z/n \mathbb Z`;
+            :math:`n = 0` means :math:`\mathbb Z`, and negative values are
+            normalized to their absolute value.
 
         RETURNS
         -------
@@ -560,8 +570,10 @@ class SymmetricRing:
         ----------
         arity : :class:`int` positive
             The arity of :math:`\mathrm S_r`, i.e., :math:`r`
-        torsion : :class:`int` positive
-            The non-neg int :math:`n` of the ring :math:`\mathbb Z/n \mathbb Z`.
+        torsion : :class:`int` or ``None``, default ``None``
+            The integer :math:`n` of the ring :math:`\mathbb Z/n \mathbb Z`;
+            :math:`n = 0` means :math:`\mathbb Z`, and negative values are
+            normalized to their absolute value.
 
         RETURNS
         -------

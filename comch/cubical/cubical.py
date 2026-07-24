@@ -156,7 +156,9 @@ class CubicalElement(FreeModuleElement):
     ATTRIBUTES
     ----------
     torsion : :class:`int`
-        The non-neg int :math:`n` of the ring :math:`\mathbb Z/n \mathbb Z`.
+        The integer :math:`n` of the ring :math:`\mathbb Z/n \mathbb Z`;
+        :math:`n = 0` means :math:`\mathbb Z`, and negative values are
+        normalized to their absolute value.
 
     """
 
@@ -171,8 +173,10 @@ class CubicalElement(FreeModuleElement):
             pairs. Each basis element must create a :class:`tuple` of
             :class:`comch.cubical.Cube` and `coefficient` must be an
             :class:`int`.
-        torsion : :class:`int`
-            The non-neg int :math:`n` of the ring :math:`\mathbb Z/n \mathbb Z`.
+        torsion : :class:`int` or ``None``, default ``None``
+            The integer :math:`n` of the ring :math:`\mathbb Z/n \mathbb Z`;
+            :math:`n = 0` means :math:`\mathbb Z`, and negative values are
+            normalized to their absolute value.
 
         EXAMPLE
         -------
@@ -588,8 +592,10 @@ class Cubical:
             The dimension of the standard cube considered.
         times : :class:`int`
             The number of tensor copies.
-        torsion : :class:`int`
-            The non-neg int :math:`n` of the ring :math:`\mathbb Z/n \mathbb Z`.
+        torsion : :class:`int` or ``None``, default ``None``
+            The integer :math:`n` of the ring :math:`\mathbb Z/n \mathbb Z`;
+            :math:`n = 0` means :math:`\mathbb Z`, and negative values are
+            normalized to their absolute value.
 
         EXAMPLES
         --------
@@ -607,8 +613,10 @@ class Cubical:
         ----------
         n : :class:`int`
             The dimension of the standard cube considered.
-        torsion : :class:`int`
-            The non-neg int :math:`n` of the ring :math:`\mathbb Z/n \mathbb Z`.
+        torsion : :class:`int` or ``None``, default ``None``
+            The integer :math:`n` of the ring :math:`\mathbb Z/n \mathbb Z`;
+            :math:`n = 0` means :math:`\mathbb Z`, and negative values are
+            normalized to their absolute value.
 
         EXAMPLES
         --------
